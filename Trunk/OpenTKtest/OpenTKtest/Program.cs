@@ -58,6 +58,9 @@ namespace OpenTKtest
             SwapBuffers();
         }
 
+        double heading, yrot, walkbiasangle;
+        float xpos, zpos, ypos, walkbias;
+        
         /// <summary>
         /// Called when it is time to setup the next frame. Add you game logic here.
         /// </summary>
@@ -65,7 +68,37 @@ namespace OpenTKtest
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             base.OnUpdateFrame(e);
+            if (Keyboard[Key.W])
+            {
+                this.xpos -= (float)Math.Sin(this.heading * Math.PI / 180.0) * 0.05f;
+                this.zpos -= (float)Math.Cos(this.heading * Math.PI / 180.0) * 0.05f;
+                if (this.walkbiasangle >= 359.0f)
+                    this.walkbiasangle = 0.0f;
+                else
+                    this.walkbiasangle += 10.0f;
+                this.walkbias = (float)Math.Sin(this.walkbiasangle * Math.PI / 180.0) / 20.0f;
 
+            }
+            if (Keyboard[Key.S])
+            {
+                this.xpos += (float)Math.Sin(this.heading * Math.PI / 180.0) * 0.05f;
+                this.zpos += (float)Math.Cos(this.heading * Math.PI / 180.0) * 0.05f;
+                if (this.walkbiasangle >= 359.0f)
+                    this.walkbiasangle = 0.0f;
+                else
+                    this.walkbiasangle -= 10.0f;
+                this.walkbias = (float)Math.Sin(this.walkbiasangle * Math.PI / 180.0) / 20.0f;
+            }
+            if (Keyboard[Key.A])
+            {
+                this.heading -= 1.0f;
+                this.yrot = this.heading;
+            }
+            if (Keyboard[Key.D])
+            {
+                this.heading += 1.0f;
+                this.yrot = this.heading;
+            }
             if (Keyboard[Key.Escape])
                 Exit();
         }
@@ -81,8 +114,12 @@ namespace OpenTKtest
             GL.MatrixMode(MatrixMode.Modelview);
             GL.LoadMatrix(ref lookat);
 
-            GL.Rotate(angle, 0.0f, 1.0f, 0.0f);
-            angle += 0.1f;
+            //GL.Rotate(angle, 0.0f, 1.0f, 0.0f);
+            //angle += 0.1f;
+            //GL.Rotate(this.lookupdown, 1.0f, 0.0f, 0.0f);
+            GL.Rotate(360.0f - this.yrot, 0.0f, 1.0f, 0.0f);
+
+            GL.Translate(-this.xpos, -this.walkbias - 0.25f, -this.zpos);
 
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.BindTexture(TextureTarget.Texture2D, boxTexture);
