@@ -20,6 +20,7 @@ namespace OpenTKtest
         int box;
         int boxTexture;
         float angle;
+ 
         /// <summary>Creates a 800x600 window with the specified title.</summary>
         public Game()
             : base(800, 600, GraphicsMode.Default, "OpenTK Quick Start Sample")
@@ -27,11 +28,59 @@ namespace OpenTKtest
             VSync = VSyncMode.On;
         }
 
+
+
+        float xrot;
+        bool mouseDown = false;
+        int lastx, lasty;
+        void MouseMove(object s,MouseEventArgs e)
+        {
+            if (this.mouseDown)
+            {
+                mouseMovement(e.X, e.Y);
+            }
+        }
+
+        void MouseButtonDown(object s, MouseButtonEventArgs e)
+        {
+            if (e.Button == MouseButton.Right)
+            {
+                this.mouseDown = true;
+                lastx = e.X;
+                lasty = e.Y;
+            }
+        }
+
+        void MouseButtonUp(object s,OpenTK.Input.MouseButtonEventArgs e)
+        {
+            if (e.Button == MouseButton.Right)
+            {
+                this.mouseDown = false;
+                lastx = 0;
+                lasty = 0;
+            }
+        }
+
+        void mouseMovement(int x, int y)
+        {
+            int diffx = x - lastx; //check the difference between the current x and the last x position
+            int diffy = y - lasty; //check the difference between the current y and the last y position
+            lastx = x; //set lastx to the current x position
+            lasty = y; //set lasty to the current y position
+            xrot += (float)diffy; //set the xrot to xrot with the addition of the difference in the y position
+            yrot += (float)diffx;// set the xrot to yrot with the addition of the difference in the x position
+        }
         /// <summary>Load resources here.</summary>
         /// <param name="e">Not used.</param>
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
+            Mouse.Move += new EventHandler<MouseMoveEventArgs>(MouseMove);
+            Mouse.ButtonDown += new EventHandler<MouseButtonEventArgs>(MouseButtonDown);
+            Mouse.ButtonUp +=  new EventHandler<MouseButtonEventArgs>(MouseButtonUp);
+
+
+
             box = shapeDraw.buildList();
             boxTexture = shapeDraw.LoadTexture(shapeDraw.CreateBoxTexture());
             GL.ClearColor(0.1f, 0.2f, 0.5f, 0.0f);
@@ -68,26 +117,27 @@ namespace OpenTKtest
         protected override void OnUpdateFrame(FrameEventArgs e)
         {
             base.OnUpdateFrame(e);
+            
             if (Keyboard[Key.W])
             {
                 this.xpos -= (float)Math.Sin(this.heading * Math.PI / 180.0) * 0.05f;
                 this.zpos -= (float)Math.Cos(this.heading * Math.PI / 180.0) * 0.05f;
-                if (this.walkbiasangle >= 359.0f)
-                    this.walkbiasangle = 0.0f;
-                else
-                    this.walkbiasangle += 10.0f;
-                this.walkbias = (float)Math.Sin(this.walkbiasangle * Math.PI / 180.0) / 20.0f;
+               // if (this.walkbiasangle >= 359.0f)
+               //     this.walkbiasangle = 0.0f;
+              //  else
+              //      this.walkbiasangle += 10.0f;
+              //  this.walkbias = (float)Math.Sin(this.walkbiasangle * Math.PI / 180.0) / 20.0f;
 
             }
             if (Keyboard[Key.S])
             {
                 this.xpos += (float)Math.Sin(this.heading * Math.PI / 180.0) * 0.05f;
                 this.zpos += (float)Math.Cos(this.heading * Math.PI / 180.0) * 0.05f;
-                if (this.walkbiasangle >= 359.0f)
-                    this.walkbiasangle = 0.0f;
-                else
-                    this.walkbiasangle -= 10.0f;
-                this.walkbias = (float)Math.Sin(this.walkbiasangle * Math.PI / 180.0) / 20.0f;
+           //     if (this.walkbiasangle >= 359.0f)
+           //         this.walkbiasangle = 0.0f;
+            //    else
+            //        this.walkbiasangle -= 10.0f;
+             //   this.walkbias = (float)Math.Sin(this.walkbiasangle * Math.PI / 180.0) / 20.0f;
             }
             if (Keyboard[Key.A])
             {
@@ -99,6 +149,7 @@ namespace OpenTKtest
                 this.heading += 1.0f;
                 this.yrot = this.heading;
             }
+      
             if (Keyboard[Key.Escape])
                 Exit();
         }
@@ -121,9 +172,16 @@ namespace OpenTKtest
 
             GL.Translate(-this.xpos, -this.walkbias - 0.25f, -this.zpos);
 
+
+           // GL.Rotate(rotateY + this.drY, -1.0f, 0.0f, 0.0f);
+            GL.Rotate(xrot, 0.0f, 0.0f, 1.0f);
+
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
             GL.BindTexture(TextureTarget.Texture2D, boxTexture);
-            shapeDraw.rawbox();
+            //shapeDraw.rawbox();
+            shapeDraw.testBox();
+            GL.Translate(2f,0,0);
+           // shapeDraw.rawbox();
             
 
             SwapBuffers();

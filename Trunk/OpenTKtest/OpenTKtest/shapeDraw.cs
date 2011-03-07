@@ -68,6 +68,71 @@ namespace OpenTKtest
 
             GL.End();
         }
+        static public void torch()
+        {
+            float width = 0.2f;
+            float height = 0.5f;
+            GL.Begin(BeginMode.Quads);
+
+            GL.TexCoord2(width,width);
+            GL.TexCoord2(0.0f, width);
+            GL.TexCoord2(0.0f, 0.0f);
+            GL.TexCoord2(width, 0.0f);
+
+
+
+            GL.End();
+
+        }
+        static public void testBox()
+        {
+
+            GL.Begin(BeginMode.Polygon);/* f1: front */
+            GL.Normal3(-1.0f, 0.0f, 0.0f);
+            GL.Vertex3(0.0f, 0.0f, 0.0f);
+            GL.Vertex3(0.0f, 0.0f, 1.0f);
+            GL.Vertex3(1.0f, 0.0f, 1.0f);
+            GL.Vertex3(1.0f, 0.0f, 0.0f);
+            GL.End();
+            GL.Begin(BeginMode.Polygon);/* f2: bottom */
+            GL.Normal3(0.0f, 0.0f, -1.0f);
+            GL.Vertex3(0.0f, 0.0f, 0.0f);
+            GL.Vertex3(1.0f, 0.0f, 0.0f);
+            GL.Vertex3(1.0f, 1.0f, 0.0f);
+            GL.Vertex3(0.0f, 1.0f, 0.0f);
+            GL.End();
+            GL.Begin(BeginMode.Polygon);/* f3:back */
+            GL.Normal3(1.0f, 0.0f, 0.0f);
+            GL.Vertex3(1.0f, 1.0f, 0.0f);
+            GL.Vertex3(1.0f, 1.0f, 1.0f);
+            GL.Vertex3(0.0f, 1.0f, 1.0f);
+            GL.Vertex3(0.0f, 1.0f, 0.0f);
+            GL.End();
+            GL.Begin(BeginMode.Polygon);/* f4: top */
+            GL.Normal3(0.0f, 0.0f, 1.0f);
+            GL.Vertex3(1.0f, 1.0f, 1.0f);
+            GL.Vertex3(1.0f, 0.0f, 1.0f);
+            GL.Vertex3(0.0f, 0.0f, 1.0f);
+            GL.Vertex3(0.0f, 1.0f, 1.0f);
+            GL.End();
+            GL.Begin(BeginMode.Polygon);/* f5: left */
+            GL.Normal3(0.0f, 1.0f, 0.0f);
+            GL.Vertex3(0.0f, 0.0f, 0.0f);
+            GL.Vertex3(0.0f, 1.0f, 0.0f);
+            GL.Vertex3(0.0f, 1.0f, 1.0f);
+            GL.Vertex3(0.0f, 0.0f, 1.0f);
+            GL.End();
+            GL.Begin(BeginMode.Polygon);/* f6: right */
+            GL.Normal3(0.0f, -1.0f, 0.0f);
+            GL.Vertex3(1.0f, 0.0f, 0.0f);
+            GL.Vertex3(1.0f, 0.0f, 1.0f);
+            GL.Vertex3(1.0f, 1.0f, 1.0f);
+            GL.Vertex3(1.0f, 1.0f, 0.0f);
+            GL.End();
+
+
+
+        }
         static public void rawbox()
         {
             GL.Begin(BeginMode.Quads);							// Start Drawing Quads
@@ -96,6 +161,11 @@ namespace OpenTKtest
             GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(-1.0f, -1.0f, 1.0f);	// Bottom Right Of The Texture and Quad
             GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(-1.0f, 1.0f, 1.0f);	// Top Right Of The Texture and Quad
             GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1.0f, 1.0f, -1.0f);	// Top Left Of The Texture and Quad
+            // Top Face
+            GL.TexCoord2(0.0f, 1.0f); GL.Vertex3(-1.0f, 1.0f, -1.0f);	// Top Left Of The Texture and Quad
+            GL.TexCoord2(0.0f, 0.0f); GL.Vertex3(-1.0f, 1.0f, 1.0f);	// Bottom Left Of The Texture and Quad
+            GL.TexCoord2(1.0f, 0.0f); GL.Vertex3(1.0f, 1.0f, 1.0f);	// Bottom Right Of The Texture and Quad
+            GL.TexCoord2(1.0f, 1.0f); GL.Vertex3(1.0f, 1.0f, -1.0f);	// Top Right Of The Texture and Quad
             GL.End();
 
         }
