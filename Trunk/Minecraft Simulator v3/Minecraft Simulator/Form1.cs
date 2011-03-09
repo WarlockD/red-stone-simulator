@@ -11,13 +11,21 @@ using LibNbt.Tags;
 using LibNbt;
 using System.IO;
 
+using OpenTK;
+using OpenTK.Graphics;
+using OpenTK.Graphics.OpenGL;
+
 namespace Mincraft_Simulator
 {
     public partial class Form1 : Form
     {
+        bool mouseDown = false;
         bool paintIt = false;
+        bool formResize = true;
+        bool glLoaded = true;
+        Matrix4 lookat;
         redstoneBmp redBmp;
-        redstoneObj[] rGrid;
+        gBlockTypeStruct[] rGrid;
         int rXmax;
         int rYmax;
         int rZmax;
@@ -25,6 +33,11 @@ namespace Mincraft_Simulator
         string rMaterials;
         byte[] rBlocks;
         byte[] rData;
+        int zoom=1;
+        int currentX=0, currentY=0;
+        int texTGrid;
+        int texSGrid;
+        int prevMouseX, prevMouseY;
 
         public Form1()
         {
@@ -60,7 +73,7 @@ namespace Mincraft_Simulator
                 rMaterials = root.Query<NbtString>("/Schematic/Materials").Value;
                 rBlocks = root.Query<NbtByteArray>("/Schematic/Blocks").Value;
                 rData = root.Query<NbtByteArray>("/Schematic/Data").Value;
-                rGrid = new redstoneObj[rBlocks.Length]; 
+                rGrid = new gBlockTypeStruct[rBlocks.Length]; 
 
                 // Ok, lets get this link list a starting
                 for (int i = 0; i < rBlocks.Length; i++)
@@ -85,7 +98,7 @@ namespace Mincraft_Simulator
                     int z =  i/zStride;
                     int y = (i - z * zStride)/xStride;
                     int x = i - (y * xStride) - (z * zStride);
-                    rGrid[i] = new redstoneObj(redBmp.getSet(rBlocks[i]));
+                    rGrid[i] = redBmp.getSet(rBlocks[i]);
                     rGrid[i].X = x; rGrid[i].Y = y; rGrid[i].Z = z;
                 }
             }
@@ -95,9 +108,7 @@ namespace Mincraft_Simulator
 
         private void openToolStripMenuItem_Click(object sender, EventArgs e)
         {
-
-            string filename1 = "";
-            //DDS test;           
+      
             openFileDialog.Filter = "Schematic Files .schematic | *.schematic";
             openFileDialog.Title = "Select a Schematic";
             openFileDialog.InitialDirectory = System.Environment.GetFolderPath(Environment.SpecialFolder.Personal);
@@ -131,51 +142,144 @@ namespace Mincraft_Simulator
             this.Refresh();
         }
 
-        private void Form1_Paint(object sender, PaintEventArgs e)
+
+        private void glControl_Load(object sender, EventArgs e)
         {
-            int yoffset = 50;
-            if (paintIt)
+            glLoaded = true;
+
+
+
+            lookat = glHelper.setupLookAtOverhead();
+            GL.ClearColor(Color.LightSkyBlue);
+           // GL.Enable(EnableCap.DepthTest);
+            GL.Enable(EnableCap.Texture2D);
+
+            GL.Hint(HintTarget.PerspectiveCorrectionHint, HintMode.Nicest);
+        }
+
+        private void Form1_ResizeBegin(object sender, EventArgs e)
+        {
+            formResize = true;
+        }
+
+        private void Form1_ResizeEnd(object sender, EventArgs e)
+        {
+            formResize = false;
+            
+        }
+
+        private void glControl_Resize(object sender, EventArgs e)
+        {
+            if (!glLoaded) return;
+
+            GL.Viewport(0, 0, glControl.Width, glControl.Height);
+        //    Matrix4 pov = Matrix4.CreateOrthographicOffCenter(-10 + currentX, 10 + currentX, -10 + currentY, -10 + currentY, 1, -1);
+          //  GL.MatrixMode(MatrixMode.Projection);
+         //   GL.LoadMatrix(ref pov);
+           // lookat = pov;
+			
+           // base.OnResize(e);
+           // float fov = MathHelper.PiOver4;
+           /// float aspect_ratio = Width / (float)Height;
+
+
+          //  Matrix4 pov = Matrix4.CreatePerspectiveFieldOfView(fov, aspect_ratio, 1f, 1000f);
+          //  GL.MatrixMode(MatrixMode.Projection);
+           // GL.LoadMatrix(ref pov);
+          //  GL.MatrixMode(MatrixMode.Projection);
+         //   GL.LoadIdentity();
+         //   GL.Ortho(0, 100, 0, 100, -1.0, 1.0);
+
+            glControl.Invalidate();
+        }
+        private void MakeGrid()
+        {
+
+        }
+        private void glControl_Paint(object sender, PaintEventArgs e)
+        {
+            if (!glLoaded) return;
+
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+          // // GL.MatrixMode(MatrixMode.Projection);
+            
+            //Matrix4 pov = Matrix4.CreateOrthographicOffCenter(0 , 10 , 0 , 10 , -1, 1);
+          //  Matrix4 pov = Matrix4.CreateOrthographic(this.Width, this.Height, -1, 1);
+         //   GL.MatrixMode(MatrixMode.Projection);
+         //   GL.LoadMatrix(ref pov);
+
+        //   // GL.Translate(currentX, currentY, 0);
+        //    GL.MatrixMode(MatrixMode.Modelview);
+         //   GL.LoadIdentity();
+            if (mouseDown)
             {
-                // Just so I can get a good visual on it going to precaculate the numbers
-                int xStride = rXmax;
-                int zStride = xStride * rYmax;
+                drawRect(prevMouseX, prevMouseY, currentX, currentY);
+            }
+            GL.Begin(BeginMode.Quads);
+                GL.Color3(Color.Green); //black
+                GL.Vertex2(0, 0);
+                GL.Vertex2(1, 0);
+                GL.Vertex2(1, 1);
+                GL.Vertex2(0, 1);
+            GL.End();
+            
+            
 
-                // Precaculate the last line in a floor and the last floor
-                int zLast = rData.Length - zStride;
-                int yLast = zStride - xStride;
+            glControl.SwapBuffers();
+        }
 
-                int bmpWidth = rXmax * (20 + 2); // With of the square + 2 for the lin left and rigg
-                int bmpLength = rYmax * (20 + 2);
-
-                e.Graphics.Clear(Color.White);
-                for (int i = 0; i < rBlocks.Length; i++)
-                {
-                    redstoneObj temp = rGrid[i];
-                    if (temp.Z == currentZ)
-                    {
-                        e.Graphics.DrawImage(temp.getBitmap(rData[i]), temp.X * 20, temp.Y * 20 + yoffset);
-                        e.Graphics.DrawRectangle(Pens.Black, temp.X * 20, temp.Y * 20 + yoffset, 20, 20);
-                    }
-
-                }
-
+        private void Form1_SizeChanged(object sender, EventArgs e)
+        {
+            if (formResize)
+            {
+                glControl.Height = this.Height;
+                glControl.Width = this.Width;
             }
         }
 
-        private void Form1_KeyPress(object sender, KeyPressEventArgs e)
+        private void glControl_MouseDown(object sender, MouseEventArgs e)
         {
-            if (e.KeyChar == 'w')
+            mouseDown = true;
+            prevMouseX = e.X;
+            prevMouseY = e.Y;
+        }
+
+        private void glControl_MouseUp(object sender, MouseEventArgs e)
+        {
+            mouseDown = false;
+        }
+        void drawRect(int x1, int y1, int x2, int y2)
+        {
+            GL.Enable(EnableCap.ColorLogicOp);
+            GL.LogicOp(LogicOp.Xor);
+            GL.Color4(1.0f, 1.0f, 1.0f, 1.0f);
+            GL.PolygonMode(MaterialFace.Front, PolygonMode.Line);
+            GL.Rect(x1, this.Height - y1, x2, this.Width - y2);
+            GL.PolygonMode(MaterialFace.Front, PolygonMode.Fill);
+            GL.Disable(EnableCap.ColorLogicOp); 
+        }
+        private void glControl_MouseMove(object sender, MouseEventArgs e)
+        {
+            int x=0, y=0;
+            if (!mouseDown) return;
+            if (e.Button == MouseButtons.Left)
             {
-                currentZ += 1;
-                if (currentZ > rZmax) currentZ = rZmax;
-                this.Refresh();
+                x = prevMouseX - e.X > 0 ? 1: -1;
+                y = prevMouseY - e.Y > 0 ? 1 : -1;
+                currentX = e.X;
+                currentY = e.Y;
+                //lookat = lookat * Matrix4.CreateTranslation(x, y, 0);
+                glControl.Invalidate();
             }
-            if (e.KeyChar == 's')
+            else if (e.Button == MouseButtons.Right)
             {
-                currentZ -= 1;
-                if (currentZ < 0) currentZ = 0;
-                this.Refresh();
+
             }
+            else if (e.Button == MouseButtons.Middle)
+            {
+
+            }
+            
         }
       
     }

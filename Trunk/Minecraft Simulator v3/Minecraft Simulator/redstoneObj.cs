@@ -17,18 +17,30 @@ namespace Mincraft_Simulator
     class redstoneBmp
     {
         const int blockMax = 256; // can only be 256 types of blocks
-        const int tileHeight = 20;
-        const int tileWidth = 20;
+        const int tileHeight = 64;
+        const int tileWidth = 64;
         Bitmap[][] img=null;
 
+        int[][] textures = new int[blockMax][];
+
+        
         // I'll make this vector drawing some day, right now its hardwired to 20,20.
-       // public void redstoneBmp()
-       // {
-       //     makeImages();
+        // public void redstoneBmp()
+        // {
+        //     makeImages();
         // }
         public redstoneBmp()
         {
-            makeImages();
+            makeTextures();
+        }
+        static public Bitmap CreateBoxTexture()
+        {
+            Bitmap tmp = new Bitmap(100, 100, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            Graphics g = Graphics.FromImage(tmp);
+            g.Clear(Color.Yellow);
+            g.DrawRectangle(new Pen(Brushes.Black, 10f), 0, 0, 100, 100);
+            g.Dispose();
+            return tmp;
         }
         void RecreateImg()
         {
@@ -58,134 +70,119 @@ namespace Mincraft_Simulator
             }
 
         }
-        void makeImages()
+        void makeTextures()
         {
-            // First release all memory used by img.
-            RecreateImg();
-            
-            //Create graphics contucts and other values
             Bitmap tmpBmp = new Bitmap(tileWidth, tileHeight, PixelFormat.Format32bppArgb);
             RectangleF centerCircle = new RectangleF(
                 (tileWidth / 2) - (tileWidth / 4),
                 (tileHeight / 2) - (tileHeight / 4),
-                (tileWidth / 4)*2,
-                (tileHeight / 4)*2);
+                (tileWidth / 4) * 2,
+                (tileHeight / 4) * 2);
             RectangleF centerLine = new RectangleF(
                 (tileWidth / 2) - (tileWidth / 8),
                 (tileHeight / 2) - (tileHeight / 8),
-                (tileWidth / 8)*2,
+                (tileWidth / 8) * 2,
                 tileHeight);
+            RectangleF entireTile = new RectangleF(0,0,tileWidth,tileHeight);
 
-            Bitmap t;
-            
-            Bitmap[] nb = null;
+
+            int t;
+
+            int[] nb = null;
             Graphics g;
 
-            // Yea yea, using a temp var as global.  byte me.
-            // Sigh, so is it better to pass Graphics and Bitmap to functions
-            // or just make a global scope for it?  meh.  Only running all of these
-            // once
             g = Graphics.FromImage(tmpBmp);
-            g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
+            //g.CompositingMode = System.Drawing.Drawing2D.CompositingMode.SourceOver;
 
-            // Lets make the nice Yellow Block and lets fill all the blocks with it in the first space.
-            // I am assuming that all the blocks put out by MCsim is all dirt blocks unless specified.
-            // Otherwise, its going to be annoying to illerate though all of them, next version:P
-            g.FillRectangle(Brushes.Yellow, 0, 0, tmpBmp.Width, tmpBmp.Width);
-            for(int idx = 0; idx < blockMax; idx++)
-                if(Enum.IsDefined(typeof(blockType),(byte)idx))
+            for (int idx = 0; idx < blockMax; idx++)
+                if (Enum.IsDefined(typeof(blockType), (byte)idx))
                 {
-                    blockType cBlockType = (blockType)Enum.Parse(typeof(blockType),idx.ToString());
-                    switch(cBlockType)
+                    blockType cBlockType = (blockType)Enum.Parse(typeof(blockType), idx.ToString());
+                    switch (cBlockType)
                     {
                         case blockType.StoneButton:
-                            nb = new Bitmap[4];
+                            nb = new int[4];
                             //North,West,South,East
-                            for(int i = 0; i<4;i++)
+                            for (int i = 0; i < 4; i++)
                             {
                                 g.Clear(Color.White);
                                 g.FillRectangle(Brushes.Gray, 4, 14, 14, 19);
                                 g.RotateTransform(i * 90);
-                                nb[i] = new Bitmap(tmpBmp);
+                                nb[i] = glHelper.LoadTexture(tmpBmp);
                             }
                             //Why the hell did notch do it like this?
                             //South,North,West,East
-                            t=nb[0]; nb[0] = nb[2]; nb[2] = nb[1]; nb[1] = t;
-                            img[idx] = nb;
-                            
+                            t = nb[0]; nb[0] = nb[2]; nb[2] = nb[1]; nb[1] = t;
+                            textures[idx] = nb;
+
                             break;
                         case blockType.RedstoneTorchOn:
                             //North,East,South,West
-                            nb = new Bitmap[5];
+                            nb = new int[5];
                             g.Clear(Color.White);
                             g.FillRectangle(Brushes.Gray, centerLine);
                             g.FillEllipse(Brushes.Red, centerCircle);
-                            for(int i = 0; i<4;i++)
+                            for (int i = 0; i < 4; i++)
                             {
-                                nb[i] = new Bitmap(tmpBmp);
+                                nb[i] = glHelper.LoadTexture(tmpBmp);
                                 tmpBmp.RotateFlip(RotateFlipType.Rotate90FlipNone);
                             }
                             // Floor Torch
                             g.Clear(Color.White);
                             g.FillEllipse(Brushes.Red, centerCircle);
-                            nb[4] = new Bitmap(tmpBmp);
+                            nb[4] = glHelper.LoadTexture(tmpBmp);
 
                             //Why the hell did notch do it like this?
                             //South,North,West,East,Floor
-                            t =nb[0]; 
-                            nb[0] = nb[2]; 
-                            nb[2] = nb[3]; 
+                            t = nb[0];
+                            nb[0] = nb[2];
+                            nb[2] = nb[3];
                             nb[3] = nb[1];
                             nb[1] = t;
-                            img[idx] = nb;
-                            debugSaveImages("RedstoneTorchOn", nb);
+                            textures[idx] = nb;
                             break;
                         case blockType.RedstoneTorchOff:
                             //South,North,West,East,Floor
-                            nb = new Bitmap[5];
+                            nb = new int[5];
                             g.Clear(Color.White);
                             g.FillRectangle(Brushes.Gray, centerLine);
                             g.FillEllipse(Brushes.Black, centerCircle);
                             for (int i = 0; i < 4; i++)
                             {
-                                nb[i] = new Bitmap(tmpBmp);
+                                nb[i] = glHelper.LoadTexture(tmpBmp);
                                 tmpBmp.RotateFlip(RotateFlipType.Rotate90FlipNone);
                             }
                             // Floor Torch
                             g.Clear(Color.White);
                             g.FillEllipse(Brushes.Black, centerCircle);
-                            nb[4] = new Bitmap(tmpBmp);
-                             t =nb[0]; 
-                            nb[0] = nb[2]; 
-                            nb[2] = nb[3]; 
+                            nb[4] = glHelper.LoadTexture(tmpBmp);
+                            t = nb[0];
+                            nb[0] = nb[2];
+                            nb[2] = nb[3];
                             nb[3] = nb[1];
                             nb[1] = t;
-                            img[idx] = nb;
-                            debugSaveImages("RedstoneTorchOff", nb);
+                            textures[idx] = nb;
                             break;
                         case blockType.RedstoneWire:
-                            nb = new Bitmap[1];
-                            Pen thickLine = new Pen(Color.Red,5);
+                            nb = new int[1];
+                            Pen thickLine = new Pen(Color.Red, 5);
                             g.Clear(Color.White);
-                            g.DrawLine(thickLine,10,0,10,20);
-                            g.DrawLine(thickLine,0,10,20,10);
-                            nb[0] = new Bitmap(tmpBmp);
-                            img[idx] = nb;
-                            nb = null;
+                            g.DrawLine(thickLine, 10, 0, 10, 20);
+                            g.DrawLine(thickLine, 0, 10, 20, 10);
+                            nb[0] = glHelper.LoadTexture(tmpBmp);
+                            textures[idx] = nb;
                             break;
                         case blockType.Air:
-                            nb = new Bitmap[1];
-                            g.Clear(Color.White);
-                            nb[0] = new Bitmap(tmpBmp);
-                            img[idx] = nb;
-                            nb = null;
+                            nb = new int[1];
+                            g.Clear(Color.Transparent);
+                            nb[0] = glHelper.LoadTexture(tmpBmp);
+                            textures[idx] = nb;
                             break;
                         default:
-                            nb = new Bitmap[1];
+                            nb = new int[1];
                             g.Clear(Color.Yellow);
-                            nb[0] = new Bitmap(tmpBmp);
-                            img[idx] = nb;
-                            nb = null;
+                            nb[0] = glHelper.LoadTexture(tmpBmp);
+                            textures[idx] = nb;
                             break;
                     }
                 }
@@ -196,26 +193,27 @@ namespace Mincraft_Simulator
                     StringFormat strCenterBox = new StringFormat();
                     strCenterBox.Alignment = StringAlignment.Center;
                     strCenterBox.LineAlignment = StringAlignment.Center;
-                    Bitmap[] b = new Bitmap[1];
-                    RectangleF tmpBmpRect = new Rectangle(5, 5, 15, 15);
 
+                    nb = new int[1];
+                    g.Clear(Color.Yellow);
+                    
+                    
                     g.Clear(Color.White);
-                    g.DrawString(idx.ToString(), SystemFonts.DefaultFont, Brushes.Black, tmpBmpRect);
- 
-                    b[0] = new Bitmap(tmpBmp);
-                    img[idx] = b;
+                    g.DrawString(idx.ToString(), SystemFonts.DefaultFont, Brushes.Black, entireTile,strCenterBox);
+
+                    nb[0] = glHelper.LoadTexture(tmpBmp);
+                    textures[idx] = nb;
                 }
-     
 
         }
 
-        public Bitmap[][] getFullSet
+        public int[][] getAllTextures
         {
-            get { return img; }
+            get { return textures; }
         }
         public gBlockTypeStruct getSet(blockType iType)
         {
-            return new gBlockTypeStruct(iType,img[(int)iType]);
+            return new gBlockTypeStruct(iType, textures[(int)iType]);
         }
 
         // This way we can fine the exact block and will image it, if its out of range it will display the 255 block
@@ -229,18 +227,31 @@ namespace Mincraft_Simulator
             }
             else
                 if (iType >= 0 && iType < blockMax)
-                    return new gBlockTypeStruct(blockType.Undefined, img[iType]);
+                    return new gBlockTypeStruct(blockType.Undefined, textures[iType]);
                 else
-                    return new gBlockTypeStruct(blockType.Undefined, img[blockMax - 1]);
+                    return new gBlockTypeStruct(blockType.Undefined, textures[blockMax - 1]);
         }
        
     }
 
     struct gBlockTypeStruct
     {
-        public gBlockTypeStruct(blockType iType, Bitmap[] tiles) { bType = iType; bmp = tiles; }
+        public gBlockTypeStruct(blockType iType, int[] tiles) { bType = iType; bmp = tiles; X = 0; Y = 0; Z = 0; }
+        public gBlockTypeStruct(blockType iType, int[] tiles, int x, int y, int z) { bType = iType; bmp = tiles; X = x; Y = y; Z = z; }
         public blockType bType;
-        public Bitmap[]   bmp;
+        public int[]   bmp;
+        public int X, Y, Z;
+        public int getBitmap(int data)
+        {
+            // Set some offsets till I figure out the structure
+            if (bType == blockType.RedstoneTorchOn)  data += 1;
+            if (bType == blockType.RedstoneTorchOff) data += 1;
+            if (data < bmp.Length)
+                return bmp[data];
+            else
+                return bmp[0];
+        }
+
     }
     // remember [FlagsAttribute]  I learned for masks
     // Only definding blocks that WILL BE USED IN THE PROGRAM.
@@ -317,7 +328,7 @@ namespace Mincraft_Simulator
     // a hollow class till I figure that nightmare out.
     class redstoneObj
     {
-        Bitmap[] bmp;
+        int[] bmp;
         blockType bType;
         public redstoneObj North = null;
         public redstoneObj South = null;
@@ -349,11 +360,11 @@ namespace Mincraft_Simulator
             }
 
         }
-        public Bitmap getBitmap()
+        public int getBitmap()
         {
             return bmp[0];
         }
-        public Bitmap getBitmap(int data)
+        public int getBitmap(int data)
         {
             if (bType == blockType.RedstoneTorchOn)
                 data += 1;

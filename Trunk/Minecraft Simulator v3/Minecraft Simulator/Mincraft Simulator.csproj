@@ -41,6 +41,8 @@
     <Reference Include="nunit.framework">
       <HintPath>..\..\..\..\..\Desktop\npt\LibNbt.Test\bin\Debug\nunit.framework.dll</HintPath>
     </Reference>
+    <Reference Include="OpenTK, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4" />
+    <Reference Include="OpenTK.GLControl, Version=1.0.0.0, Culture=neutral, PublicKeyToken=bad199fe84eb3df4, processorArchitecture=MSIL" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -53,6 +55,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="glHelper.cs" />
+    <Compile Include="makeTexture.cs" />
     <Compile Include="redstoneObj.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
@@ -60,19 +64,10 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
-    <Compile Include="gridControl.cs">
-      <SubType>UserControl</SubType>
-    </Compile>
-    <Compile Include="gridControl.Designer.cs">
-      <DependentUpon>gridControl.cs</DependentUpon>
-    </Compile>
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
-    </EmbeddedResource>
-    <EmbeddedResource Include="gridControl.resx">
-      <DependentUpon>gridControl.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
