@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="3.5" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{C324A237-9755-4855-9439-05B9B1D8BEA9}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <RootNamespace>MoneRedstoneConversion</RootNamespace>
+    <AssemblyName>MoneRedstone Conversion</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug</OutputPath>
+    <DefineConstants>DEBUG</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <Externalconsole>true</Externalconsole>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <DebugType>none</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Release</OutputPath>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <PlatformTarget>x86</PlatformTarget>
+    <Externalconsole>true</Externalconsole>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Main.cs" />
+    <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="BlockColors.cs" />
+    <Compile Include="BlockField.cs" />
+    <Compile Include="Block.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <Folder Include="Images\" />
+    <Folder Include="OldJava\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\Camera24.gif" />
+    <None Include="Images\Camera16.gif" />
+    <None Include="Images\Logo16.png" />
+    <None Include="Images\ShrinkFront16.gif" />
+    <None Include="Images\ShrinkBack16.gif" />
+    <None Include="Images\GrowBack16.gif" />
+    <None Include="Images\GrowFront16.gif" />
+    <None Include="Images\GrowBottom16.gif" />
+    <None Include="Images\GrowTop16.gif" />
+    <None Include="Images\GrowRight16.gif" />
+    <None Include="Images\GrowLeft16.gif" />
+    <None Include="Images\ShrinkBottom16.gif" />
+    <None Include="Images\ShrinkRight16.gif" />
+    <None Include="Images\ShrinkLeft16.gif" />
+    <None Include="Images\ShrinkTop16.gif" />
+    <None Include="Images\Ore16.gif" />
+    <None Include="Images\Torch16.gif" />
+    <None Include="Images\Redstone16.gif" />
+    <None Include="Images\Up24.gif" />
+    <None Include="Images\Down16.gif" />
+    <None Include="Images\Down24.gif" />
+    <None Include="Images\Up16.gif" />
+    <None Include="Images\StepForward24.gif" />
+    <None Include="Images\Pause24.gif" />
+    <None Include="Images\Play24.gif" />
+    <None Include="Images\StepForward16.gif" />
+    <None Include="Images\Play16.gif" />
+    <None Include="Images\Pause16.gif" />
+    <None Include="Images\Stop24.gif" />
+    <None Include="Images\Stop16.gif" />
+    <None Include="Images\SaveAs24.gif" />
+    <None Include="Images\SaveAs16.gif" />
+    <None Include="Images\New24.gif" />
+    <None Include="Images\New16.gif" />
+    <None Include="Images\ZoomIn16.gif" />
+    <None Include="Images\ZoomOut16.gif" />
+    <None Include="Images\AlignCenter16.gif" />
+    <None Include="Images\ZoomOut24.gif" />
+    <None Include="Images\ZoomIn24.gif" />
+    <None Include="Images\Save16.gif" />
+    <None Include="Images\Save24.gif" />
+    <None Include="Images\Preferences24.gif" />
+    <None Include="Images\Preferences16.gif" />
+    <None Include="Images\Open16.gif" />
+    <None Include="Images\Open24.gif" />
+    <None Include="Images\Copy24.gif" />
+    <None Include="Images\Copy16.gif" />
+    <None Include="Images\AlignCenter24.gif" />
+    <None Include="Images\Blocks.java" />
+    <None Include="Images\Colors.java" />
+    <None Include="Images\Expander.java" />
+    <None Include="Images\Field.java" />
+    <None Include="Images\LevelLoader.java" />
+    <None Include="Images\Palette.java" />
+    <None Include="Images\Tag.java" />
+    <None Include="Images\Viewport.java" />
+    <None Include="OldJava\Blocks.java" />
+    <None Include="OldJava\Colors.java" />
+    <None Include="OldJava\Expander.java" />
+    <None Include="OldJava\Field.java" />
+    <None Include="OldJava\LevelLoader.java" />
+    <None Include="OldJava\Palette.java" />
+    <None Include="OldJava\Tag.java" />
+    <None Include="OldJava\Viewport.java" />
+  </ItemGroup>
+</Project>
