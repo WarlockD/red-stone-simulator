@@ -731,7 +731,7 @@ public class Viewport
 
     
     private JScrollPane init_buildView()
-    {
+    {   
         view = new JPanel(null) {
 
             @Override
@@ -1273,7 +1273,7 @@ public class Viewport
         default:
             break;
 
-        case 1: 
+        case MouseEvent.BUTTON1: 
         {
             bi = 0;
             int p = lyr + 1;
@@ -1287,6 +1287,11 @@ public class Viewport
                 if(field.g(lastX, lastY, p) == Blocks.BUTTON && !field.p(lastX, lastY, p))
                     field.sp(lastX, lastY, p, 10);
                 else
+                if(field.g(lastX, lastY, p) == Blocks.REPEATER )
+                {
+                    field.srh(lastX, lastY, p, field.rh(x,y,z)+1);
+                }
+                else
                 if(field.g(lastX, lastY, p) == Blocks.PRESS && !playing)
                     field.sp(lastX, lastY, p, field.p(lastX, lastY, p) ? 0 : 10);
                 field.update();
@@ -1296,13 +1301,13 @@ public class Viewport
          
         }
 
-        case 3:
+        case MouseEvent.BUTTON3: 
         {
             place(lastX, lastY, lyr, palArr[bi]);
             break;
         }
 
-        case 2: // '\002'
+        case MouseEvent.BUTTON2: 
         {
             int p = lyr + 1;
             if(field.g(lastX, lastY, lyr).wall != 0)
@@ -1311,17 +1316,32 @@ public class Viewport
                 break;
             if(field.g(lastX, lastY, p) == Blocks.DOORB)
                 p--;
-            int w = field.w(lastX, lastY, p);
-            int ow = w;
-            do
-                w = ++w % 5;
-            while(!field.s(lastX, lastY, p, w));
-            if(ow != w)
+            if(field.g(lastX, lastY, p) == Blocks.REPEATER)
             {
-                field.update();
-                view.repaint();
+                int w = field.r(lastX, lastY, p) & 3;
+                int ow = w;
+                do
+                    w=(w+1) & 3;
+                while(!field.sr(lastX, lastY, p, w));
+                if(ow != w)
+                {
+                    field.update();
+                    view.repaint();
+                }
+            } else
+            {
+                int w = field.w(lastX, lastY, p);
+                int ow = w;
+                do
+                    w = ++w % 5;
+                while(!field.s(lastX, lastY, p, w));
+                if(ow != w)
+                {
+                    field.update();
+                    view.repaint();
+                }
+                break;
             }
-            break;
         }
         }
     }

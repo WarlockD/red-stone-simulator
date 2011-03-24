@@ -90,6 +90,32 @@ public class Field
             return 0;
         return extra[z][y][x] >> 5 & 7;
     }
+    
+    public int r(int x, int y, int z)
+    {
+        if(z < 0 || z >= data.length)
+            return 0;
+        if(cyclic)
+        {
+            y = (y % data[0].length + data[0].length) % data[0].length;
+            x = (x % data[0][0].length + data[0][0].length) % data[0][0].length;
+        } else
+        if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
+            return 0;
+        return (extra[z][y][x] >> 4) & 0xF;
+    }
+    
+    public int rh(int x, int y, int z)
+    {
+        return r(x,y,z) >>2;
+    }
+    public int rl(int x, int y, int z)
+    {
+        return r(x,y,z) & 3;
+    }
+    
+    
+    
 
     public void s(int x, int y, int z, Blocks v)
     {
@@ -147,7 +173,27 @@ public class Field
             return true;
         }
     }
-
+    // Set the repeater.  Sigh, why does the repeater have to be special
+    public boolean sr(int x, int y, int z, int w)
+    {
+        if(!valid(x, y, z, w))
+        {
+            return false;
+        } else
+        {
+            extra[z][y][x] = (byte)((w << 4) + (extra[z][y][x] & 0xf));
+            return true;
+        }
+    }
+    public boolean srh(int x, int y, int z, int w)
+    {
+        return sr(x,y,z,(w & 3) <<2);
+    }
+    public boolean srl(int x, int y, int z, int w)
+    {
+        return sr(x,y,z,(w & 3));
+    }
+    
     public void sp(int x, int y, int z, int p)
     {
         if(z < 0 || z >= data.length)
@@ -278,7 +324,13 @@ public class Field
             tog = false;
             // fall through
 
-        case TORCH: // '\004'
+        case TORCH: 
+            /*
+             *  0x1: Pointing south
+                0x2: Pointing north
+                0x3: Pointing west
+                0x4: Pointing east
+             */
             g.setColor(Colors.door);
             if(fake || w(x, y, z + p) == 1)
                 g.fillRect(r.x + 3, r.y + 3, 2, 5);
@@ -303,7 +355,58 @@ public class Field
             if(!tog && !fake && p(x, y, z + p))
                 g.fillOval(r.x + 3, r.y + 3, 2, 2);
             break;
-
+        case REPEATER:
+            /*
+             * Low (1st & 2nd) bits:
+                0x0: Facing east
+                0x1: Facing south
+                0x2: Facing west
+                0x3: Facing north
+                High (3rd & 4th) bits:
+                0x0: 1 tick delay
+                0x1: 2 tick delay
+                0x2: 3 tick delay
+                0x3: 4 tick delay
+             */
+            g.setColor(Colors.door);
+            int dir = r(x, y, z + p);
+            switch(dir & 3)
+            {
+                case 0: // east
+                    if(fake)
+                       g.fillRect(r.x+3, r.y , 2, 2);
+                    else
+                        g.fillRect(r.x, r.y + 3, 2, 2);
+                    break;
+                case 1: // south
+                    g.fillRect(r.x+ 3, r.y + 6, 2, 2);
+                    break;
+                case 2: // west
+                    g.fillRect(r.x+6, r.y + 3, 2, 2);
+                    break;
+                case 3: // north
+                    g.fillRect(r.x+3, r.y , 2, 2);
+                    break;
+            }
+            g.setFont(new Font("Courier", Font.BOLD, 5));
+            switch(dir>>2 & 3)
+            {
+                case 0: // 1 tick
+                    
+                   g.drawString("1", r.x+3, r.y+6);
+                    break;
+                case 1: // 2 tick
+                  g.drawString("2", r.x+3, r.y+6);
+                    break;
+                case 2: // 3 tick
+                   g.drawString("3",r.x+3, r.y+6);
+                    break;
+                case 3: // 4 tick
+                   g.drawString("4", r.x+3, r.y+6);
+                    break;
+            }
+            break;
+            
         case BUTTON: // '\006'
             g.setColor(Colors.button);
             if(!fake && p(x, y, z + p))

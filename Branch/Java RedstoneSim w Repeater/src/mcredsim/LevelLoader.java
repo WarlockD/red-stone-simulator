@@ -174,6 +174,15 @@ public class LevelLoader
                     case 13: 
                         chunk[i][j][k] = (byte)Blocks.SAND.ordinal();
                         break;
+                    case 94:    // Repeater On
+                       // cext[i][j][k] = 16;
+                        // fall through
+
+                    case 93: //repeater Off
+                        // Looks like the "extra" byte has the stats at the far left and the count for redstone to the left.  Meh
+                        cext[i][j][k] += d<<4;  
+                        chunk[i][j][k] = (byte)Blocks.REPEATER.ordinal();
+                        break;
 
                     default:
                         chunk[i][j][k] = (byte)Blocks.BLOCK.ordinal();

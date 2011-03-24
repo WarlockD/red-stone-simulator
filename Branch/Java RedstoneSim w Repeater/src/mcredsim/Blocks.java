@@ -15,7 +15,8 @@ public enum Blocks
     PRESS ( 0, true, "pressure pad"),
     SAND (0, false, "sand"),
     WATER (0, false, "water"),
-    SHADOW ( 0, false, "shadow");
+    SHADOW ( 0, false, "shadow"),
+    REPEATER (3, true, "repeater");
     
     private Blocks(int w, boolean c, String s)
     {
@@ -26,7 +27,7 @@ public enum Blocks
 
     public boolean ctrl()
     {
-        return this == LEVER || this == BUTTON || this == PRESS;
+        return this == LEVER || this == BUTTON || this == PRESS || this == REPEATER;
     }
 
     public boolean block()
