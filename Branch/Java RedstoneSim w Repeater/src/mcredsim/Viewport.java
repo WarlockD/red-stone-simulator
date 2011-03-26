@@ -528,6 +528,7 @@ public class Viewport
         if(pal.a.wall == 3 && !field.g(x, y + 1, z).block() && !field.g(x, y - 1, z).block() && !field.g(x + 1, y, z).block() && !field.g(x - 1, y, z).block())
             return;
         modify();
+       
         field.s(x, y, z, pal.a);
         if(Field.layers > 1)
         {
@@ -1289,7 +1290,7 @@ public class Viewport
                 else
                 if(field.g(lastX, lastY, p) == Blocks.REPEATER )
                 {
-                    field.srh(lastX, lastY, p, field.rh(x,y,z)+1);
+                    //field.srh(lastX, lastY, p, field.rh(x,y,z)+1);
                 }
                 else
                 if(field.g(lastX, lastY, p) == Blocks.PRESS && !playing)
@@ -1318,11 +1319,11 @@ public class Viewport
                 p--;
             if(field.g(lastX, lastY, p) == Blocks.REPEATER)
             {
-                int w = field.r(lastX, lastY, p) & 3;
+                int w = field.gRepeater_face(lastX, lastY, p);
                 int ow = w;
                 do
                     w=(w+1) & 3;
-                while(!field.sr(lastX, lastY, p, w));
+                while(!field.sRepeater_Face(lastX, lastY, p, w));
                 if(ow != w)
                 {
                     field.update();

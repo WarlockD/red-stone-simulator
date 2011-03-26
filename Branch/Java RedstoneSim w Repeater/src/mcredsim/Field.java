@@ -13,19 +13,23 @@ public class Field
         parent = v;
         data = new byte[z][][];
         extra = new byte[z][][];
+        repeater = new byte[z][][];
         wires = torches = 0;
         for(int i = 0; i < z; i++)
         {
             data[i] = new byte[y][];
             extra[i] = new byte[y][];
+            repeater[i] = new byte[y][];
             for(int j = 0; j < y; j++)
             {
                 data[i][j] = new byte[x];
                 extra[i][j] = new byte[x];
+                repeater[i][j] = new byte[x];
                 for(int k = 0; k < x; k++)
                 {
                     data[i][j][k] = 0;
                     extra[i][j][k] = 0;
+                    repeater[i][j][k] = 0;
                 }
 
             }
@@ -74,6 +78,8 @@ public class Field
         } else
         if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
             return 0;
+        // Ok, part of the hack is that we return the block as "powered" when the ticks of the block hit 0
+        // shifted from the bit 5 and 6.  
         return extra[z][y][x] & 0x1f;
     }
 
@@ -105,14 +111,38 @@ public class Field
         return (extra[z][y][x] >> 4) & 0xF;
     }
     
-    public int rh(int x, int y, int z)
+    public int gRepeater_ticks(int x, int y, int z)
     {
-        return r(x,y,z) >>2;
+        if(z < 0 || z >= data.length)
+            return 0;
+        if(cyclic)
+        {
+            y = (y % data[0].length + data[0].length) % data[0].length;
+            x = (x % data[0][0].length + data[0][0].length) % data[0][0].length;
+        } else
+        if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
+            return 0;
+        
+        return (repeater[z][y][x] >>2 & 0x3);
     }
-    public int rl(int x, int y, int z)
+    
+  
+    public int gRepeater_face(int x, int y, int z)
     {
-        return r(x,y,z) & 3;
+        if(z < 0 || z >= data.length)
+            return 0;
+        if(cyclic)
+        {
+            y = (y % data[0].length + data[0].length) % data[0].length;
+            x = (x % data[0][0].length + data[0][0].length) % data[0][0].length;
+        } else
+        if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
+            return 0;
+        
+        return (repeater[z][y][x] & 0x3);
     }
+    
+    
     
     
     
@@ -169,30 +199,106 @@ public class Field
             return false;
         } else
         {
-            extra[z][y][x] = (byte)((w << 5) + (extra[z][y][x] & 0x1f));
+    //        if(data[z][y][x] == Blocks.REPEATER)
+     //       {
+                
+    // /           
+     //       }
+      ///      else
+                extra[z][y][x] = (byte)((w << 5) + (extra[z][y][x] & 0x1f));
             return true;
         }
     }
     // Set the repeater.  Sigh, why does the repeater have to be special
-    public boolean sr(int x, int y, int z, int w)
+    public boolean sRepeater_Face(int x, int y, int z, int w)
     {
-        if(!valid(x, y, z, w))
-        {
+        if(z < 0 || z >= data.length)
             return false;
-        } else
+        if(cyclic)
         {
-            extra[z][y][x] = (byte)((w << 4) + (extra[z][y][x] & 0xf));
+            y = (y % data[0].length + data[0].length) % data[0].length;
+            x = (x % data[0][0].length + data[0][0].length) % data[0][0].length;
+        } else
+        if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
+            return false;
+        
+            repeater[z][y][x] = (byte)((w << 2) + (repeater[z][y][x] & 0x3));
             return true;
-        }
+        
     }
-    public boolean srh(int x, int y, int z, int w)
+    
+    // Set the repeater.  Sigh, why does the repeater have to be special
+    public boolean sRepeater_Ticks(int x, int y, int z, int w)
     {
-        return sr(x,y,z,(w & 3) <<2);
+        if(z < 0 || z >= data.length)
+            return false;
+        if(cyclic)
+        {
+            y = (y % data[0].length + data[0].length) % data[0].length;
+            x = (x % data[0][0].length + data[0][0].length) % data[0][0].length;
+        } else
+        if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
+            return false;
+            repeater[z][y][x] = (byte)((w & 0x3) + (repeater[z][y][x] & 0xc));
+            return true;
+        
     }
-    public boolean srl(int x, int y, int z, int w)
+    
+    // Reset the current tick count
+    public boolean Repeater_ResetCount(int x, int y, int z)
     {
-        return sr(x,y,z,(w & 3));
+        if(z < 0 || z >= data.length)
+            return false;
+        if(cyclic)
+        {
+            y = (y % data[0].length + data[0].length) % data[0].length;
+            x = (x % data[0][0].length + data[0][0].length) % data[0][0].length;
+        } else
+        if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
+            return false;
+        
+        repeater[z][y][x] = (byte)(repeater[z][y][x]  & 0xf);
+        return true;
+        
+        
     }
+    public boolean Repeater_Inc(int x, int y, int z)
+    {
+        if(z < 0 || z >= data.length)
+            return false;
+        if(cyclic)
+        {
+            y = (y % data[0].length + data[0].length) % data[0].length;
+            x = (x % data[0][0].length + data[0][0].length) % data[0][0].length;
+        } else
+        if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
+            return false;
+
+        repeater[z][y][x] += 0x10;
+        if(repeater[z][y][x] > 128)
+            repeater[z][y][x] = (byte)((repeater[z][y][x]  & 0xf) + 0x40);
+        
+         return true;
+    }
+    
+    public boolean Repeater_Sending(int x,int y, int z)
+    {
+        if(z < 0 || z >= data.length)
+            return false;
+        if(cyclic)
+        {
+            y = (y % data[0].length + data[0].length) % data[0].length;
+            x = (x % data[0][0].length + data[0][0].length) % data[0][0].length;
+        } else
+        if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
+            return false;
+
+        byte tmp = (byte)(repeater[z][y][x] >> 2 & 3);
+        byte tmp2 = (byte)(repeater[z][y][x] >> 4 & 3);
+        if(tmp2 > tmp) return true;
+        return false;  
+    }
+    
     
     public void sp(int x, int y, int z, int p)
     {
@@ -216,6 +322,7 @@ public class Field
                 parent.play(true);
             sp(x, y, z + 1, p);
         }
+        
         extra[z][y][x] = (byte)((extra[z][y][x] & 0xe0) + p);
     }
 
@@ -313,6 +420,89 @@ public class Field
         boolean tog = true;
         switch(b[p])   
         {
+        case REPEATER:
+            /*
+             * Low (1st & 2nd) bits:
+                0x0: Facing east
+                0x1: Facing south
+                0x2: Facing west
+                0x3: Facing north
+                High (3rd & 4th) bits:
+                0x0: 1 tick delay
+                0x1: 2 tick delay
+                0x2: 3 tick delay
+                0x3: 4 tick delay
+             */
+            int[] xP;
+            int[] yP;
+            g.setColor(Colors.repeater);
+            //g.setColor(Colors.door);
+            int rdir = 2 ; //gRepeater_face(x,y,z);
+            int tick = 0; //this.gRepeater_ticks(x, y, z);
+            boolean rpow = true ; this.Repeater_Sending(x, y, z);
+            switch(rdir)
+            {
+                
+                case 3: // North
+                        xP = new int[] { r.x +1,r.x+4,r.x+7,r.x+5,r.x+5,r.x+3,r.x+3,r.x+1 };
+                        yP = new int[] { r.y +4,r.y+1,r.y+4,r.y+4,r.y+7,r.y+7,r.y+4,r.y+4 };
+                        g.fillPolygon(xP,yP,8);
+                        if(rpow)
+                            g.setColor(Colors.wireOn);
+                        else
+                            g.setColor(Colors.wireOff);
+                        if(rpow & tick ==0)
+                            g.fillRect(r.x+3, y+3, 2, 1);
+                        else
+                            g.fillRect(r.x+3, y+3+tick, 2, 1);
+
+                    break;
+                case 1: // south
+                        xP = new int[] { r.x +1,r.x+4,r.x+7,r.x+5,r.x+5,r.x+3,r.x+3,r.x+1 };
+                        yP = new int[] { r.y +4,r.y+7,r.y+4,r.y+4,r.y+1,r.y+1,r.y+4,r.y+4 };
+                        g.fillPolygon(xP,yP,8);
+                        if(rpow)
+                            g.setColor(Colors.wireOn);
+                        else
+                            g.setColor(Colors.wireOff);
+                        if(rpow & tick ==0)
+                            g.fillRect(r.x+3, y+3, 2, 1);
+                        else
+                            g.fillRect(r.x+3, y+3-tick, 2, 1);
+                    break;
+                case 0: // East
+                        xP = new int[] { r.x +1,r.x+4,r.x+4,r.x+7,r.x+7,r.x+4,r.x+4,r.x+1 };
+                        yP = new int[] { r.y +4,r.y+1,r.y+3,r.y+3,r.y+5,r.y+5,r.y+7,r.y+4 };
+                        g.fillPolygon(xP,yP,8);
+                        if(rpow)
+                            g.setColor(Colors.wireOn);
+                        else
+                            g.setColor(Colors.wireOff);
+                        if(rpow & tick ==0)
+                            g.fillRect(r.x+3, y+3, 1, 2);
+                        else
+                            g.fillRect(r.x+3, y+3+tick, 1, 2);
+                    break;
+                case 2: // west
+                        xP = new int[] { r.x +7,r.x+4,r.x+4,r.x+1,r.x+1,r.x+4,r.x+4,r.x+7 };
+                        yP = new int[] { r.y +4,r.y+1,r.y+3,r.y+3,r.y+5,r.y+5,r.y+7,r.y+4 };
+                        g.fillPolygon(xP,yP,8);
+                        if(rpow)
+                            g.setColor(Colors.wireOn);
+                        else
+                            g.setColor(Colors.wireOff);
+                        if(rpow & tick ==0)
+                            g.fillRect(r.x+3, y+3, 1, 2);
+                        else
+                            g.fillRect(r.x+3, y+3+tick, 1, 2);
+                    break;
+            }
+            
+            
+            
+            break;
+           
+            
         case WIRE: // '\003'
             if(fake)
                 drawWire(g, r, true, 15, false);
@@ -354,59 +544,7 @@ public class Field
             g.setColor(Colors.wireOn);
             if(!tog && !fake && p(x, y, z + p))
                 g.fillOval(r.x + 3, r.y + 3, 2, 2);
-            break;
-        case REPEATER:
-            /*
-             * Low (1st & 2nd) bits:
-                0x0: Facing east
-                0x1: Facing south
-                0x2: Facing west
-                0x3: Facing north
-                High (3rd & 4th) bits:
-                0x0: 1 tick delay
-                0x1: 2 tick delay
-                0x2: 3 tick delay
-                0x3: 4 tick delay
-             */
-            g.setColor(Colors.door);
-            int dir = r(x, y, z + p);
-            switch(dir & 3)
-            {
-                case 0: // east
-                    if(fake)
-                       g.fillRect(r.x+3, r.y , 2, 2);
-                    else
-                        g.fillRect(r.x, r.y + 3, 2, 2);
-                    break;
-                case 1: // south
-                    g.fillRect(r.x+ 3, r.y + 6, 2, 2);
-                    break;
-                case 2: // west
-                    g.fillRect(r.x+6, r.y + 3, 2, 2);
-                    break;
-                case 3: // north
-                    g.fillRect(r.x+3, r.y , 2, 2);
-                    break;
-            }
-            g.setFont(new Font("Courier", Font.BOLD, 5));
-            switch(dir>>2 & 3)
-            {
-                case 0: // 1 tick
-                    
-                   g.drawString("1", r.x+3, r.y+6);
-                    break;
-                case 1: // 2 tick
-                  g.drawString("2", r.x+3, r.y+6);
-                    break;
-                case 2: // 3 tick
-                   g.drawString("3",r.x+3, r.y+6);
-                    break;
-                case 3: // 4 tick
-                   g.drawString("4", r.x+3, r.y+6);
-                    break;
-            }
-            break;
-            
+      
         case BUTTON: // '\006'
             g.setColor(Colors.button);
             if(!fake && p(x, y, z + p))
@@ -917,8 +1055,10 @@ public class Field
     private Viewport parent;
     byte data[][][];
     byte extra[][][];
+    byte repeater[][][]; // fuckit, lets add another byte
     int wires;
     int torches;
+    
     public static boolean cyclic = false;
     public static boolean dummyGdValve = false;
     public static boolean MCwires = true;

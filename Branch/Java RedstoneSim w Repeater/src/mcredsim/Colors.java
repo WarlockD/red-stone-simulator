@@ -12,6 +12,7 @@ public class Colors
     }
 
     public static final Color air;
+    public static final Color repeater; 
     public static final Color wireOn;
     public static final Color wireOff;
     public static final Color block;
@@ -33,6 +34,7 @@ public class Colors
 
     static 
     {
+        repeater = new Color(0x66FFFF);
         air = Color.WHITE;
         wireOn = Color.RED;
         wireOff = new Color(0x800000);
