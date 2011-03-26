@@ -102,7 +102,32 @@ namespace Redstone_Simulator
                 }
             }
         }
-        
+
+        public static Blocks AIR { get { return new Blocks(eBlock.AIR); } }
+        public static Blocks BLOCK { get { return new Blocks(eBlock.BLOCK); } }
+        public static Blocks WIRE { get { return new Blocks(eBlock.WIRE); } }
+        public static Blocks TORCH { get { return new Blocks(eBlock.TORCH); } }
+        public static Blocks LEVER { get { return new Blocks(eBlock.LEVER); } }
+        public static Blocks BUTTON { get { return new Blocks(eBlock.BUTTON); } }
+        public static Blocks DOORA { get { return new Blocks(eBlock.DOORA); } }
+        public static Blocks DOORB { get { return new Blocks(eBlock.DOORB); } }
+        public static Blocks PRESS { get { return new Blocks(eBlock.PRESS); } }
+        public static Blocks WATER { get { return new Blocks(eBlock.WATER); } }
+        public static Blocks REPEATER { get { return new Blocks(eBlock.REPEATER); } }
+
+        public static Blocks sAIR { get { return new Blocks(eBlock.AIR,true); } }
+        public static Blocks sBLOCK { get { return new Blocks(eBlock.BLOCK,true); } }
+        public static Blocks sWIRE { get { return new Blocks(eBlock.WIRE, true); } }
+        public static Blocks sTORCH { get { return new Blocks(eBlock.TORCH, true); } }
+        public static Blocks sLEVER { get { return new Blocks(eBlock.LEVER, true); } }
+        public static Blocks sBUTTON { get { return new Blocks(eBlock.BUTTON, true); } }
+        public static Blocks sDOORA { get { return new Blocks(eBlock.DOORA, true); } }
+        public static Blocks sDOORB { get { return new Blocks(eBlock.DOORB, true); } }
+        public static Blocks sPRESS { get { return new Blocks(eBlock.PRESS, true); } }
+        public static Blocks sWATER { get { return new Blocks(eBlock.WATER, true); } }
+        public static Blocks sREPEATER { get { return new Blocks(eBlock.REPEATER, true); } }
+
+
 
        
         public Blocks(eBlock Type)
@@ -113,6 +138,29 @@ namespace Redstone_Simulator
             _powered = false;
             _mount = Type == eBlock.LEVER || Type == eBlock.TORCH ? eMount.TOP : eMount.NORTH;
         }
+
+        public Blocks(eBlock Type, bool select)
+        {
+            _type = Type;
+            x = y = z = up = down = north = south = east = west = -1;
+            _distance = _extra = 0;
+            _powered = false;
+            _mount = Type == eBlock.LEVER || Type == eBlock.TORCH ? eMount.TOP : eMount.NORTH;
+
+            // if true, then lets make them model just for the selection screen
+            if (select)
+            {
+                switch (Type)
+                {
+                    case eBlock.TORCH: _powered = true; _mount = eMount.NORTH; break;
+                    case eBlock.LEVER: _mount = eMount.NORTH; break;
+                    case eBlock.BUTTON: _mount = eMount.NORTH; break;
+                    case eBlock.WIRE: _powered = true; break;
+                }
+
+            }
+        }
+
 
         /// <summary>
         /// Get tye type of the Block

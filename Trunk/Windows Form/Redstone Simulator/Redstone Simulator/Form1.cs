@@ -16,6 +16,34 @@ namespace Redstone_Simulator
         public Form1()
         {
             InitializeComponent();
+            this.MouseWheel += new MouseEventHandler(Form1_MouseWheel);
+        }
+
+        void Form1_MouseWheel(object sender, MouseEventArgs e)
+        {
+            if (e.Delta > 0 | e.Delta < 0)
+                blockSelect.moveSelect(e.Delta > 0 ? 1 : -1);
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Form1_MouseDown(object sender, MouseEventArgs e)
+        {
+
+        }
+
+        private void Form1_MouseClick(object sender, MouseEventArgs e)
+        {
+            if (e.Delta > 0 | e.Delta < 0)
+                blockSelect.moveSelect(e.Delta);
+        }
+
+        private void Form1_MouseMove(object sender, MouseEventArgs e)
+        {
+            
         }
     }
 }
