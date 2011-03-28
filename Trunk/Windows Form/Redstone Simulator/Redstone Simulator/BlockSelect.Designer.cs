@@ -39,7 +39,6 @@
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.BlockSelect_Paint);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.BlockSelect_MouseClick);
             this.MouseEnter += new System.EventHandler(this.BlockSelect_MouseEnter);
-            this.Resize += new System.EventHandler(this.BlockSelect_Resize);
             this.ResumeLayout(false);
 
         }

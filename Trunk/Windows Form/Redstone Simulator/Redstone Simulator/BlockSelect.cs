@@ -6,15 +6,17 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Drawing.Imaging;
 
 namespace Redstone_Simulator
 {
     public partial class BlockSelect : UserControl
     {
         Bitmap bar;
-        int selected = 0;
-        int scale = 5;
-        Size maxSize;
+        int selected = 0; public int Selected { get { return selected; } }
+        public Blocks SelectedBlock { get { return sArray[selected][0]; } }
+        float scale = 5;
+        public float BlockScale { get { return scale; } set { scale = value; } }
         Blocks[][] sArray = { 
                                new Blocks[] { Blocks.sAIR,Blocks.AIR,Blocks.AIR },
                                 new Blocks[]  { Blocks.sBLOCK,Blocks.AIR,Blocks.AIR },
@@ -36,17 +38,13 @@ namespace Redstone_Simulator
       
         public BlockSelect()
         {
-            maxSize = new Size((sArray.Length * 9 + 1) * scale, scale * 10);
-            this.MinimumSize = maxSize;
-            this.MinimumSize = maxSize;
-            makeBar();
+            makeBar();      
             this.DoubleBuffered = true;
             InitializeComponent();
         }
         void makeBar()
         {
-            Rectangle r;
-            bar = new Bitmap(maxSize.Width, maxSize.Height);
+            bar = new Bitmap((int)((sArray.Length * 9 + 1) * scale), (int)(scale * 10));
             Graphics g = Graphics.FromImage(bar);
             
             g.Clear(BlockColors.cGrid);
@@ -54,15 +52,15 @@ namespace Redstone_Simulator
             g.ScaleTransform(scale, scale);
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
             g.FillRectangle(BlockColors.bHilite, (selected * 9), 0, 10, 10);
-            // g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            //g.setColor(Colors.hilite);
-            
+ 
             for (int i = 0; i < sArray.Length; i++)
             {
-                r = new Rectangle(i * 9 + 1, 1, 8, 8);
+                Rectangle r = new Rectangle(i * 9 + 1, 1, 8, 8);
                 BlockImages.gDrawBlockStack(g, r, sArray[i]);
             }
             g.Dispose();
+            this.MinimumSize = bar.Size;
+            this.MaximumSize = bar.Size;
         }
         private void BlockSelect_Load(object sender, EventArgs e)
         {
@@ -87,42 +85,17 @@ namespace Redstone_Simulator
         {
       
             Graphics g = e.Graphics;
-            g.Clear(BlockColors.cGrid);
-            
-            g.DrawImage(bar, center, 0);
-            //g.ScaleTransform(scale, scale);
-            //g.DrawRectangle(new Pen(BlockColors.bHilite), (selected * 9) +center, 0, 10, 10);
-           
-
+            g.DrawImage(bar, 0, 0);
         }
-        int center = 0;
-        private void BlockSelect_Resize(object sender, EventArgs e)
-        {
-            center = (Width -bar.Width) / 2; 
-            if (center < 0) center = 0;
-            this.Refresh();
-        //    this.Invalidate();
-          //  scale = this.Width / (sArray.Length * 9 + 1);
-          //  if (scale > 5)
-           //     scale = 5;
-           // //if (scale < 2)
-            //    scale = 2;
-            ////maxSize = new Size((sArray.Length * 9 + 1) * scale, scale * 10);
-           // this.MinimumSize = maxSize;
-           // this.MinimumSize = maxSize;
-           // Dimension d = new Dimension((palArr.length * 9 + 1) * pScale, 10 * pScale);
-          //  pView.setPreferredSize(d);
-          //  pView.setMaximumSize(d);
-           // pView.revalidate();
-        }
-
+       
 
         private void BlockSelect_MouseClick(object sender, MouseEventArgs e)
         {
             switch (e.Button)
             {
                 case System.Windows.Forms.MouseButtons.Left:
-                    int pX = (e.X-center) / scale;
+                   // int pX = (e.X-center) / (int)scale;
+                    int pX = (e.X) / (int)scale;
                     if (pX < 0) return;
                     if (pX % 9 == 0) return;
                     pX /= 9;
@@ -140,7 +113,7 @@ namespace Redstone_Simulator
 
         private void BlockSelect_MouseEnter(object sender, EventArgs e)
         {
-            if (!this.Focused) this.Focus();
+        //    if (!this.Focused) this.Focus();
         }
 
       

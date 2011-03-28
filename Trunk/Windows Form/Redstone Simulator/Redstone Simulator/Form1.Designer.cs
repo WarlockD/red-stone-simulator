@@ -40,8 +40,9 @@
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
+            this.blockView = new Redstone_Simulator.BlockView();
             this.blockSelect = new Redstone_Simulator.BlockSelect();
-            this.mainStatusStrip = new Redstone_Simulator.myStatusStrip();
+            this.mainStatusStrip = new Redstone_Simulator.BlockStatusStrip();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -52,7 +53,7 @@
             this.fileToolStripMenuItem});
             this.menuStrip1.Location = new System.Drawing.Point(0, 0);
             this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(974, 24);
+            this.menuStrip1.Size = new System.Drawing.Size(1105, 24);
             this.menuStrip1.TabIndex = 1;
             this.menuStrip1.Text = "menuStrip1";
             // 
@@ -116,7 +117,7 @@
             this.toolStripButton1});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(974, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(1105, 25);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
             // 
@@ -129,31 +130,48 @@
             this.toolStripButton1.Size = new System.Drawing.Size(23, 22);
             this.toolStripButton1.Text = "toolStripButton1";
             // 
+            // blockView
+            // 
+            this.blockView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.blockView.AutoScroll = true;
+            this.blockView.AutoScrollMinSize = new System.Drawing.Size(813, 813);
+            this.blockView.Location = new System.Drawing.Point(0, 52);
+            this.blockView.Margin = new System.Windows.Forms.Padding(9);
+            this.blockView.MinimumSize = new System.Drawing.Size(271, 271);
+            this.blockView.Name = "blockView";
+            this.blockView.Size = new System.Drawing.Size(1105, 488);
+            this.blockView.TabIndex = 6;
+            this.blockView.TabStop = false;
+            // 
             // blockSelect
             // 
-            this.blockSelect.AutoSize = true;
-            this.blockSelect.Dock = System.Windows.Forms.DockStyle.Bottom;
-            this.blockSelect.Location = new System.Drawing.Point(0, 321);
-            this.blockSelect.MaximumSize = new System.Drawing.Size(0, 50);
-            this.blockSelect.MinimumSize = new System.Drawing.Size(0, 50);
+            this.blockSelect.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.blockSelect.BlockScale = 5F;
+            this.blockSelect.Location = new System.Drawing.Point(0, 540);
+            this.blockSelect.MaximumSize = new System.Drawing.Size(725, 50);
+            this.blockSelect.MinimumSize = new System.Drawing.Size(725, 50);
             this.blockSelect.Name = "blockSelect";
-            this.blockSelect.Size = new System.Drawing.Size(974, 50);
-            this.blockSelect.TabIndex = 3;
+            this.blockSelect.Size = new System.Drawing.Size(725, 50);
+            this.blockSelect.TabIndex = 5;
             // 
             // mainStatusStrip
             // 
             this.mainStatusStrip.BackColor = System.Drawing.Color.White;
             this.mainStatusStrip.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
-            this.mainStatusStrip.Location = new System.Drawing.Point(0, 371);
+            this.mainStatusStrip.Location = new System.Drawing.Point(0, 593);
             this.mainStatusStrip.Name = "mainStatusStrip";
-            this.mainStatusStrip.Size = new System.Drawing.Size(974, 23);
+            this.mainStatusStrip.Size = new System.Drawing.Size(1105, 23);
             this.mainStatusStrip.TabIndex = 0;
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(974, 394);
+            this.ClientSize = new System.Drawing.Size(1105, 616);
+            this.Controls.Add(this.blockView);
             this.Controls.Add(this.blockSelect);
             this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.mainStatusStrip);
@@ -164,6 +182,7 @@
             this.Load += new System.EventHandler(this.Form1_Load);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseClick);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseMove);
+            this.Resize += new System.EventHandler(this.Form1_Resize);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.toolStrip1.ResumeLayout(false);
@@ -175,7 +194,7 @@
 
         #endregion
 
-        private myStatusStrip mainStatusStrip;
+        private BlockStatusStrip mainStatusStrip;
         private System.Windows.Forms.MenuStrip menuStrip1;
         private System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
         private System.Windows.Forms.ToolStripMenuItem newToolStripMenuItem;
@@ -188,6 +207,7 @@
         private System.Windows.Forms.ToolStrip toolStrip1;
         private System.Windows.Forms.ToolStripButton toolStripButton1;
         private BlockSelect blockSelect;
+        private BlockView blockView;
 
  
 

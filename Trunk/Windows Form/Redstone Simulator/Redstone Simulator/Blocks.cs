@@ -7,7 +7,7 @@ namespace Redstone_Simulator
 {
     public enum  eBlock : byte
     {
-        AIR,
+        AIR=0,
         BLOCK, 
         WIRE,
         TORCH,
@@ -21,7 +21,7 @@ namespace Redstone_Simulator
     }
     public enum eMount : byte
     {
-        TOP,
+        TOP=0,
         SOUTH=1,
         NORTH,
         EAST,
@@ -29,7 +29,7 @@ namespace Redstone_Simulator
     }
     public enum eDirection
     {
-        UP,
+        UP=0,
         SOUTH=1,
         NORTH,
         EAST,
@@ -43,14 +43,31 @@ namespace Redstone_Simulator
     }
     public struct Blocks
     {
+        WireMask _wireMask;
+        public WireMask wMask { get { return _wireMask; } set { _wireMask = value; } }
+
         eBlock _type; 
         eMount _mount; 
-        short _extra;
-        short _distance;
         short up, down, north, south, east, west;
         short x,y,z; // Hard position
-        bool _powered;
-
+        short _power;
+        short _ticks;
+        public short Ticks
+        {
+            get
+            {
+                if (_type == eBlock.REPEATER)
+                    return _ticks;
+                else
+                    return 0;
+            }
+            set
+            {
+                _ticks = value;
+                if (_ticks < 1) _ticks = 1;
+                if (_ticks > 4) _ticks = 4;
+            }
+        }
         /// <summary>
         /// This is the mounted direction.  It is facing this direction or mounted
         /// in this direction.  Levers require to use the Extra byte
@@ -70,13 +87,22 @@ namespace Redstone_Simulator
         }
 
 
-
+        public short Power
+        {
+            set
+            {
+                
+                if (value > 16) _power = 16;
+                else
+                    if (value < 0) _power = 0;
+                    else
+                        _power = value;
+            }
+            get { return _power; }
+        }
         public bool Powered { 
             get {
-                if(_type == eBlock.WIRE)
-                    return _distance > 0;
-                else
-                    return _powered; 
+                    return _power > 0;
             } 
             set 
             {
@@ -88,16 +114,12 @@ namespace Redstone_Simulator
                     case eBlock.BUTTON:
                     case eBlock.DOORA:
                     case eBlock.DOORB:
-                        _powered = value;
-                        break;
-                        // The wire is powered from a direct source
                     case eBlock.WIRE:
-                        _powered = value; 
-                        if(value)
-                            _distance  = 15;
+                        _power = 16;
                         break;
+
                     default:
-                        _powered = false;
+                        _power = 16;
                         break;
                 }
             }
@@ -128,23 +150,44 @@ namespace Redstone_Simulator
         public static Blocks sREPEATER { get { return new Blocks(eBlock.REPEATER, true); } }
 
 
+        
+      /*  {
+            _ticks = 1;
+            _wireMask = WireMask.None;
+            _type = eBlock.AIR;
+            x = y = z = up = down = north = south = east = west = -1;
+            _extra = 0;
+            _power = 0;
+            _mount = eMount.TOP;
+        }*/
+        public void RotateRight()
+        {
+            this._mount++;
+            if(_mount > eMount.WEST) _mount= eMount.TOP;
+        }
+        public void  RotateLeft()
+        {
+            this._mount--;
+            if (_mount < 0) _mount = eMount.WEST;
 
-       
+        }
         public Blocks(eBlock Type)
         {
+            _ticks = 1;
+            _wireMask = WireMask.None;
             _type = Type;
             x = y = z = up = down = north = south = east = west = -1;
-            _distance = _extra = 0;
-            _powered = false;
+            _power = 0;
             _mount = Type == eBlock.LEVER || Type == eBlock.TORCH ? eMount.TOP : eMount.NORTH;
         }
 
         public Blocks(eBlock Type, bool select)
         {
+            _ticks = 1;
+            _wireMask = WireMask.None;
             _type = Type;
             x = y = z = up = down = north = south = east = west = -1;
-            _distance = _extra = 0;
-            _powered = false;
+            _power = 0;
             _mount = Type == eBlock.LEVER || Type == eBlock.TORCH ? eMount.TOP : eMount.NORTH;
 
             // if true, then lets make them model just for the selection screen
@@ -152,10 +195,10 @@ namespace Redstone_Simulator
             {
                 switch (Type)
                 {
-                    case eBlock.TORCH: _powered = true; _mount = eMount.NORTH; break;
+                    case eBlock.TORCH: _power = 16; _mount = eMount.NORTH; break;
                     case eBlock.LEVER: _mount = eMount.NORTH; break;
                     case eBlock.BUTTON: _mount = eMount.NORTH; break;
-                    case eBlock.WIRE: _powered = true; break;
+                    case eBlock.WIRE: _power = 16; break;
                 }
 
             }
@@ -167,10 +210,7 @@ namespace Redstone_Simulator
         /// </summary>
         public eBlock Type{ get { return _type; } }
 
-        /// <summary>
-        /// Distance from power, mainly for wire caculation
-        /// </summary>
-        public short Distance { get { return _distance; } set { _distance = value; } }
+
 
         public void setLoc(short X, short Y, short Z) { x = X; y = Y; z = Z; }
         public void setLoc(short[] loc) { setLoc(loc[0], loc[1], loc[2]); }

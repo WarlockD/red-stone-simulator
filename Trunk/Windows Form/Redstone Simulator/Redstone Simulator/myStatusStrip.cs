@@ -8,7 +8,9 @@ using System.Drawing.Imaging;
 
 namespace Redstone_Simulator
 {
-    public partial class myStatusStrip : StatusStrip
+    
+
+    public partial class BlockStatusStrip : StatusStrip
     {
         int x=0;
         int y=0;
@@ -20,7 +22,12 @@ namespace Redstone_Simulator
         ToolStripLabel cTorches;
         ToolStripLabel cWires;
         ToolStripLabel cRedstone;
+        
+        
+        
+        //public event EventHandler<myStatusStripEventArgs> StatusStripEvent;
 
+        
         private void CreateStrip()
         {
             this.SuspendLayout();
@@ -77,7 +84,7 @@ namespace Redstone_Simulator
             this.ResumeLayout(false);
 
         }
-        public myStatusStrip()
+        public BlockStatusStrip()
         {
             this.BackColor = Color.White;
             CreateStrip();
@@ -124,6 +131,34 @@ namespace Redstone_Simulator
         }
 
 
-      
+   
     }
+        [Flags]
+        public enum eStatusStripUdate
+        {
+            XYZ = 1,
+            Torches = 2,
+            RedStone = 4,
+            Wires = 8,
+            Layer = 10,
+            Hide = 12
+        }
+    
+        public class myStatusStripEventArgs : EventArgs
+        {
+            public int X { get;  set; }
+            public int Y  { get;  set; }
+            public int Z  { get;  set; }
+            public int Torches  { get;  set; }
+            public int Redstone  { get;  set; }
+            public int Wires  { get;  set; }
+            public int Layer  { get;  set; }
+
+            public eStatusStripUdate Update { get; internal set; }
+
+            public myStatusStripEventArgs(eStatusStripUdate t) { Update = t; X = Y = Z = Torches = Redstone = Wires = Layer = 0; }
+
+
+        }
+        
 }
