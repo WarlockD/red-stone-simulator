@@ -171,36 +171,32 @@ namespace Redstone_Simulator
                     Point[] Arrow = new Point[8];
                     int tick = b.Ticks - 1;
                     bool rpow = b.Powered;
-                    b.Mount = eMount.EAST;
+                    //b.Mount = 
                     switch (b.Mount)
                     {
                             // There a better, fasterway for a vector arrow?
                         case eMount.NORTH: 
                             for (int i = 0; i < 8; i++) { Arrow[i] = northArrow[i]; Arrow[i].Offset(r.Location); }
-                            g.FillPolygon(BlockColors.bRepeater, Arrow);
                             r = new Rectangle(r.X + 3, r.Y + 3, 2, 1);
                             r.Offset(0, tick);
                             break;
                         case eMount.SOUTH:
                             for (int i = 0; i < 8; i++) { Arrow[i] = southArrow[i]; Arrow[i].Offset(r.Location); }
-                            g.FillPolygon(BlockColors.bRepeater, Arrow);
                             r = new Rectangle(r.X + 3, r.Y + 4, 2, 1); 
                             r.Offset(0, -tick);
                             break;
                         case eMount.WEST: 
                             for (int i = 0; i < 8; i++) { Arrow[i] = westArrow[i]; Arrow[i].Offset(r.Location); }
-                            g.FillPolygon(BlockColors.bRepeater, Arrow);
                             r = new Rectangle(r.X + 4, r.Y + 3, 1, 2);
                             r.Offset(-tick, 0);
                             break;
                         case eMount.EAST: 
-                            for (int i = 0; i < 8; i++) { Arrow[i] = eastArrow[i]; Arrow[i].Offset(r.Location); }
-                            g.FillPolygon(BlockColors.bRepeater, Arrow);
+                            for (int i = 0; i < 8; i++) { Arrow[i] = eastArrow[i]; Arrow[i].Offset(r.Location); } 
                             r = new Rectangle(r.X + 3, r.Y + 3, 1, 2);
                             r.Offset(tick, 0);
                             break;
                     }
-                    
+                    g.FillPolygon(BlockColors.bRepeater, Arrow);
                     // If its powered we light it up, if its not powered we don't need to display a single tick
                     if (rpow & tick == 0)
                         g.FillRectangle(BlockColors.bWireOn, r);

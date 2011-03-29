@@ -19,22 +19,25 @@ namespace Redstone_Simulator
         WATER,
         REPEATER
     }
+    [Flags]
     public enum eMount : byte
     {
-        TOP=0,
-        SOUTH=1,
-        NORTH,
-        EAST,
-        WEST
+        TOP=1,
+        SOUTH=2,
+        NORTH=4,
+        EAST=8,
+        WEST=10
     }
+
+    [Flags]
     public enum eDirection
     {
-        UP=0,
-        SOUTH=1,
-        NORTH,
-        EAST,
-        WEST,
-        DOWN
+        UP=1,
+        SOUTH=2,
+        NORTH=4,
+        EAST=8,
+        WEST=10,
+        DOWN=12
     }
     public enum eExtraParm
     {
@@ -160,15 +163,47 @@ namespace Redstone_Simulator
             _power = 0;
             _mount = eMount.TOP;
         }*/
-        public void RotateRight()
+        public void Rotate()
         {
-            this._mount++;
-            if(_mount > eMount.WEST) _mount= eMount.TOP;
+            if (!this.canRotate)
+                return;
+            switch(_mount)
+            {
+                case eMount.TOP: _mount = eMount.NORTH; break;
+                case eMount.NORTH: _mount = eMount.SOUTH; break;
+                case eMount.SOUTH: _mount = eMount.EAST; break;
+                case eMount.EAST: _mount = eMount.WEST; break;
+                case eMount.WEST:
+                    if(_type == eBlock.BUTTON || _type == eBlock.DOORB || _type == eBlock.REPEATER)
+                        _mount = eMount.NORTH;
+                else
+                    _mount = eMount.TOP;
+                    break;
+
+            }
         }
-        public void  RotateLeft()
+        /// <summary>
+        /// Rotate object but not in these directions
+        /// </summary>
+        /// <param name="dirs">Direction flag not to be moved in</param>
+        public void Rotate(eMount dirs)
         {
-            this._mount--;
-            if (_mount < 0) _mount = eMount.WEST;
+            if (!this.canRotate)
+                return;
+            if (!dirs.HasFlag(eMount.NORTH) && _mount == eMount.NORTH)
+            { _mount = eMount.WEST; return; }
+            if (!dirs.HasFlag(eMount.WEST) && _mount == eMount.WEST)
+            { _mount = eMount.SOUTH; return; }
+            if (!dirs.HasFlag(eMount.SOUTH) && _mount == eMount.SOUTH)
+            { _mount = eMount.EAST; return; }
+            if (!dirs.HasFlag(eMount.EAST) && _mount == eMount.EAST)
+                if (this.canStand)
+                { _mount = eMount.TOP; return; }
+                else
+                { _mount = eMount.NORTH; return; }
+            if (!dirs.HasFlag(eMount.TOP) && _mount == eMount.TOP)
+            { _mount = eMount.NORTH; return; }
+
 
         }
         public Blocks(eBlock Type)
@@ -289,7 +324,7 @@ namespace Redstone_Simulator
         /// This control object or torch and stand ontop of a block, Always have an UP
         /// </summary>
         public bool canStand { get { return this._type == eBlock.LEVER  || this._type == eBlock.PRESS || this._type == eBlock.REPEATER || this._type == eBlock.TORCH;  }}
-
+        public bool canRotate { get { return this._type == eBlock.LEVER ||  this._type == eBlock.REPEATER || this._type == eBlock.TORCH; } }
         /// <summary>
         /// You can put this on the side of a block
         /// </summary>
