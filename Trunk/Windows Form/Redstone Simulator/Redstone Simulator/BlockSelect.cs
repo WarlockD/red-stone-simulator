@@ -17,24 +17,7 @@ namespace Redstone_Simulator
         public Blocks SelectedBlock { get { return sArray[selected][0]; } }
         float scale = 5;
         public float BlockScale { get { return scale; } set { scale = value; } }
-        Blocks[][] sArray = { 
-                               new Blocks[] { Blocks.sAIR,Blocks.AIR,Blocks.AIR },
-                                new Blocks[]  { Blocks.sBLOCK,Blocks.AIR,Blocks.AIR },
-                                new Blocks[]  { Blocks.sBLOCK,Blocks.sBLOCK,Blocks.AIR },
-                                new Blocks[]  { Blocks.sWIRE,Blocks.AIR,Blocks.AIR },
-                                new Blocks[]  { Blocks.sTORCH,Blocks.AIR,Blocks.AIR },
-                                new Blocks[]  { Blocks.sBLOCK,Blocks.sWIRE,Blocks.AIR },
-                               new Blocks[]   { Blocks.sBLOCK,Blocks.sTORCH,Blocks.AIR },
-                               new Blocks[]   { Blocks.sWIRE,Blocks.sBLOCK,Blocks.AIR },
-                                new Blocks[]  { Blocks.sTORCH,Blocks.sBLOCK,Blocks.AIR },
-                                new Blocks[]  { Blocks.sWIRE,Blocks.sTORCH,Blocks.AIR },
-                                new Blocks[]  { Blocks.sWIRE,Blocks.sBLOCK,Blocks.sWIRE },
-                               new Blocks[]   { Blocks.sLEVER,Blocks.AIR,Blocks.AIR },
-                                new Blocks[]  { Blocks.sBUTTON,Blocks.AIR,Blocks.AIR },
-                                new Blocks[]  { Blocks.sPRESS,Blocks.AIR,Blocks.AIR },
-                                new Blocks[]  { Blocks.sDOORA,Blocks.AIR,Blocks.AIR }  ,
-                                 new Blocks[]  { Blocks.REPEATER,Blocks.AIR,Blocks.AIR }  
-                            };
+        Blocks[][] sArray = Blocks.PickBlocks;
       
         public BlockSelect()
         {
@@ -55,8 +38,21 @@ namespace Redstone_Simulator
  
             for (int i = 0; i < sArray.Length; i++)
             {
+                
                 Rectangle r = new Rectangle(i * 9 + 1, 1, 8, 8);
-                BlockImages.gDrawBlockStack(g, r, sArray[i]);
+                BlockDrawSettings b;
+                int j = 0;
+                if (sArray[i][j].Type == eBlock.BLOCK)
+                {
+                    j++;
+                    b = new BlockDrawSettings(sArray[i][j], WireMask.AllDir, true);
+                    b.OnBlock = true;
+                }
+                else
+                    b = new BlockDrawSettings(sArray[i][j], WireMask.AllDir, true);
+
+                if (sArray[i][j+1].Type == eBlock.BLOCK) b.Fog = true;
+                BlockImages.gDrawBlock(g, r, b);
             }
             g.Dispose();
             this.MinimumSize = bar.Size;

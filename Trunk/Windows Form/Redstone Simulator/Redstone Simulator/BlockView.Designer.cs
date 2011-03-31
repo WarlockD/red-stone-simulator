@@ -41,6 +41,8 @@
             this.Name = "BlockView";
             this.Size = new System.Drawing.Size(996, 640);
             this.Load += new System.EventHandler(this.BlockView_Load);
+            this.KeyDown += new System.Windows.Forms.KeyEventHandler(this.BlockView_KeyDown);
+            this.KeyUp += new System.Windows.Forms.KeyEventHandler(this.BlockView_KeyUp);
             this.ResumeLayout(false);
 
         }

@@ -15,26 +15,22 @@ namespace Redstone_Simulator
         South = 2,
         East = 4,
         West = 8,
-        NoConn = 10
+        AllDir = North | South | East | West
     }
-    [Flags]
-    public enum eBlockImage
+
+    public struct BlockDrawSettings
     {
-        Blank = 0,
-        Air = 1,
-        Block = 2,
-        Shadow = 4,
-        Fog = 8
-    }
-    public struct BlockIData
-    {
-        public WireMask Mask;
-        public eBlockImage Flags;
-        public Blocks Block;
-        public BlockIData(Blocks b, eBlockImage f, WireMask m)
-        { Mask = m; Flags = f; Block = b; }
-        public BlockIData(Blocks b) : this(b, eBlockImage.Air, WireMask.None) { }
- 
+        Blocks block;
+        public Blocks Block { get { return block; } }
+        public bool OverShadow { get; set; }
+        public bool Fog { get; set; }
+        public bool On { get; set; }
+        public bool OnBlock { get; set; }
+        public WireMask Mask { get; set; }
+        public BlockDrawSettings(Blocks Block) : this() { block = Block; }
+        public BlockDrawSettings(Blocks Block, WireMask Mask) : this(Block) { this.Mask = Mask; }
+        public BlockDrawSettings(Blocks Block, WireMask Mask, bool On) : this(Block,Mask) { block.Power = On ? 16 : 0; }
+        public BlockDrawSettings(Blocks Block,  bool On) : this(Block) { block.Power = On ? 16 : 0; }
     }
     public class BlockColors
     {
@@ -83,25 +79,7 @@ namespace Redstone_Simulator
         public static  Brush  bTooltip = new SolidBrush(cTooltip);
         
     }
-        
-    /*
-                case 1: // south
-                        xP = new int[] { r.x +1,r.x+4,r.x+7,r.x+5,r.x+5,r.x+3,r.x+3,r.x+1 };
-                        yP = new int[] { r.y +4,r.y+7,r.y+4,r.y+4,r.y+1,r.y+1,r.y+4,r.y+4 };
-
-                case 0: // East
-                        xP = new int[] { r.x +1,r.x+4,r.x+4,r.x+7,r.x+7,r.x+4,r.x+4,r.x+1 };
-                        yP = new int[] { r.y +4,r.y+1,r.y+3,r.y+3,r.y+5,r.y+5,r.y+7,r.y+4 };
-     
-                case 2: // west
-                        xP = new int[] { r.x +7,r.x+4,r.x+4,r.x+1,r.x+1,r.x+4,r.x+4,r.x+7 };
-                        yP = new int[] { r.y +4,r.y+1,r.y+3,r.y+3,r.y+5,r.y+5,r.y+7,r.y+4 };
-
-
-    /*
-    }
-        */
-
+  
     class BlockImages
     {
         public static  Point[] northArrow = 
@@ -113,85 +91,62 @@ namespace Redstone_Simulator
         public static Point[] westArrow = 
         { new Point(7, 4), new Point(4, 1), new Point(4, 3), new Point(1, 3), new Point(1, 5), new Point(4, 5), new Point(4, 7), new Point(7, 4) };
 
-        public static void gDrawWire(Graphics g, Rectangle r, bool on, WireMask c)
+        public static void gDrawWire(Graphics g, Rectangle r, BlockDrawSettings s)
         {
-            gDrawWire(g, r, on, c, true);
+            Brush b = s.Block.Powered ? BlockColors.bWireOn : BlockColors.bWireOff;
+
+ 
+            if (s.Mask.HasFlag(WireMask.North)) g.FillRectangle(b, r.X + 3, r.Y, 2, 5);
+            if (s.Mask.HasFlag(WireMask.South)) g.FillRectangle(b, r.X + 3, r.Y + 3, 2, 5);
+            if (s.Mask.HasFlag(WireMask.East)) g.FillRectangle(b, r.X + 3, r.Y + 3, 5, 2);
+            if (s.Mask.HasFlag(WireMask.West)) g.FillRectangle(b, r.X, r.Y + 3, 5, 2);
+           // if (s.Mask.HasFlag(WireMask.None)) g.FillRectangle(b, r.X + 2, r.Y + 2, 4, 4);
         }
-        public static void gDrawWire(Graphics g, Rectangle r, bool on, WireMask c, bool onNonePrintAll)
+        public static void gDrawBlock(Graphics g, Rectangle r, BlockDrawSettings b)
         {
-            Brush b = on ? BlockColors.bWireOn : BlockColors.bWireOff;
-
-            if (c == WireMask.None)
-                if (onNonePrintAll)
-                    c = WireMask.North | WireMask.South | WireMask.East | WireMask.West;
-                else
-                {
-                    g.FillRectangle(b, r.X + 2, r.Y + 2, 4, 4);
-                    return;
-                }
-
-            if (c.HasFlag(WireMask.North)) g.FillRectangle(b, r.X + 3, r.Y, 2, 5);
-            if (c.HasFlag(WireMask.South)) g.FillRectangle(b, r.X + 3, r.Y + 3, 2, 5);
-            if (c.HasFlag(WireMask.East)) g.FillRectangle(b, r.X + 3, r.Y + 3, 5, 2);
-            if (c.HasFlag(WireMask.West)) g.FillRectangle(b, r.X, r.Y + 3, 5, 2);
-
-
-        }
-        public static void gDrawBlock(Graphics g, Rectangle r, BlockIData b)
-        {
-            if (b.Flags.HasFlag(eBlockImage.Shadow)) g.FillRectangle(BlockColors.bGrid, r);
+            if (b.OverShadow) g.FillRectangle(BlockColors.bGrid, r);
             else
-                if (b.Flags.HasFlag(eBlockImage.Block)) g.FillRectangle(BlockColors.bBlock, r);
+                if (b.Block.Type == eBlock.BLOCK || b.OnBlock) g.FillRectangle(BlockColors.bBlock, r);
                 else
                     g.FillRectangle(BlockColors.bAir, r);
-            gDrawBlock(g, r, b.Block);
-            if (b.Flags.HasFlag(eBlockImage.Fog)) g.FillRectangle(BlockColors.bFog, r);
-        }
-        public static void gDrawBlock(Graphics g, Rectangle r, Blocks b, bool overShadow, bool onBlock, bool withFog)
-        {
-            if(overShadow) g.FillRectangle(BlockColors.bGrid, r);
-            else
-            if(onBlock) g.FillRectangle(BlockColors.bBlock, r);
-            else
-                g.FillRectangle(BlockColors.bAir, r);
-            gDrawBlock(g, r, b);
-            if(withFog) g.FillRectangle(BlockColors.bFog, r);
-        }
-        public static void gDrawBlock(Graphics g, Rectangle r, Blocks b)
-        {
+
             /*
              * 0x1: Facing south
                0x2: Facing north
                0x3: Facing west
                0x4: Facing east
              */
-            switch (b.Type)
+
+            switch (b.Block.Type)
             {
+                case eBlock.WIRE:
+                    gDrawWire(g, r, b);
+                    break;
                 case eBlock.REPEATER:
                     Point[] Arrow = new Point[8];
-                    int tick = b.Ticks - 1;
-                    bool rpow = b.Powered;
+                    int tick = b.Block.Ticks;
+                    bool rpow = b.Block.Powered;
                     //b.Mount = 
-                    switch (b.Mount)
+                    switch (b.Block.Mount)
                     {
-                            // There a better, fasterway for a vector arrow?
-                        case eMount.NORTH: 
+                        // There a better, fasterway for a vector arrow?
+                        case eMount.NORTH:
                             for (int i = 0; i < 8; i++) { Arrow[i] = northArrow[i]; Arrow[i].Offset(r.Location); }
                             r = new Rectangle(r.X + 3, r.Y + 3, 2, 1);
                             r.Offset(0, tick);
                             break;
                         case eMount.SOUTH:
                             for (int i = 0; i < 8; i++) { Arrow[i] = southArrow[i]; Arrow[i].Offset(r.Location); }
-                            r = new Rectangle(r.X + 3, r.Y + 4, 2, 1); 
+                            r = new Rectangle(r.X + 3, r.Y + 4, 2, 1);
                             r.Offset(0, -tick);
                             break;
-                        case eMount.WEST: 
+                        case eMount.WEST:
                             for (int i = 0; i < 8; i++) { Arrow[i] = westArrow[i]; Arrow[i].Offset(r.Location); }
                             r = new Rectangle(r.X + 4, r.Y + 3, 1, 2);
                             r.Offset(-tick, 0);
                             break;
-                        case eMount.EAST: 
-                            for (int i = 0; i < 8; i++) { Arrow[i] = eastArrow[i]; Arrow[i].Offset(r.Location); } 
+                        case eMount.EAST:
+                            for (int i = 0; i < 8; i++) { Arrow[i] = eastArrow[i]; Arrow[i].Offset(r.Location); }
                             r = new Rectangle(r.X + 3, r.Y + 3, 1, 2);
                             r.Offset(tick, 0);
                             break;
@@ -200,7 +155,7 @@ namespace Redstone_Simulator
                     // If its powered we light it up, if its not powered we don't need to display a single tick
                     if (rpow & tick == 0)
                         g.FillRectangle(BlockColors.bWireOn, r);
-                     else
+                    else
                         if (tick != 0)
                             if (rpow)
                                 g.FillRectangle(BlockColors.bWireOn, r);
@@ -209,11 +164,8 @@ namespace Redstone_Simulator
 
 
                     break;
-                case eBlock.WIRE: 
-                    gDrawWire(g, r, b.Powered, b.wMask, true);  //FIX THIS
-                    break;
                 case eBlock.LEVER:
-                    switch (b.Mount)
+                    switch (b.Block.Mount)
                     {
                         case eMount.SOUTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y, 2, 5); break;
                         case eMount.NORTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 2, 5); break;
@@ -221,11 +173,11 @@ namespace Redstone_Simulator
                         case eMount.WEST: g.FillRectangle(BlockColors.bLever, r.X, r.Y + 3, 5, 2); break;
                     }
                     g.FillEllipse(BlockColors.bValve, r.X + 2, r.Y + 2, 4, 4);
-                    if (b.Powered)
+                    if (b.Block.Powered)
                         g.FillEllipse(BlockColors.bWireOn, r.X + 3, r.X + 3, 2, 2);
                     break;
-                case eBlock.TORCH: 
-                    switch (b.Mount)
+                case eBlock.TORCH:
+                    switch (b.Block.Mount)
                     {
                         case eMount.SOUTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y, 2, 5); break;
                         case eMount.NORTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 2, 5); break;
@@ -233,17 +185,17 @@ namespace Redstone_Simulator
                         case eMount.WEST: g.FillRectangle(BlockColors.bLever, r.X, r.Y + 3, 5, 2); break;
                     }
 
-                    if (b.Powered)
+                    if (b.Block.Powered)
                         g.FillEllipse(BlockColors.bWireOn, r.X + 2, r.Y + 2, 4, 4);
                     else
                         g.FillEllipse(BlockColors.bWireOff, r.X + 2, r.Y + 2, 4, 4);
 
                     break;
 
-                case eBlock.BUTTON: 
+                case eBlock.BUTTON:
 
-                    if (b.Powered)
-                        switch (b.Mount)
+                    if (b.Block.Powered)
+                        switch (b.Block.Mount)
                         {
                             case eMount.NORTH: g.FillRectangle(BlockColors.bButton, r.X + 2, r.Y + 7, 4, 1); break;
                             case eMount.SOUTH: g.FillRectangle(BlockColors.bButton, r.X + 2, r.Y, 4, 1); break;
@@ -251,7 +203,7 @@ namespace Redstone_Simulator
                             case eMount.WEST: g.FillRectangle(BlockColors.bButton, r.X, r.Y + 2, 1, 4); break;
                         }
                     else
-                        switch (b.Mount)
+                        switch (b.Block.Mount)
                         {
                             case eMount.SOUTH: g.FillRectangle(BlockColors.bButton, r.X + 2, r.Y + 5, 4, 3); break;
                             case eMount.NORTH: g.FillRectangle(BlockColors.bButton, r.X + 2, r.Y, 4, 3); break;
@@ -262,7 +214,7 @@ namespace Redstone_Simulator
                     break;
 
                 case eBlock.PRESS: // '\t'
-                    if (b.Powered)
+                    if (b.Block.Powered)
                         g.FillRectangle(BlockColors.bWireOn, r.X + 1, r.Y + 1, 6, 6);
                     else
                         g.FillRectangle(BlockColors.bValve, r.X + 1, r.Y + 1, 6, 6);
@@ -270,8 +222,8 @@ namespace Redstone_Simulator
                 case eBlock.DOORB:
                     break; //Check for this 
                 case eBlock.DOORA: // '\007'
-                    if (b.Powered)
-                        switch (b.Mount) // THIS IS UNPOWERED, NEEDS TO BE MODIFIED.
+                    if (b.Block.Powered)
+                        switch (b.Block.Mount) // THIS IS UNPOWERED, NEEDS TO BE MODIFIED.
                         // JUST LASY AND TESTING RIGHT NOW
                         {
                             // FYI, this is facing, so its hinge to edge not powered
@@ -293,7 +245,7 @@ namespace Redstone_Simulator
                                 break;
                         }
                     else
-                        switch (b.Mount)
+                        switch (b.Block.Mount)
                         {
                             // FYI, this is facing, so its hinge to edge not powered
                             case eMount.NORTH: // Hinge, bottom left, Closed
@@ -317,90 +269,12 @@ namespace Redstone_Simulator
 
                     break;
 
-                case eBlock.WATER:
-                    //int col = fake ? Colors.water.getRGB() : 
-                    // How deap the water is?
-                    // ((~gp(x, y, z + p) & 7) * 24 + 87 << 24) + (Colors.water.getRGB() & 0xffffff);
-                    //g.setColor(new Color(col, true));
-                    g.FillRectangle(BlockColors.bWater, r);
 
-                    // Below puts a square if the water is dropping or a circle if the water is standing 
-                    //  g.setColor(Color.BLACK);
-                    //  if(!fake)
-                    //     if((gp(x, y, z + p) & 8) != 0)
-                    //          g.fillOval(r.x + 3, r.y + 3, 2, 2);
-                    //      else
-                    //     if((gp(x, y, z + p) & 0xf) == 0)
-                    //          g.fillRect(r.x + 3, r.y + 3, 2, 2);
-                    break;
             }
-
+            if (b.Fog) g.FillRectangle(BlockColors.bFog, r);
         }
 
-        public static void gDrawBlockStack(Graphics g, Rectangle r, Blocks[] b)
-        {
-            if (b == null)  throw new ArgumentNullException("b", "Blocks is Null");  
-            if (b.Length != 3)  throw new ArgumentException("Blocks is not 3 Length", "b"); 
-            bool whiteout = false;
-            int p = 0;
-
-
-            // Figure out what our background color needs to be
-            // By the block at the bottom.
-            // We are always going to see 3 layers, I may change it latter.
-            switch (b[0].Type)
-            {
-                case eBlock.BLOCK: p++; g.FillRectangle(BlockColors.bBlock, r); break;
-                case eBlock.AIR:
-                    if (b[1].isBlock) 
-                        g.FillRectangle(BlockColors.bGrid, r);
-                    else
-                    {
-                        whiteout = true;
-                        p++;
-                        g.FillRectangle(BlockColors.bAir, r);
-                    }
-                    break;
-                default: g.FillRectangle(BlockColors.bAir, r); break;
-            }
-
-            if (b[0].Type == eBlock.WIRE)
-            {
-                // Filler, right now I will make the wire all sides till
-                // I get the draw wire routine right.
-                gDrawWire(g, r, true, WireMask.None, true);
-                p++;
-                if (!b[p].isAir && !b[p].isBlock) // if the 
-                    g.FillRectangle(BlockColors.bAirCover, r);
-            }
-            if (b[p].Type == eBlock.DOORB) p--; // DOORB fix
-            gDrawBlock(g, r, b[p]);
-
-
-
-            if (b[1].isBlock)
-            {
-                g.FillRectangle(BlockColors.bCover, r);
-                if (b[0].isBlock)
-                    gDrawWire(g,r,true,WireMask.None);
-            }
-            else
-                if (whiteout)
-                {
-                    g.FillRectangle(BlockColors.bFog, r);
-
-                }
-            //  if(b[1].isBlock)
-            //  {
-            //      g.FillRectangle(getBrush(BlockColors.Cover),r);
-            //     if(b[2].Type == rBlocks.WIRE && b[0].Type ==  Blocks.WIRE || b[0].isBlock)
-            //     if(fake)
-            //          drawWire(g, r, true, 12, false);
-            //     else
-            //         drawWire(g, r, x, y, z + 2, false);
-            //
-            //  }
-
-        }
+      
+        
     }
 }
