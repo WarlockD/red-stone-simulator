@@ -141,7 +141,7 @@ namespace Redstone_Simulator
             }
         }
 
-        public bool Conn
+        public bool WireConn
         {
             get
             {

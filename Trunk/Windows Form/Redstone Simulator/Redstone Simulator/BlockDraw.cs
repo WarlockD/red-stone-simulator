@@ -100,7 +100,7 @@ namespace Redstone_Simulator
             if (s.Mask.HasFlag(WireMask.South)) g.FillRectangle(b, r.X + 3, r.Y + 3, 2, 5);
             if (s.Mask.HasFlag(WireMask.East)) g.FillRectangle(b, r.X + 3, r.Y + 3, 5, 2);
             if (s.Mask.HasFlag(WireMask.West)) g.FillRectangle(b, r.X, r.Y + 3, 5, 2);
-           // if (s.Mask.HasFlag(WireMask.None)) g.FillRectangle(b, r.X + 2, r.Y + 2, 4, 4);
+            if (s.Mask == WireMask.None) g.FillRectangle(b, r.X + 2, r.Y + 2, 4, 4);
         }
         public static void gDrawBlock(Graphics g, Rectangle r, BlockDrawSettings b)
         {
@@ -271,7 +271,7 @@ namespace Redstone_Simulator
 
 
             }
-            if (b.Fog) g.FillRectangle(BlockColors.bFog, r);
+            if (b.Fog) g.FillRectangle(BlockColors.bCover, r);
         }
 
       

@@ -250,7 +250,10 @@ namespace Redstone_Simulator
                     // g.PageScale
                     Rectangle r = new Rectangle(x * 9 + 1, y * 9 + 1, 8, 8);
                     BlockDrawSettings b = new BlockDrawSettings(currentSim.GetBlock(x,y,cZ));
-                    BlockImages.gDrawBlock(g, r, b);
+                    if (b.Block.Type == eBlock.WIRE)
+                        drawWire(g, r, x, y, cZ);
+                    else
+                        BlockImages.gDrawBlock(g, r, b);
 
                 }
         }

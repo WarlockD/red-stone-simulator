@@ -42,16 +42,22 @@ namespace Redstone_Simulator
                 Rectangle r = new Rectangle(i * 9 + 1, 1, 8, 8);
                 BlockDrawSettings b;
                 int j = 0;
-                if (sArray[i][j].Type == eBlock.BLOCK)
+                if (sArray[i][0].Type == eBlock.BLOCK)
                 {
-                    j++;
-                    b = new BlockDrawSettings(sArray[i][j], WireMask.AllDir, true);
+                    if (sArray[i][1].Type == eBlock.BLOCK)
+                    {
+                        b = new BlockDrawSettings(sArray[i][2], WireMask.AllDir, true);
+                        b.Fog = true;
+                    }
+                    else
+                        b = new BlockDrawSettings(sArray[i][1], WireMask.AllDir, true);
                     b.OnBlock = true;
+
                 }
                 else
                     b = new BlockDrawSettings(sArray[i][j], WireMask.AllDir, true);
 
-                if (sArray[i][j+1].Type == eBlock.BLOCK) b.Fog = true;
+                if (sArray[i][2].Type == eBlock.BLOCK) b.Fog = true;
                 BlockImages.gDrawBlock(g, r, b);
             }
             g.Dispose();

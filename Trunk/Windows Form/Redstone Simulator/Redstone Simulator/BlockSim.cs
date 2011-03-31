@@ -12,12 +12,19 @@ namespace Redstone_Simulator
         public static readonly BlockVector Null = new BlockVector();
         bool offset; public bool HasOffset { get { return offset; } }
         int x,y,z,xO,yO,zO;
+        bool defined;
+        public bool isNull { get { return !defined; }}
+
+
         public int X { get { if(offset) return xO; else return x; } }
         public int Y { get { if (offset) return yO; else return y; } }
         public int Z { get { if (offset) return zO; else return z; } }
         public BlockVector Old { get { return offset ? new BlockVector(x, y, z) : BlockVector.Null; } }
-        public BlockVector(int X, int Y, int Z) : this() { x = X; y = Y; z = Z; }
+        public BlockVector(int X, int Y, int Z) : this() { x = X; y = Y; z = Z; defined = true; }
+        
         public BlockVector(BlockVector v) : this(v.X, v.Y, v.Z) { }
+        public void SetNext(int X, int Y, int Z) { xO = X ; yO = Y ; zO = Z ; offset = true; }
+        public void SetNext(int X, int Y) { xO = X; yO = Y; zO = z; offset = true; }
         public void Offset(int X, int Y, int Z) { xO =X+ x; yO=Y + y; zO =Z + z; offset =true;}
         public void Offset(int X, int Y) { xO = X + x; yO = Y + y; zO = z; offset = true; }
         public void ClearOff() {  offset = false; }
@@ -86,13 +93,14 @@ namespace Redstone_Simulator
         /// <param name="tY"></param>
         /// <param name="z"></param>
         /// <returns></returns>
-        public bool canConnect(int x, int y, int tX, int tY, int z)
+        public bool canConnectOld(int x, int y, int tX, int tY, int z)
         {
-            Blocks test = this[tX, tY, z];
+            BlockVector v = new BlockVector(x, y, z);
+            Blocks test = GetBlock(v);
             if (test.isAir) // if the block is Air, return the connection below
-                return this[tX, tY, z - 1].Conn;
+                return GetBlock(v.Down).WireConn;
             if (test.isBlock) // if there isn't a block above us ANd we have a connection on the block in front..
-                return !this[x, y, z + 1].isBlock && this[tX, tY, z + 1].Conn;
+                return !GetBlock(v.Old.Up).isBlock && GetBlock(v.Up).WireConn;
             if (test.Type == eBlock.REPEATER)
             {
                 // Repeater matters what side its connected too.
@@ -113,6 +121,55 @@ namespace Redstone_Simulator
             else
                 return true;
         }
+        bool CheckMount(eBlock t)
+        {
+            switch (t)
+            {
+                case eBlock.TORCH: return true;
+                case eBlock.LEVER: return true;
+                case eBlock.BUTTON: return true;
+                case eBlock.REPEATER: return true; // block can charge a repeater
+                default:
+                    return false;
+            }
+        }
+
+        public bool canConnect(int x, int y, int tX, int tY, int z)
+        {
+            BlockVector v = new BlockVector(x, y, z); v.SetNext(tX, tY);
+            Blocks test = GetBlock(v);
+
+            if (test.WireConn)
+                return true;
+            if (test.isAir)
+                return GetBlockType(v.Down)== eBlock.WIRE;
+            if (test.isBlock)
+            {
+                BlockVector t = BlockVector.Null;
+                if (GetBlockType(v.Up) == eBlock.WIRE && !(GetBlockType(v.Old.Up) == eBlock.BLOCK))
+                    return true;
+
+                if (GetBlock(v.North).Mount == eMount.NORTH)  t = v.North;
+                if (GetBlock(v.South).Mount == eMount.SOUTH) t = v.South;
+                if (GetBlock(v.East).Mount == eMount.EAST) t = v.East;
+                if (GetBlock(v.West).Mount == eMount.WEST) t = v.West; 
+                if (GetBlock(v.Up).Mount == eMount.TOP) t = v.Up;
+                
+                if(!t.isNull)
+                        if (GetBlockType(t) == eBlock.TORCH)
+                            return blockConnect(v.X, v.Y, v.Old.X - v.X, v.Old.Y - v.Y, z, false);
+                        else
+                            return GetBlock(v.Up).Mount != eMount.TOP || GetBlockType(t) != eBlock.LEVER;
+
+
+                return GetBlockType(v.Down) == eBlock.TORCH;
+            }
+            else
+            {
+                return false;
+            }
+
+        }
         public void touchControl(int x, int y, int z)
         {
 
@@ -121,17 +178,19 @@ namespace Redstone_Simulator
 
         public Boolean blockConnect(int x, int y, int dy, int dx, int z, bool pow)
         {
+            // Ok, top line is to check if its a wire or if its powered.  Ahh, this is for the wire drawing or sim
             if (this[x + dx, y + dy, z].Type != eBlock.WIRE || this[x + dx, y + dy, z].Powered && pow)
                 return false;
+            // 
             if (this[x + dx + dy, (y + dy) - dx, z].isBlock)
             {
-                if (!this[x + dx, y + dy, z + 1].isBlock && this[x + dx + dy, (y + dy) - dx, z + 1].Conn)
+                if (!this[x + dx, y + dy, z + 1].isBlock && this[x + dx + dy, (y + dy) - dx, z + 1].WireConn)
                     return false;
             }
             else
                 if (this[x + dx + dy, (y + dy) - dx, z].isAir)
                 {
-                    if (this[x + dx + dy, (y + dy) - dx, z - 1].Conn)
+                    if (this[x + dx + dy, (y + dy) - dx, z - 1].WireConn)
                         return false;
                 }
                 else
@@ -139,9 +198,9 @@ namespace Redstone_Simulator
                     return false;
                 }
             if (this[(x + dx) - dy, y + dy + dx, z].isBlock) // Check the direction right to see if its a torch.  Not sure if I can use this
-                return this[x + dx, y + dy, z + 1].isBlock || !this[(x + dx) - dy, y + dy + dx, z + 1].Conn;
+                return this[x + dx, y + dy, z + 1].isBlock || !this[(x + dx) - dy, y + dy + dx, z + 1].WireConn;
             if (this[(x + dx) - dy, y + dy + dx, z].isAir)
-                return !this[(x + dx) - dy, y + dy + dx, z - 1].Conn;
+                return !this[(x + dx) - dy, y + dy + dx, z - 1].WireConn;
             else
                 return false;
         }
@@ -181,6 +240,15 @@ namespace Redstone_Simulator
                 return Blocks.AIR;
 
             return data[v.X, v.Y, v.Z];
+        }
+        public eBlock GetBlockType(BlockVector v)
+        {
+            if (v.Z < 0)
+                return eBlock.BLOCK;
+            if (v.Z >= lenZ || v.Y < 0 || v.Y >= lenY || v.X < 0 || v.X >= lenX)
+                return eBlock.AIR;
+
+            return data[v.X, v.Y, v.Z].Type;
         }
         public void SetBlock(int x, int y, int z, eBlock b)
         {
