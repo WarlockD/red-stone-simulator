@@ -1319,11 +1319,11 @@ public class Viewport
                 p--;
             if(field.g(lastX, lastY, p) == Blocks.REPEATER)
             {
-                int w = field.gRepeater_face(lastX, lastY, p);
+                 int w = field.w(lastX, lastY, p);
                 int ow = w;
                 do
-                    w=(w+1) & 3;
-                while(!field.sRepeater_Face(lastX, lastY, p, w));
+                    w = ++w % 5;
+                while(!field.s(lastX, lastY, p, w));
                 if(ow != w)
                 {
                     field.update();

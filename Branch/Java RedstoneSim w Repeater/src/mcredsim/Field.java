@@ -8,28 +8,53 @@ import java.io.*;
 public class Field
 {
 
+    private Viewport parent;
+    byte data[][][];
+    byte extra[][][];
+    byte ticks[][][]; // fuckit, lets add another byte
+    int wires;
+    int torches;
+    
+    public static boolean cyclic = false;
+    public static boolean dummyGdValve = false;
+    public static boolean MCwires = true;
+    public static boolean bridge = true;
+    public static int layers = 3;
+    private static final int dir[][] = {
+        {
+            0, 0, -1
+        }, {
+            0, 1, 0
+        }, {
+            0, -1, 0
+        }, {
+            1, 0, 0
+        }, {
+            -1, 0, 0
+        }
+    };
     public Field(Viewport v, int x, int y, int z)
     {
         parent = v;
         data = new byte[z][][];
         extra = new byte[z][][];
-        repeater = new byte[z][][];
+        ticks = new byte[z][][];
         wires = torches = 0;
         for(int i = 0; i < z; i++)
         {
             data[i] = new byte[y][];
             extra[i] = new byte[y][];
-            repeater[i] = new byte[y][];
+            ticks[i] = new byte[y][];
             for(int j = 0; j < y; j++)
             {
                 data[i][j] = new byte[x];
                 extra[i][j] = new byte[x];
-                repeater[i][j] = new byte[x];
+                ticks[i][j] = new byte[x];
                 for(int k = 0; k < x; k++)
                 {
                     data[i][j][k] = 0;
                     extra[i][j][k] = 0;
-                    repeater[i][j][k] = 0;
+                    ticks[i][j][k] = 0;
                 }
 
             }
@@ -111,7 +136,7 @@ public class Field
         return (extra[z][y][x] >> 4) & 0xF;
     }
     
-    public int gRepeater_ticks(int x, int y, int z)
+    public int gTicks(int x, int y, int z)
     {
         if(z < 0 || z >= data.length)
             return 0;
@@ -123,26 +148,42 @@ public class Field
         if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
             return 0;
         
-        return (repeater[z][y][x] >>2 & 0x3);
+        return (ticks[z][y][x] >>2 & 0x3);
     }
-    
-  
-    public int gRepeater_face(int x, int y, int z)
-    {
+    public boolean t(int x,int y, int z)
+  {
         if(z < 0 || z >= data.length)
-            return 0;
+            return false;
         if(cyclic)
         {
             y = (y % data[0].length + data[0].length) % data[0].length;
             x = (x % data[0][0].length + data[0][0].length) % data[0][0].length;
         } else
         if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
-            return 0;
+            return false;
         
-        return (repeater[z][y][x] & 0x3);
+        return (ticks[z][y][x] & 0x3) == 0;
     }
     
-    
+     public void it(int x,int y, int z)
+  {
+        if(z < 0 || z >= data.length)
+            return ;
+        if(cyclic)
+        {
+            y = (y % data[0].length + data[0].length) % data[0].length;
+            x = (x % data[0][0].length + data[0][0].length) % data[0][0].length;
+        } else
+        if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
+            return ;
+        
+        byte t = ticks[z][y][x];
+        if(((t >> 2) & 0x3) == (t & 0x3))
+                ticks[z][y][x] = (byte)(t & 12);
+        else
+                ticks[z][y][x] =(byte)((t & 12) & ((t+1) & 3));
+        
+  }
     
     
     
@@ -199,106 +240,12 @@ public class Field
             return false;
         } else
         {
-    //        if(data[z][y][x] == Blocks.REPEATER)
-     //       {
-                
-    // /           
-     //       }
-      ///      else
+            
                 extra[z][y][x] = (byte)((w << 5) + (extra[z][y][x] & 0x1f));
             return true;
         }
     }
-    // Set the repeater.  Sigh, why does the repeater have to be special
-    public boolean sRepeater_Face(int x, int y, int z, int w)
-    {
-        if(z < 0 || z >= data.length)
-            return false;
-        if(cyclic)
-        {
-            y = (y % data[0].length + data[0].length) % data[0].length;
-            x = (x % data[0][0].length + data[0][0].length) % data[0][0].length;
-        } else
-        if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
-            return false;
-        
-            repeater[z][y][x] = (byte)((w << 2) + (repeater[z][y][x] & 0x3));
-            return true;
-        
-    }
-    
-    // Set the repeater.  Sigh, why does the repeater have to be special
-    public boolean sRepeater_Ticks(int x, int y, int z, int w)
-    {
-        if(z < 0 || z >= data.length)
-            return false;
-        if(cyclic)
-        {
-            y = (y % data[0].length + data[0].length) % data[0].length;
-            x = (x % data[0][0].length + data[0][0].length) % data[0][0].length;
-        } else
-        if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
-            return false;
-            repeater[z][y][x] = (byte)((w & 0x3) + (repeater[z][y][x] & 0xc));
-            return true;
-        
-    }
-    
-    // Reset the current tick count
-    public boolean Repeater_ResetCount(int x, int y, int z)
-    {
-        if(z < 0 || z >= data.length)
-            return false;
-        if(cyclic)
-        {
-            y = (y % data[0].length + data[0].length) % data[0].length;
-            x = (x % data[0][0].length + data[0][0].length) % data[0][0].length;
-        } else
-        if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
-            return false;
-        
-        repeater[z][y][x] = (byte)(repeater[z][y][x]  & 0xf);
-        return true;
-        
-        
-    }
-    public boolean Repeater_Inc(int x, int y, int z)
-    {
-        if(z < 0 || z >= data.length)
-            return false;
-        if(cyclic)
-        {
-            y = (y % data[0].length + data[0].length) % data[0].length;
-            x = (x % data[0][0].length + data[0][0].length) % data[0][0].length;
-        } else
-        if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
-            return false;
-
-        repeater[z][y][x] += 0x10;
-        if(repeater[z][y][x] > 128)
-            repeater[z][y][x] = (byte)((repeater[z][y][x]  & 0xf) + 0x40);
-        
-         return true;
-    }
-    
-    public boolean Repeater_Sending(int x,int y, int z)
-    {
-        if(z < 0 || z >= data.length)
-            return false;
-        if(cyclic)
-        {
-            y = (y % data[0].length + data[0].length) % data[0].length;
-            x = (x % data[0][0].length + data[0][0].length) % data[0][0].length;
-        } else
-        if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
-            return false;
-
-        byte tmp = (byte)(repeater[z][y][x] >> 2 & 3);
-        byte tmp2 = (byte)(repeater[z][y][x] >> 4 & 3);
-        if(tmp2 > tmp) return true;
-        return false;  
-    }
-    
+  
     
     public void sp(int x, int y, int z, int p)
     {
@@ -355,6 +302,8 @@ public class Field
 
     private boolean valid(int x, int y, int z, int w)
     {
+        if(g(x,y,z) == Blocks.REPEATER)
+                return w >0;
         if(w == 0)
             return g(x, y, z).wall < 2;
         if(g(x, y, z).wall % 2 == 0)
@@ -437,9 +386,11 @@ public class Field
             int[] yP;
             g.setColor(Colors.repeater);
             //g.setColor(Colors.door);
-            int rdir = 2 ; //gRepeater_face(x,y,z);
+            int rdir = w(x,y,z);
+            System.out.print(rdir);
+            
             int tick = 0; //this.gRepeater_ticks(x, y, z);
-            boolean rpow = true ; this.Repeater_Sending(x, y, z);
+            boolean rpow = t(x,y,z);
             switch(rdir)
             {
                 
@@ -470,7 +421,7 @@ public class Field
                         else
                             g.fillRect(r.x+3, y+3-tick, 2, 1);
                     break;
-                case 0: // East
+                case 4: // East
                         xP = new int[] { r.x +1,r.x+4,r.x+4,r.x+7,r.x+7,r.x+4,r.x+4,r.x+1 };
                         yP = new int[] { r.y +4,r.y+1,r.y+3,r.y+3,r.y+5,r.y+5,r.y+7,r.y+4 };
                         g.fillPolygon(xP,yP,8);
@@ -544,7 +495,7 @@ public class Field
             g.setColor(Colors.wireOn);
             if(!tog && !fake && p(x, y, z + p))
                 g.fillOval(r.x + 3, r.y + 3, 2, 2);
-      
+            break;
         case BUTTON: // '\006'
             g.setColor(Colors.button);
             if(!fake && p(x, y, z + p))
@@ -1052,30 +1003,5 @@ public class Field
         parent.modify();
     }
 
-    private Viewport parent;
-    byte data[][][];
-    byte extra[][][];
-    byte repeater[][][]; // fuckit, lets add another byte
-    int wires;
-    int torches;
-    
-    public static boolean cyclic = false;
-    public static boolean dummyGdValve = false;
-    public static boolean MCwires = true;
-    public static boolean bridge = true;
-    public static int layers = 3;
-    private static final int dir[][] = {
-        {
-            0, 0, -1
-        }, {
-            0, 1, 0
-        }, {
-            0, -1, 0
-        }, {
-            1, 0, 0
-        }, {
-            -1, 0, 0
-        }
-    };
 
 }

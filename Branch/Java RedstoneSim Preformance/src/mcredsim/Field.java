@@ -7,10 +7,34 @@ import java.io.*;
 
 public class Field
 {
-
+    private Viewport parent;
+    byte data[][][];
+    byte extra[][][];
+    int wires;
+    int torches;
+    public static boolean cyclic = false;
+    public static boolean dummyGdValve = false;
+    public static boolean MCwires = true;
+    public static boolean bridge = true;
+    public static int layers = 3;
+    private static final int dir[][] = {
+        {
+            0, 0, -1
+        }, {
+            0, 1, 0
+        }, {
+            0, -1, 0
+        }, {
+            1, 0, 0
+        }, {
+            -1, 0, 0
+        }
+    };
+    
     public Field(Viewport v, int x, int y, int z)
     {
         parent = v;
+        z++; y++; z++;
         data = new byte[z][][];
         extra = new byte[z][][];
         wires = torches = 0;
@@ -811,28 +835,6 @@ public class Field
         parent.modify();
     }
 
-    private Viewport parent;
-    byte data[][][];
-    byte extra[][][];
-    int wires;
-    int torches;
-    public static boolean cyclic = false;
-    public static boolean dummyGdValve = false;
-    public static boolean MCwires = true;
-    public static boolean bridge = true;
-    public static int layers = 3;
-    private static final int dir[][] = {
-        {
-            0, 0, -1
-        }, {
-            0, 1, 0
-        }, {
-            0, -1, 0
-        }, {
-            1, 0, 0
-        }, {
-            -1, 0, 0
-        }
-    };
+    
 
 }

@@ -16,7 +16,7 @@ public enum Blocks
     SAND (0, false, "sand"),
     WATER (0, false, "water"),
     SHADOW ( 0, false, "shadow"),
-    REPEATER (3, true, "repeater");
+    REPEATER (1, true, "repeater");
     
     private Blocks(int w, boolean c, String s)
     {
