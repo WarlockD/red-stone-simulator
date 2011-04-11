@@ -300,19 +300,7 @@ public class Viewport
                 Field.bridge = e.getStateChange() == 1;
                 break;
 
-            case 6: 
-                if(Viewport.waterMode = e.getStateChange() == 1)
-                {
-                    c1Lyr.setSelected(false);
-                    c3Lyr.setSelected(false);
-                    cBridge.setEnabled(false);
-                    Field.layers = 1;
-                    setPalette(Palette.waterP);
-                } else
-                {
-                    c1Lyr.setSelected(true);
-                }
-                break;
+           
             }
             view.repaint();
         }
@@ -521,7 +509,7 @@ public class Viewport
 
     private void place(int x, int y, int z, Palette pal)
     {
-        if(field.match(x, y, z, pal) && pal != Palette.water)
+        if(field.match(x, y, z, pal))
             return;
         if(pal == Palette.door && z == this.z - 1)
             return;
@@ -540,9 +528,6 @@ public class Viewport
         if(pal.a == Blocks.WIRE || pal.a == Blocks.PRESS)
             field.s(x, y, z - 1, Blocks.BLOCK);
         int d[];
-        if(pal == Palette.water)
-            field.sp(x, y, z, 16);
-        else
         if(pal == Palette.door && (d = findDoor(x, y, z)) != null && field.w(d[0], d[1], d[2]) == d[3])
         {
             field.s(x, y, z, 4 - field.w(d[0], d[1], d[2]));
@@ -1519,9 +1504,6 @@ public class Viewport
             int p = lyr + i;
             switch(field.g(lastX, lastY, p))
             {
-            case SAND: 
-            default:
-                break;
 
             case BUTTON: 
                 s = (new StringBuilder(String.valueOf(s))).append("<p>button: attached to ").append(dir[field.w(lastX, lastY, p)]).append(" face").append("<p>button: ").append(field.p(lastX, lastY, p) ? (new StringBuilder(String.valueOf(field.gp(lastX, lastY, p)))).append(" ticks of power left").toString() : "unpowered").toString();
@@ -1555,9 +1537,7 @@ public class Viewport
                 s = (new StringBuilder(String.valueOf(s))).append("<p>wire: ").append(field.p(lastX, lastY, p) ? (new StringBuilder("will carry power for ")).append(field.gp(lastX, lastY, p)).append(" blocks").toString() : "unpowered").toString();
                 break;
 
-            case WATER: 
-                s = (new StringBuilder(String.valueOf(s))).append("<p>water: ").append((field.gp(lastX, lastY, p) & 0xf) != 0 ? (new StringBuilder("level ")).append(8 - (field.gp(lastX, lastY, p) & 7)).toString() : "source").append((field.gp(lastX, lastY, p) & 8) != 0 ? ", falling" : "").append((field.gp(lastX, lastY, p) & 0x10) != 0 ? " (dynamic)" : " (static)").toString();
-                break;
+
             }
         }
 
@@ -1878,7 +1858,6 @@ public class Viewport
     static final int GIF_DELAY = 200;
     static final boolean IS_MAC = System.getProperty("os.name").toLowerCase().indexOf("mac") != -1;
     static final boolean doubleDoors = false;
-    static boolean waterMode = false;
     int block;
     JFrame frame;
     JDialog adjF;

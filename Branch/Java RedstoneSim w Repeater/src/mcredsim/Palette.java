@@ -14,8 +14,7 @@ public enum Palette
     lever ( Blocks.LEVER),
     button ( Blocks.BUTTON),
     press ( Blocks.PRESS),
-    sand ( Blocks.SAND),
-    water ( Blocks.WATER),
+ 
     repeater ( Blocks.REPEATER),
     air2 (Blocks.AIR, Blocks.AIR),
     shadow2 ( Blocks.SHADOW, Blocks.SHADOW),
@@ -59,9 +58,7 @@ public enum Palette
             air, air2, block, blockblock, wire, torch, blockwire, blocktorch, wireblock, torchblock, 
             wiretorch, bridge, lever, button, press, door, shadow, shadow2,repeater
         };
-    public static final Palette waterP[] = new Palette[] {
-            air, block, sand, water, torch, shadow
-        };
+  
     
 
     static 

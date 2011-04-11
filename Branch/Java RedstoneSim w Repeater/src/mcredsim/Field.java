@@ -9,9 +9,11 @@ public class Field
 {
 
     private Viewport parent;
+    boolean twatch[][][];
     byte data[][][];
     byte extra[][][];
     byte ticks[][][]; // fuckit, lets add another byte
+    byte tickMax[][][];
     int wires;
     int torches;
     
@@ -39,22 +41,30 @@ public class Field
         data = new byte[z][][];
         extra = new byte[z][][];
         ticks = new byte[z][][];
+        tickMax = new byte[z][][];
+        twatch = new boolean[z][][];
         wires = torches = 0;
         for(int i = 0; i < z; i++)
         {
             data[i] = new byte[y][];
             extra[i] = new byte[y][];
             ticks[i] = new byte[y][];
+            tickMax[i] = new byte[y][];
+            twatch[i] = new boolean[y][];
             for(int j = 0; j < y; j++)
             {
                 data[i][j] = new byte[x];
                 extra[i][j] = new byte[x];
                 ticks[i][j] = new byte[x];
+                tickMax[i][j] = new byte[x];
+                twatch[i][j] = new boolean[x];
                 for(int k = 0; k < x; k++)
                 {
                     data[i][j][k] = 0;
                     extra[i][j][k] = 0;
                     ticks[i][j][k] = 0;
+                    tickMax[i][j][k] = 0;
+                    twatch[i][j][k] = false;
                 }
 
             }
@@ -148,7 +158,7 @@ public class Field
         if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
             return 0;
         
-        return (ticks[z][y][x] >>2 & 0x3);
+        return tickMax[z][y][x];
     }
     public boolean t(int x,int y, int z)
   {
@@ -162,11 +172,10 @@ public class Field
         if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
             return false;
         
-        return (ticks[z][y][x] & 0x3) == 0;
+        return ticks[z][y][x] ==0 && twatch[z][y][x];
     }
-    
-     public void it(int x,int y, int z)
-  {
+    public void TogleTick(int x, int y, int z, boolean flag)
+    {
         if(z < 0 || z >= data.length)
             return ;
         if(cyclic)
@@ -176,13 +185,31 @@ public class Field
         } else
         if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
             return ;
-        
-        byte t = ticks[z][y][x];
-        if(((t >> 2) & 0x3) == (t & 0x3))
-                ticks[z][y][x] = (byte)(t & 12);
-        else
-                ticks[z][y][x] =(byte)((t & 12) & ((t+1) & 3));
-        
+
+        if(flag && !twatch[z][y][x]) ticks[z][y][x] = tickMax[z][y][x];
+        twatch[z][y][x] = flag;
+    }
+   
+     public boolean it(int x,int y, int z)
+  {
+        if(z < 0 || z >= data.length)
+            return false ;
+        if(cyclic)
+        {
+            y = (y % data[0].length + data[0].length) % data[0].length;
+            x = (x % data[0][0].length + data[0][0].length) % data[0][0].length;
+        } else
+        if(y < 0 || y >= data[0].length || x < 0 || x >= data[0][0].length)
+            return false;
+        if(!twatch[z][y][z])
+            return false;
+ 
+        if( ticks[z][y][x] >0 )
+        {
+            ticks[z][y][x] -=1;
+                return false;
+        }
+        return true;
   }
     
     
@@ -324,16 +351,8 @@ public class Field
         if(b[0].block())
         {
             p++;
-            if(Viewport.waterMode)
-            {
-                if(b[0] == Blocks.SAND)
-                    g.setColor(Colors.sand);
-                else
-                    g.setColor(Colors.dirt);
-            } else
-            {
-                g.setColor(Colors.block);
-            }
+            g.setColor(Colors.block);
+       
         } else
         if(b[0].air())
         {
@@ -386,66 +405,82 @@ public class Field
             int[] yP;
             g.setColor(Colors.repeater);
             //g.setColor(Colors.door);
-            int rdir = w(x,y,z);
+            int rdir = fake ? 2 : w(x,y,z);
             System.out.print(rdir);
             
             int tick = 0; //this.gRepeater_ticks(x, y, z);
-            boolean rpow = t(x,y,z);
+            boolean rpow = fake ? false : t(x,y,z);
             switch(rdir)
             {
                 
-                case 3: // North
+                case 2: // North
                         xP = new int[] { r.x +1,r.x+4,r.x+7,r.x+5,r.x+5,r.x+3,r.x+3,r.x+1 };
                         yP = new int[] { r.y +4,r.y+1,r.y+4,r.y+4,r.y+7,r.y+7,r.y+4,r.y+4 };
-                        g.fillPolygon(xP,yP,8);
                         if(rpow)
+                        {
                             g.setColor(Colors.wireOn);
+                            g.fillPolygon(xP,yP,8);
+                            if(tick>0)
+                            {
+                                g.setColor(Colors.wireOff);   
+                                g.fillRect(r.x+3, r.y+3+tick, 2, 1);
+                            }
+                        }
                         else
-                            g.setColor(Colors.wireOff);
-                        if(rpow & tick ==0)
-                            g.fillRect(r.x+3, y+3, 2, 1);
-                        else
-                            g.fillRect(r.x+3, y+3+tick, 2, 1);
+                             g.fillPolygon(xP,yP,8);
+                      
 
                     break;
                 case 1: // south
                         xP = new int[] { r.x +1,r.x+4,r.x+7,r.x+5,r.x+5,r.x+3,r.x+3,r.x+1 };
                         yP = new int[] { r.y +4,r.y+7,r.y+4,r.y+4,r.y+1,r.y+1,r.y+4,r.y+4 };
-                        g.fillPolygon(xP,yP,8);
                         if(rpow)
+                        {
                             g.setColor(Colors.wireOn);
+                            g.fillPolygon(xP,yP,8);
+                            if(tick>0)
+                            {
+                                g.setColor(Colors.wireOff);   
+                                g.fillRect(r.x+3, r.y+3-tick, 2, 1);
+                            }
+                        }
                         else
-                            g.setColor(Colors.wireOff);
-                        if(rpow & tick ==0)
-                            g.fillRect(r.x+3, y+3, 2, 1);
-                        else
-                            g.fillRect(r.x+3, y+3-tick, 2, 1);
+                             g.fillPolygon(xP,yP,8);
+                
                     break;
                 case 4: // East
                         xP = new int[] { r.x +1,r.x+4,r.x+4,r.x+7,r.x+7,r.x+4,r.x+4,r.x+1 };
                         yP = new int[] { r.y +4,r.y+1,r.y+3,r.y+3,r.y+5,r.y+5,r.y+7,r.y+4 };
-                        g.fillPolygon(xP,yP,8);
                         if(rpow)
+                        {
                             g.setColor(Colors.wireOn);
+                            g.fillPolygon(xP,yP,8);
+                            if(tick>0)
+                            {
+                                g.setColor(Colors.wireOff);   
+                                g.fillRect(r.x+3, r.y+3+tick, 1, 2);
+                            }
+                        }
                         else
-                            g.setColor(Colors.wireOff);
-                        if(rpow & tick ==0)
-                            g.fillRect(r.x+3, y+3, 1, 2);
-                        else
-                            g.fillRect(r.x+3, y+3+tick, 1, 2);
+                             g.fillPolygon(xP,yP,8);
+                     
                     break;
-                case 2: // west
+                case 3: // west
                         xP = new int[] { r.x +7,r.x+4,r.x+4,r.x+1,r.x+1,r.x+4,r.x+4,r.x+7 };
                         yP = new int[] { r.y +4,r.y+1,r.y+3,r.y+3,r.y+5,r.y+5,r.y+7,r.y+4 };
-                        g.fillPolygon(xP,yP,8);
                         if(rpow)
+                        {
                             g.setColor(Colors.wireOn);
+                            g.fillPolygon(xP,yP,8);
+                            if(tick>0)
+                            {
+                                g.setColor(Colors.wireOff);   
+                                g.fillRect(r.x+3, r.y+3+tick, 1, 2);
+                            }
+                        }
                         else
-                            g.setColor(Colors.wireOff);
-                        if(rpow & tick ==0)
-                            g.fillRect(r.x+3, y+3, 1, 2);
-                        else
-                            g.fillRect(r.x+3, y+3+tick, 1, 2);
+                             g.fillPolygon(xP,yP,8);
+                     
                     break;
             }
             
@@ -578,18 +613,7 @@ public class Field
                 g.fillRect(r.x, r.y + 6, 2, 2);
             break;
 
-        case WATER: // '\013'
-            int col = fake ? Colors.water.getRGB() : ((~gp(x, y, z + p) & 7) * 24 + 87 << 24) + (Colors.water.getRGB() & 0xffffff);
-            g.setColor(new Color(col, true));
-            g.fillRect(r.x, r.y, r.width, r.height);
-            g.setColor(Color.BLACK);
-            if(!fake)
-                if((gp(x, y, z + p) & 8) != 0)
-                    g.fillOval(r.x + 3, r.y + 3, 2, 2);
-                else
-                if((gp(x, y, z + p) & 0xf) == 0)
-                    g.fillRect(r.x + 3, r.y + 3, 2, 2);
-            break;
+       
         }
         if(b[1].block() && layers > 1)
         {
@@ -612,6 +636,27 @@ public class Field
     {
         if(MCwires)
         {
+             if(g(x2,y2,z) == Blocks.REPEATER)
+             {
+            // Might be a better way, but trying to find the direction faceing
+            int dx = x - x2;
+            int dy = y - y2;
+            if(dx ==0 && dy !=0)
+            {
+                if(dy>0 && w(x2,y2,z) == 1)  // if pointing south
+                    return true;
+                if(dy<0 && w(x2,y2,z) == 2) // if pointing north
+                    return true;
+            }
+             if(dx !=0 && dy ==0)
+            {
+                if(dx>0 && w(x2,y2,z) == 4)  // if pointing south
+                    return true;
+                if(dx<0 && w(x2,y2,z) == 3) // if pointing north
+                    return true;
+            }
+                return false;
+            }
             if(g(x2, y2, z).air())
                 return g(x2, y2, z - 1).conn;
             if(g(x2, y2, z).block())
@@ -637,6 +682,30 @@ public class Field
 
             return g(x2, y2, z - 1) == Blocks.TORCH;
         } else
+        if(g(x2,y2,z) == Blocks.REPEATER)
+        {
+            // Might be a better way, but trying to find the direction faceing
+            int dx = x - x2;
+            int dy = y - y2;
+            if(dx ==0 && dy !=0)
+            {
+                if(dy>0 && w(x2,y2,z) == 1)  // if pointing south
+                    return true;
+                if(dy<0 && w(x2,y2,z) == 2) // if pointing north
+                    return true;
+            }
+             if(dx !=0 && dy ==0)
+            {
+                if(dx>0 && w(x2,y2,z) == 4)  // if pointing south
+                    return true;
+                if(dx<0 && w(x2,y2,z) == 3) // if pointing north
+                    return true;
+            }
+   
+
+            return false;
+            
+        } else 
         {
             return false;
         }
@@ -675,28 +744,47 @@ public class Field
 
     public void update()
     {
+        // clear wires and set blocks power by torches
         for(int z = 0; z < data.length; z++)
         {
             for(int y = 0; y < data[0].length; y++)
             {
                 for(int x = 0; x < data[0][0].length; x++)
-                    if(g(x, y, z) == Blocks.WIRE || g(x, y, z) == Blocks.DOORB)
+                {
+                    if(g(x, y, z) == Blocks.WIRE || g(x, y, z) == Blocks.DOORB || g(x,y,z) == Blocks.REPEATER)
                         sp(x, y, z, 0);
                     else
                     if(g(x, y, z).block())
                     {
-                        sp(x, y, z, 0);
                         if(p(x, y, z - 1) && g(x, y, z - 1) == Blocks.TORCH)
                         {
                             sp(x, y, z, 17);
                         } else
                         {
                             for(int i = dummyGdValve ? 1 : 0; i < 5; i++)
-                                if(g(x - dir[i][0], y - dir[i][1], z - dir[i][2]).ctrl() && w(x - dir[i][0], y - dir[i][1], z - dir[i][2]) == i && p(x - dir[i][0], y - dir[i][1], z - dir[i][2]))
+                            {
+                                if(g(x - dir[i][0], y - dir[i][1], z - dir[i][2]).ctrl() && 
+                                        w(x - dir[i][0], y - dir[i][1], z - dir[i][2]) == i && 
+                                        p(x - dir[i][0], y - dir[i][1], z - dir[i][2]))
                                     sp(x, y, z, 17);
-
+                                
+                                    
+                            }
                         }
+                        sp(x, y, z, 0);
                     }
+                    if(g(x,y,z) == Blocks.REPEATER)
+                    {
+                        if(g(x + dir[i][0], y + dir[i][1], z ) == Blocks.REPEATER)
+                                {
+                                    int w = w(x + dir[i][0], y + dir[i][1], z);
+                                    if(w == i) // Arrow pointing at this block
+                                        if(it(x + dir[i][0], y+ dir[i][1], z + dir[i][2]))
+                                            sp(x,y,z,17); 
+                                }
+                        
+                    }
+                }
 
             }
 
@@ -707,7 +795,10 @@ public class Field
             for(int y = 0; y < data[0].length; y++)
             {
                 for(int x = 0; x < data[0][0].length; x++)
-                    if(gp(x, y, z) >= (g(x, y, z) != Blocks.BUTTON && g(x, y, z) != Blocks.PRESS ? 16 : 1) && (g(x, y, z) == Blocks.TORCH || g(x, y, z).ctrl() || g(x, y, z).block() && gp(x, y, z) == 17))
+                    if(
+                            gp(x, y, z) >= (g(x, y, z) != Blocks.BUTTON && g(x, y, z) != Blocks.PRESS ? 16 : 1) && (g(x, y, z) == Blocks.TORCH || 
+                            g(x, y, z).ctrl() || 
+                            g(x, y, z).block() && gp(x, y, z) == 17))
                     {
                         if(g(x, y, z - 1) == Blocks.WIRE)
                             followWire(x, y, z - 1, 15);
@@ -732,8 +823,21 @@ public class Field
             for(int y = 0; y < data[0].length; y++)
             {
                 for(int x = 0; x < data[0][0].length; x++)
-                    if((g(x, y, z).block() && !p(x, y, z) || g(x, y, z) == Blocks.DOORA) && (g(x, y, z + 1) == Blocks.WIRE && p(x, y, z + 1) || blockConnect(x, y, 0, 1, z, true) || blockConnect(x, y, 0, -1, z, true) || blockConnect(x, y, 1, 0, z, true) || blockConnect(x, y, -1, 0, z, true)))
+                {
+                    if(
+                            (g(x, y, z).block() && !p(x, y, z) || g(x, y, z) == Blocks.DOORA) && 
+                            (g(x, y, z + 1) == Blocks.WIRE && p(x, y, z + 1) || blockConnect(x, y, 0, 1, z, true) || blockConnect(x, y, 0, -1, z, true) || blockConnect(x, y, 1, 0, z, true) || blockConnect(x, y, -1, 0, z, true)))
                         sp(x, y, z, 16);
+                    if(g(x,y,z) == Blocks.REPEATER)
+                    {
+                            int w = w(x,y,z);
+                            if(repeaterConnect(x,y,dir[w][0],dir[w][1],z,true))
+                            {
+                                    this.TogleTick(x, y, z, true);
+                            }
+                    }
+                    
+                }
 
             }
 
@@ -755,7 +859,31 @@ public class Field
         }
 
     }
-
+    private boolean repeaterConnect(int x, int y, int dx, int dy, int z, boolean pow)
+    {
+        Blocks g = g(x+dx,y+dy,z);
+        
+        int l = 0;
+        if(dx ==0 && dy >0) l = 1; // is south
+        if(dx ==0 && dy <0) l = 2; // is north
+        if(dx >0 && dy ==0) l = 3; // is east
+        if(dx <0 && dy ==0) l = 4; // is west
+        if(l==0) return false; // invalid data
+        if(l != w(x,y,z)) return false; // the back end is not at this location so we cannot power the repeater
+        if(g == Blocks.WIRE )
+        {
+            if(p(x+dx,y+dy,z))
+                return true;
+            else
+                return false;
+            // Ok this is a filler, figuring out wire connections for the back end is going to be a bitch
+        }
+        if((g.block() || g.ctrl() || g == Blocks.TORCH ) && p(x+dx,y+dy,z))
+            return true;
+        if(g == Blocks.REPEATER && w(x,y,z) == w(x + dx, y + dy, z))
+            return true;
+        return false;
+    }
     private boolean powerDoor(int x, int y, int z)
     {
         return g(x, y, z) != Blocks.DOORA && g(x, y, z) != Blocks.DOORB && p(x, y, z);
@@ -763,6 +891,7 @@ public class Field
 
     private boolean blockConnect(int x, int y, int dx, int dy, int z, boolean pow)
     {
+       // if(g(x+dx,y+dy,z) == Blocks.REPEATER && t(x+dx,y+dy,z))
         if(g(x + dx, y + dy, z) != Blocks.WIRE || !p(x + dx, y + dy, z) && pow)
             return false;
         if(g(x + dx + dy, (y + dy) - dx, z).block())
@@ -818,63 +947,18 @@ public class Field
             followWire(x2, y2, z - 1, p);
     }
 
-    private int findLowGround(int x, int y, int z, int depth)
-    {
-        if(!g(x, y, z).destruct())
-            return 0x7fffffff;
-        if(g(x, y, z - 1).destruct())
-            return depth;
-        if(depth == 5)
-            return 0x7fffffff;
-        else
-            return Math.min(Math.min(findLowGround(x, y + 1, z, depth + 1), findLowGround(x, y - 1, z, depth + 1)), Math.min(findLowGround(x + 1, y, z, depth + 1), findLowGround(x - 1, y, z, depth + 1)));
-    }
+  
 
     public void tick()
     {
         parent.modify();
-        for(int z = 0; z < data.length; z++)
-        {
-            for(int y = 0; y < data[0].length; y++)
-            {
-                for(int x = 0; x < data[0][0].length; x++)
-                    if(g(x, y, z) == Blocks.WATER && (gp(x, y, z) & 0x10) != 0 && w(x, y, z) == 0)
-                    {
-                        boolean mod = false;
-                        if(g(x, y, z - 1).destruct() || g(x, y, z - 1) == Blocks.WATER && (gp(x, y, z - 1) & 8) == 0 && (gp(x, y, z - 1) & 0xf) != 0)
-                            mod |= s(x, y, z - 1, Blocks.WATER, gp(x, y, z) | 0x38);
-                        else
-                        if((gp(x, y, z) & 0xf) != 7 && (g(x, y, z - 1) != Blocks.WATER ? !g(x, y, z - 1).destruct() : (gp(x, y, z) & 0xf) == 0))
-                        {
-                            int sp[] = new int[4];
-                            int spMin = 0x7fffffff;
-                            for(int i = 1; i < 5; i++)
-                                if((sp[i - 1] = findLowGround(x + dir[i][0], y + dir[i][1], z, 1)) < spMin)
-                                    spMin = sp[i - 1];
-
-                            int g = gp(x, y, z) & 0xf;
-                            g = g < 8 ? g + 1 : 1;
-                            for(int i = 1; i < 5; i++)
-                                if(sp[i - 1] == spMin && (g(x + dir[i][0], y + dir[i][1], z).destruct() || g(x + dir[i][0], y + dir[i][1], z) == Blocks.WATER && (gp(x + dir[i][0], y + dir[i][1], z) ^ 7) > (g ^ 7)))
-                                    mod |= s(x + dir[i][0], y + dir[i][1], z, Blocks.WATER, g + 48);
-
-                        }
-                        if(!mod)
-                            s(x, y, z, Blocks.WATER, gp(x, y, z) & 0xf);
-                    }
-
-            }
-
-        }
+        
 
         for(int z = 0; z < data.length; z++)
         {
             for(int y = 0; y < data[0].length; y++)
             {
                 for(int x = 0; x < data[0][0].length; x++)
-                    if(g(x, y, z) == Blocks.WATER)
-                        s(x, y, z, 0);
-                    else
                     if(g(x, y, z) == Blocks.TORCH)
                     {
                         int w[] = dir[w(x, y, z)];

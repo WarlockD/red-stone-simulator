@@ -13,10 +13,8 @@ public enum Blocks
     DOORA ( 2, true, "door"),
     DOORB ( 2, true, "door"),
     PRESS ( 0, true, "pressure pad"),
-    SAND (0, false, "sand"),
-    WATER (0, false, "water"),
     SHADOW ( 0, false, "shadow"),
-    REPEATER (1, true, "repeater");
+    REPEATER (1, false, "repeater");
     
     private Blocks(int w, boolean c, String s)
     {
@@ -32,7 +30,7 @@ public enum Blocks
 
     public boolean block()
     {
-        return this == BLOCK || this == SAND;
+        return this == BLOCK ;
     }
 
     public boolean air()
@@ -42,7 +40,7 @@ public enum Blocks
 
     public boolean destruct()
     {
-        return !block() && this != PRESS && this != DOORA && this != DOORB && this != WATER;
+        return !block() && this != PRESS && this != DOORA && this != DOORB ;
     }
     public byte wall;
     public boolean conn;

@@ -166,13 +166,14 @@ public class LevelLoader
 
                     case 9: 
                     case 11: 
-                        chunk[i][j][k] = (byte)Blocks.WATER.ordinal();
-                        cext[i][j][k] += d;
+                        // Water thing
+                      //  chunk[i][j][k] = (byte)Blocks.WATER.ordinal();
+                       // cext[i][j][k] += d;
                        
 
                     case 12: 
                     case 13: 
-                        chunk[i][j][k] = (byte)Blocks.SAND.ordinal();
+                      //  chunk[i][j][k] = (byte)Blocks.SAND.ordinal();
                         break;
                     case 94:    // Repeater On
                        // cext[i][j][k] = 16;
@@ -218,9 +219,6 @@ public class LevelLoader
                 {
                     switch(p.field.g(k, j, i))
                     {
-                    case SAND: 
-                    default:
-                        break;
 
                     case AIR: 
                     case SHADOW:
@@ -276,10 +274,7 @@ public class LevelLoader
                         data[n] = (byte)(data[n - sX * sY] + 8);
                         break;
 
-                    case WATER: 
-                        blocks[n] = (byte)((p.field.extra[i][j][k] & 0x10) != 0 ? 8 : 9);
-                        data[n] = (byte)(p.field.extra[i][j][k] & 0xf);
-                        break;
+
                     }
                     k++;
                     n++;
