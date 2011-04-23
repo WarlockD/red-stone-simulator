@@ -1287,13 +1287,13 @@ public class Viewport
          
         }
 
-        case MouseEvent.BUTTON3: 
+        case MouseEvent.BUTTON2: 
         {
             place(lastX, lastY, lyr, palArr[bi]);
             break;
         }
 
-        case MouseEvent.BUTTON2: 
+        case MouseEvent.BUTTON3: 
         {
             int p = lyr + 1;
             if(field.g(lastX, lastY, lyr).wall != 0)
@@ -1327,7 +1327,7 @@ public class Viewport
                     view.repaint();
                 }
                 break;
-            }
+            
         }
         }
     }
