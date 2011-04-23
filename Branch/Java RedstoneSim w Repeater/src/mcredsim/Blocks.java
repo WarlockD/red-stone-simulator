@@ -22,7 +22,10 @@ public enum Blocks
         conn = c;
         name = s;
     }
-
+    public boolean repeater()
+    {
+        return this == REPEATER;
+    }
     public boolean ctrl()
     {
         return this == LEVER || this == BUTTON || this == PRESS || this == REPEATER;
