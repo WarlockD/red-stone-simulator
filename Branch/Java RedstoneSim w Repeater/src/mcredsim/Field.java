@@ -214,6 +214,7 @@ public class Field
     
     
     
+ 
 
     public void s(int x, int y, int z, Blocks v)
     {
@@ -332,11 +333,11 @@ public class Field
         if(g(x,y,z) == Blocks.REPEATER)
                 return w >0;
         if(w == 0)
-            return g(x, y, z).wall < 2;
+            return g(x, y, z).wall < 2; // valid if we are air.
         if(g(x, y, z).wall % 2 == 0)
-            return g(x, y, z).wall == 2;
+            return g(x, y, z).wall == 2; // if door?
         else
-            return g(x + dir[w][0], y + dir[w][1], z + dir[w][2]).block();
+            return g(x + dir[w][0], y + dir[w][1], z + dir[w][2]).block(); // is next to me?
     }
 
     public void draw(int x, int y, int z, Graphics g, Rectangle r, Blocks b[])
@@ -383,6 +384,7 @@ public class Field
                 g.fillRect(r.x, r.y, r.width, r.height);
             }
         }
+        
         if(p > 0 && layers == 1)
             return;
         boolean tog = true;
@@ -400,6 +402,13 @@ public class Field
                 0x1: 2 tick delay
                 0x2: 3 tick delay
                 0x3: 4 tick delay
+             */
+            /*
+             * Changing the internal poisitions so its more like the torch
+             *  0x1: Pointing south
+                0x2: Pointing north
+                0x3: Pointing west
+                0x4: Pointing east
              */
             int[] xP;
             int[] yP;
@@ -483,6 +492,17 @@ public class Field
                      
                     break;
             }
+            g.fillPolygon(xP,yP,8);
+            if(rpow)
+            g.setColor(Colors.wireOn);
+            else
+            g.setColor(Colors.wireOff);
+            
+            if(rpow & tick ==0)
+                g.fillRect(rt.x,rt.y,rt.width, rt.height);
+            else
+                if(tick>0)
+                    g.fillRect(rt.x,rt.y,rt.width,rt.height);
             
             
             
@@ -659,6 +679,8 @@ public class Field
             }
             if(g(x2, y2, z).air())
                 return g(x2, y2, z - 1).conn;
+            if(g(x2,y2,z).repeater())
+                return g(x2,y2,z).wall 
             if(g(x2, y2, z).block())
                 return !g(x, y, z + 1).block() && g(x2, y2, z + 1).conn;
             else
@@ -713,7 +735,12 @@ public class Field
 
     public void drawWire(Graphics g, Rectangle r, int x, int y, int z, boolean thick)
     {
-        drawWire(g, r, p(x, y, z), (c(x, y, x - 1, y, z) ? 8 : 0) + (c(x, y, x + 1, y, z) ? 4 : 0) + (c(x, y, x, y - 1, z) ? 2 : 0) + (c(x, y, x, y + 1, z) ? 1 : 0), false);
+        drawWire(g, r, p(x, y, z), 
+                (c(x, y, x - 1, y, z) ? 8 : 0) + 
+                (c(x, y, x + 1, y, z) ? 4 : 0) + 
+                (c(x, y, x, y - 1, z) ? 2 : 0) + 
+                (c(x, y, x, y + 1, z) ? 1 : 0), 
+                false);
     }
 
     public static void drawWire(Graphics g, Rectangle r, boolean on, int c, boolean thick)
@@ -938,12 +965,12 @@ public class Field
         if(g(x2, y2, z) == Blocks.WIRE)
             followWire(x2, y2, z, p);
         else
-        if(g(x2, y2, z).block())
+        if(g(x2, y2, z).block()) // if we reached a block, and that block has a wire on top
         {
             if(g(x2, y2, z + 1) == Blocks.WIRE && !g(x, y, z + 1).block())
                 followWire(x2, y2, z + 1, p);
         } else
-        if(g(x2, y2, z - 1) == Blocks.WIRE)
+        if(g(x2, y2, z - 1) == Blocks.WIRE) //if the wire is below the next block
             followWire(x2, y2, z - 1, p);
     }
 
