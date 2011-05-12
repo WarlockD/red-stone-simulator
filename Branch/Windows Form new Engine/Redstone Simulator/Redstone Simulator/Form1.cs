@@ -11,14 +11,29 @@ namespace Redstone_Simulator
 {
     public partial class Form1 : Form
     {
-     
+        Image goImage;
+        Image stopImage;
+        bool running = false;
+        int  ticks = 0;
+        void MakeIcons()
+        {
+            goImage = new Bitmap(16, 16);
+            stopImage = new Bitmap(16, 16);
+            Graphics g = Graphics.FromImage(goImage);
+            g.Clear(Color.LightGreen);
+            g.Dispose();
+            g = Graphics.FromImage(stopImage);
+            g.Clear(Color.Red);
+            g.Dispose();
+        }
 
         public Form1()
         {
             InitializeComponent();
-            this.blockView.ChangeStrip += new BlockView.ChangeStripHandler(blockView_ChangeStrip);
+            MakeIcons();
+            this.blockView.StatusStrip = this.mainStatusStrip;
             this.blockView.select = blockSelect;
-            
+            this.toolStripButton1.Image = goImage;
         }
 
         void  blockView_ChangeStrip(object s, myStatusStripEventArgs e)
@@ -73,6 +88,38 @@ namespace Redstone_Simulator
         {
             blockSelect.Left = (this.Width - blockSelect.Width) / 2;
             if (blockSelect.Left < 0) blockSelect.Left = 0;
+        }
+
+        private void toolStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
+        {
+
+        }
+
+        private void toolStripButton1_Click(object sender, EventArgs e)
+        {
+            if (running)
+            {
+                running = false;
+                toolStripButton1.Image = goImage;
+            }
+            else
+            {
+                running = true;
+                toolStripButton1.Image = stopImage;
+                ticks = 0;
+                mainStatusStrip.setTicks(ticks);
+            }
+
+        }
+
+        private void toolStripButton2_Click(object sender, EventArgs e)
+        {
+            ticks++;
+          //  blockView.currentSim.tick();
+          //  blockView.currentSim.noTick();
+            blockView.currentSim.newTick();
+            mainStatusStrip.setTicks(ticks);
+            blockView.Invalidate();
         }
     }
 }

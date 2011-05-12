@@ -43,6 +43,7 @@
             this.blockView = new Redstone_Simulator.BlockView();
             this.blockSelect = new Redstone_Simulator.BlockSelect();
             this.mainStatusStrip = new Redstone_Simulator.BlockStatusStrip();
+            this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
             this.menuStrip1.SuspendLayout();
             this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
@@ -114,12 +115,14 @@
             // toolStrip1
             // 
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButton1});
+            this.toolStripButton1,
+            this.toolStripButton2});
             this.toolStrip1.Location = new System.Drawing.Point(0, 24);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(1105, 25);
             this.toolStrip1.TabIndex = 2;
             this.toolStrip1.Text = "toolStrip1";
+            this.toolStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.toolStrip1_ItemClicked);
             // 
             // toolStripButton1
             // 
@@ -129,6 +132,7 @@
             this.toolStripButton1.Name = "toolStripButton1";
             this.toolStripButton1.Size = new System.Drawing.Size(23, 22);
             this.toolStripButton1.Text = "toolStripButton1";
+            this.toolStripButton1.Click += new System.EventHandler(this.toolStripButton1_Click);
             // 
             // blockView
             // 
@@ -142,6 +146,7 @@
             this.blockView.MinimumSize = new System.Drawing.Size(271, 271);
             this.blockView.Name = "blockView";
             this.blockView.Size = new System.Drawing.Size(1105, 488);
+            this.blockView.StatusStrip = null;
             this.blockView.TabIndex = 6;
             this.blockView.TabStop = false;
             // 
@@ -165,6 +170,16 @@
             this.mainStatusStrip.Name = "mainStatusStrip";
             this.mainStatusStrip.Size = new System.Drawing.Size(1105, 23);
             this.mainStatusStrip.TabIndex = 0;
+            // 
+            // toolStripButton2
+            // 
+            this.toolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.toolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton2.Image")));
+            this.toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripButton2.Name = "toolStripButton2";
+            this.toolStripButton2.Size = new System.Drawing.Size(23, 22);
+            this.toolStripButton2.Text = "Tick";
+            this.toolStripButton2.Click += new System.EventHandler(this.toolStripButton2_Click);
             // 
             // Form1
             // 
@@ -208,6 +223,7 @@
         private System.Windows.Forms.ToolStripButton toolStripButton1;
         private BlockSelect blockSelect;
         private BlockView blockView;
+        private System.Windows.Forms.ToolStripButton toolStripButton2;
 
  
 

@@ -14,10 +14,10 @@ namespace Redstone_Simulator
     {
         Bitmap bar;
         int selected = 0; public int Selected { get { return selected; } }
-        public Blocks SelectedBlock { get { return sArray[selected][0]; } }
+        public Block SelectedBlock { get { return sArray[selected][0]; } }
         float scale = 5;
         public float BlockScale { get { return scale; } set { scale = value; } }
-        Blocks[][] sArray = Blocks.PickBlocks;
+        Block[][] sArray = PickBlocks;
       
         public BlockSelect()
         {
@@ -42,16 +42,16 @@ namespace Redstone_Simulator
                 Rectangle r = new Rectangle(i * 9 + 1, 1, 8, 8);
                 BlockDrawSettings b;
                 int j = 0;
-                if (sArray[i][j].Type == eBlock.BLOCK)
+                if (sArray[i][j].isBlock)
                 {
                     j++;
-                    b = new BlockDrawSettings(sArray[i][j], WireMask.AllDir, true);
+                    b = new BlockDrawSettings(sArray[i][j],  true);
                     b.OnBlock = true;
                 }
                 else
-                    b = new BlockDrawSettings(sArray[i][j], WireMask.AllDir, true);
+                    b = new BlockDrawSettings(sArray[i][j],  true);
 
-                if (sArray[i][j+1].Type == eBlock.BLOCK) b.Fog = true;
+                if (sArray[i][j+1].isBlock) b.Fog = true;
                 BlockImages.gDrawBlock(g, r, b);
             }
             g.Dispose();
@@ -75,7 +75,43 @@ namespace Redstone_Simulator
             this.Invalidate();
         }
 
+        public static Block[][] PickBlocks
+        {
+            get
+            {
+                Block[][] tmp = new Block[][] 
+                 {
+                    new Block[] { Block.AIR,Block.AIR,Block.AIR },
+                                new Block[]  { Block.BLOCK,Block.AIR,Block.AIR },
+                                new Block[]  { Block.BLOCK,Block.BLOCK,Block.AIR },
+                                new Block[]  { Block.WIRE,Block.AIR,Block.AIR },
+                                new Block[]  { Block.TORCH,Block.AIR,Block.AIR },
+                                new Block[]  { Block.BLOCK,Block.WIRE,Block.AIR },
+                               new Block[]   { Block.BLOCK,Block.TORCH,Block.AIR },
+                               new Block[]   { Block.WIRE,Block.BLOCK,Block.AIR },
+                                new Block[]  { Block.TORCH,Block.BLOCK,Block.AIR },
+                                new Block[]  { Block.WIRE,Block.TORCH,Block.AIR },
+                                new Block[]  { Block.WIRE,Block.BLOCK,Block.WIRE },
+                               new Block[]   { Block.LEVER,Block.AIR,Block.AIR },
+                                new Block[]  { Block.BUTTON,Block.AIR,Block.AIR },
+                                new Block[]  { Block.PREASUREPAD,Block.AIR,Block.AIR },
+                               // new Blocks[]  { Blocks.DOORA,Blocks.AIR,Blocks.AIR }  ,
+                                 new Block[]  { Block.REPEATER,Block.AIR,Block.AIR }
+                 };
+                for (int i = 0; i < tmp.Length; i++)
+                    for (int j = 0; j < tmp[i].Length; j++)
+                    {
+                        if (tmp[i][j].isControl) tmp[i][j].Charge = 0;
+                        else
+                            tmp[i][j].Charge = 16;
+                        tmp[i][j].Place = Direction.NORTH;
 
+
+                    }
+
+                return tmp;
+            }
+        }
 
         private void BlockSelect_Paint(object sender, PaintEventArgs e)
         {

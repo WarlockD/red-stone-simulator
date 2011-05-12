@@ -12,24 +12,50 @@ namespace Redstone_Simulator
     public partial class BlockView : UserControl
     {
         Timer simTime;
-        Bitmap bmp;
+        private BlockStatusStrip statusStrip = null;
+        public BlockStatusStrip StatusStrip { get { return statusStrip; } set { statusStrip = value; } }
         private PictureBox Display;
         public BlockSelect select;
         public BlockSim currentSim;
         Size DisplaySize;
         float scale = 3;
-        bool isDragging = false;
-        bool isCloneing = false;
-        bool ctrlDown = true;
-        bool cChanged = false;
-        Point lMouse = new Point(0, 0);
-        int cX = -1, cY = -1, cZ = 0;
-        bool isMouseHere = false;
+
+        Point startMouse = new Point(-1, -1);
+        Point nextMouse = new Point(-1, -1);
+        BlockVector currentLoc;
+        BlockVector startLoc;
+        int floor = 0;
+        bool mouseLeftDown = false;
         bool playing = false;
+        bool locValid = false;
+        bool isDragging = false;
+        void UpdateLoc(Point p, int cFloor)
+        {
+            
+            if (p.X < 0 || p.Y < 0 || p.X > Display.Width|| p.Y > Display.Height)
+            {
+                UpdateLoc(false);
+            }
+            else
+            {
+                currentLoc = new BlockVector((int)(p.X / scale / 9), (int)(p.Y / scale / 9), floor);
+                UpdateLoc(true);
+            }
+        }
+        void UpdateLoc(bool valid)
+        {
+            if (!valid)
+            {
+                locValid = false;
+                if (statusStrip != null) statusStrip.setCord(0, 0, 0);
+            }
+            else
+            {
+                locValid = true;
+                if (statusStrip != null) statusStrip.setCord(currentLoc.X, currentLoc.Y, floor);
+            }
 
-        public delegate void ChangeStripHandler(object s, myStatusStripEventArgs e);
-        public event ChangeStripHandler ChangeStrip;
-
+        }
 
         void ToggleTimer()
         {
@@ -95,67 +121,83 @@ namespace Redstone_Simulator
         void Display_MouseLeave(object sender, EventArgs e)
         {
            isDragging = false;
+           mouseLeftDown = false;
+           UpdateLoc(false);
         }
 
         void Display_MouseEnter(object sender, EventArgs e)
         {
             Focus();
             isDragging = false;
+            mouseLeftDown = false;
         }
 
         void Display_MouseUp(object sender, MouseEventArgs e)
         {
-            this.isDragging = false;
-            if (!cChanged)
-                place(cX, cY, cZ, true);
-            switch (e.Button)
-            {
-                case System.Windows.Forms.MouseButtons.Left:
-                    if (isDragging)
-                        isDragging = false;
-                    if(!cChanged)
-                        place(cX, cY, cZ, true);
-                    break;
+            if(mouseLeftDown)
+                switch (e.Button)
+                {
+                    case System.Windows.Forms.MouseButtons.Left:
+                        break;
                 
-                case System.Windows.Forms.MouseButtons.Right:
-                    Blocks b = currentSim[cX, cY, cZ];
-                    if (b.isControl)
-                    {
-                        currentSim.SetPower(cX, cY, cZ, 16);
-                        Display.Invalidate();
-                    }
-                    break;
-            }
+                    case System.Windows.Forms.MouseButtons.Right:
+                        if (currentSim[currentLoc].isControl)
+                        {
+                            currentSim[currentLoc].Charge = 16;
+                            Display.Invalidate();
+                        }
+                        break;
+                }
+            mouseLeftDown = false;
+            isDragging = false;
         }
 
         void Display_MouseDown(object sender, MouseEventArgs e)
         {
-            switch(e.Button)
-            {
-                case System.Windows.Forms.MouseButtons.Left:
-                    lMouse = e.Location;
-                    isDragging = true;
-                    cChanged = false;
-                    break;
-                
+            if(!mouseLeftDown)
+                switch(e.Button)
+                {
+                    case System.Windows.Forms.MouseButtons.Left:
 
+                        startMouse = e.Location;
+                        startLoc = currentLoc;
+                        place(currentLoc, false);
+                        isDragging = false;
+                        mouseLeftDown = true;
 
+                        break;
+                    case System.Windows.Forms.MouseButtons.Right:
+                        if (currentSim[currentLoc].isControl)
+                        {
+                            currentSim[currentLoc].Charge = 16;
+                            Display.Invalidate();
+                        }
+                        break;
             }
+            
         }
 
         void Display_MouseMove(object sender, MouseEventArgs e)
         {
-            lMouse = e.Location;
-            updateTooltip();
-            if (isDragging && cChanged)
-            {
-                place(cX, cY, cZ,false);
-            }
-         
+            UpdateLoc(e.Location, floor);
+            if (mouseLeftDown)
+                if (startLoc != currentLoc)
+                {
+                    startLoc = currentLoc;
+                    place(currentLoc, false);
+                }
         }
+         
 
 
-       
+        BlockVector getTileLoc(Point p)
+        {
+            if (p.X < 0 || p.Y < 0 || p.X > currentSim.X * 9 || p.Y > currentSim.Y * 9)
+            {
+                return new BlockVector(-1, -1,currentLoc.Z);
+            } else
+                return new BlockVector((int)(startMouse.X / scale), (int)(startMouse.Y / scale),currentLoc.Z);
+        }
 
 
 
@@ -172,64 +214,31 @@ namespace Redstone_Simulator
         private void BlockView_Load(object sender, EventArgs e)
         {
 
-            bmp = new Bitmap(DisplaySize.Height,DisplaySize.Width);
         }
         public BlockView(BlockSim sim)
         {
             InitializeComponent();
             currentSim = sim;
-        }
-        public void drawWire(Graphics g, Rectangle r,int x, int y, int z)
-        {
-            WireMask m = WireMask.None;
-
-            if (currentSim.canConnect(x, y, x - 1, y, z)) m |= WireMask.West;
-            if (currentSim.canConnect(x, y, x + 1, y, z)) m |= WireMask.East;
-            if (currentSim.canConnect(x, y, x, y - 1, z)) m |= WireMask.North;
-            if (currentSim.canConnect(x, y, x, y + 1, z)) m |= WireMask.South;
-
-            BlockImages.gDrawBlock(g, r, new BlockDrawSettings(currentSim.GetBlock(x, y, z), m));
-    
 
         }
+      
 
-        public void updateTooltip()
+       
+
+        private void place(BlockVector v, bool rotate)
         {
-            Point p = new Point(lMouse.X / (int)scale, lMouse.Y / (int)scale);
-            //ifoutofbounds
-            if (lMouse.X < 0 || lMouse.Y < 0 || p.X < 0 || p.Y < 0 || p.X > currentSim.X * 9 || p.Y > currentSim.Y * 9)
+            Block b = select.SelectedBlock;
+            if (currentSim[v].ID == b.ID)
             { 
-                cX = cY = -1;
-                toolTip.Active = false;
-                return;
+                currentSim[v].Rotate(); 
             }
-            if (p.X % 9 == 0 || p.Y % 9 == 0)
-                return;
-            if (cX != p.X / 9 || cY != p.Y)
-                cChanged = true;
             else
-                cChanged = false;
-            cX = p.X / 9; cY = p.Y / 9; 
-            
-            myStatusStripEventArgs e = new myStatusStripEventArgs(eStatusStripUdate.XYZ);
-            e.X = cX;
-            e.Y = cY;
-            e.Z = cZ;
-            ChangeStrip(this,e);
-            // lLoc.setText("X=" + lastX +"Y=" + lastY + "Z=" +lyr);
-            //  lLoc.setVisible(true);
-            //   sLoc.setVisible(true);
-
-        }
-
-        private void place(int x, int y, int z, bool rotate)
-        {
-            Blocks b = select.SelectedBlock;
-            Blocks t = currentSim[x, y, z];
-            if (t.Type == b.Type && t.canRotate && rotate)
-            { currentSim.RotateMount(x, y, z); }
-            else
-                currentSim.SetBlock(x,y,z, b.Type);
+            {
+                Block b = new Block(b.ID);
+                if(b.ID == BlockType.BUTTON)
+                currentSim[v].ID = b.ID;
+                currentSim.setConnections(v);
+            }
             Display.Refresh();
         }
 
@@ -249,7 +258,7 @@ namespace Redstone_Simulator
                     //int ba = r.x / scale / 9; (i * 9 + 1) * scale < r.x + r.width;
                     // g.PageScale
                     Rectangle r = new Rectangle(x * 9 + 1, y * 9 + 1, 8, 8);
-                    BlockDrawSettings b = new BlockDrawSettings(currentSim.GetBlock(x,y,cZ));
+                    BlockDrawSettings b = new BlockDrawSettings(currentSim[currentLoc.ChangeXY(x,y)]);
                     BlockImages.gDrawBlock(g, r, b);
 
                 }

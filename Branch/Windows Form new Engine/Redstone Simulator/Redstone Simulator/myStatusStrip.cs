@@ -15,14 +15,15 @@ namespace Redstone_Simulator
         int x=0;
         int y=0;
         int z=0;
-        int wires, torches,redstone = 0;
+        int ticks,wires, torches,redstone = 0;
         int layer = 1;
+
         ToolStripLabel cLayer;
         ToolStripLabel cCord;
         ToolStripLabel cTorches;
         ToolStripLabel cWires;
         ToolStripLabel cRedstone;
-        
+        ToolStripLabel cTicks;
         
         
         //public event EventHandler<myStatusStripEventArgs> StatusStripEvent;
@@ -47,6 +48,15 @@ namespace Redstone_Simulator
             this.cCord.Text = "0x0y0z";
             this.cCord.Alignment = ToolStripItemAlignment.Left;
             this.Items.Add(cCord);
+
+            this.Items.Add(new ToolStripSeparator());
+
+            this.cTicks = new ToolStripLabel();
+            this.cTicks.ForeColor = Color.Black;
+            this.cTicks.Name = "cTicks";
+            this.cTicks.Text = "Ticks: 0";
+            this.cTicks.Alignment = ToolStripItemAlignment.Left;
+            this.Items.Add(cTicks);
 
             this.Items.Add(new ToolStripSeparator());
 
@@ -93,6 +103,7 @@ namespace Redstone_Simulator
 
         void ChangeText()
         {
+            cTicks.Text = String.Format("Ticks: {0}", ticks);
             cLayer.Text = String.Format("Layer {0,3:d}" , layer);
             cTorches.Text = String.Format("{0,3:d}", torches);
             cWires.Text = String.Format("{0,3:d}", wires);
@@ -106,6 +117,11 @@ namespace Redstone_Simulator
         public void setCord(int X, int Y, int Z)
         {
             x = X; y = Y; z = Z;
+            ChangeText();
+        }
+        public void setTicks(int t)
+        {
+            ticks = t;
             ChangeText();
         }
         public void setWire(int Wires)
@@ -146,14 +162,15 @@ namespace Redstone_Simulator
     
         public class myStatusStripEventArgs : EventArgs
         {
-            public int X { get;  set; }
-            public int Y  { get;  set; }
-            public int Z  { get;  set; }
-            public int Torches  { get;  set; }
-            public int Redstone  { get;  set; }
-            public int Wires  { get;  set; }
-            public int Layer  { get;  set; }
+            public int X { get; internal set; }
+            public int Y  { get; internal set; }
+            public int Z  { get;  internal set; }
+            public int Torches  { get; internal  set; }
+            public int Redstone  { get; internal  set; }
+            public int Wires  { get; internal  set; }
+            public int Layer  { get; internal set; }
 
+            myStatusStripEventArgs() { X=0; Y=0; Z =0; Torches = 0; Redstone =0; Wires=0; Layer =0; }
             public eStatusStripUdate Update { get; internal set; }
 
             public myStatusStripEventArgs(eStatusStripUdate t) { Update = t; X = Y = Z = Torches = Redstone = Wires = Layer = 0; }

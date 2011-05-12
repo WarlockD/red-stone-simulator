@@ -8,29 +8,27 @@ using System.Drawing.Imaging;
 namespace Redstone_Simulator
 {
     [Flags]
-    public enum WireMask
+    public enum WireMask: int
     {
-        None = 0, // Constant
-        North = 1,
-        South = 2,
-        East = 4,
-        West = 8,
+        NotConnected =0,
+        North =1  ,
+        South =2  ,
+        East =4  ,
+        West  = 8,
+        BlockPower = 16,
         AllDir = North | South | East | West
     }
 
     public struct BlockDrawSettings
     {
-        Blocks block;
-        public Blocks Block { get { return block; } }
+        public Block B { get;  internal set; }
         public bool OverShadow { get; set; }
-        public bool Fog { get; set; }
-        public bool On { get; set; }
-        public bool OnBlock { get; set; }
-        public WireMask Mask { get; set; }
-        public BlockDrawSettings(Blocks Block) : this() { block = Block; }
-        public BlockDrawSettings(Blocks Block, WireMask Mask) : this(Block) { this.Mask = Mask; }
-        public BlockDrawSettings(Blocks Block, WireMask Mask, bool On) : this(Block,Mask) { block.Power = On ? 16 : 0; }
-        public BlockDrawSettings(Blocks Block,  bool On) : this(Block) { block.Power = On ? 16 : 0; }
+        public bool Fog { get;  set; }
+        public bool On { get; internal set; }
+        public bool OnBlock { get;  set; }
+        public WireMask Mask { get { return B.Mask; } }
+        public BlockDrawSettings(Block b) : this() { B = b; this.On = b.Powered ? true : false;  }
+        public BlockDrawSettings(Block b, bool On) : this() { B = b; this.On = On; }
     }
     public class BlockColors
     {
@@ -93,20 +91,19 @@ namespace Redstone_Simulator
 
         public static void gDrawWire(Graphics g, Rectangle r, BlockDrawSettings s)
         {
-            Brush b = s.Block.Powered ? BlockColors.bWireOn : BlockColors.bWireOff;
+            Brush b = s.On ? BlockColors.bWireOn : BlockColors.bWireOff;
 
- 
             if (s.Mask.HasFlag(WireMask.North)) g.FillRectangle(b, r.X + 3, r.Y, 2, 5);
             if (s.Mask.HasFlag(WireMask.South)) g.FillRectangle(b, r.X + 3, r.Y + 3, 2, 5);
             if (s.Mask.HasFlag(WireMask.East)) g.FillRectangle(b, r.X + 3, r.Y + 3, 5, 2);
             if (s.Mask.HasFlag(WireMask.West)) g.FillRectangle(b, r.X, r.Y + 3, 5, 2);
-           // if (s.Mask.HasFlag(WireMask.None)) g.FillRectangle(b, r.X + 2, r.Y + 2, 4, 4);
+            if (s.Mask ==0) g.FillRectangle(b, r.X + 2, r.Y + 2, 4, 4);
         }
         public static void gDrawBlock(Graphics g, Rectangle r, BlockDrawSettings b)
         {
             if (b.OverShadow) g.FillRectangle(BlockColors.bGrid, r);
             else
-                if (b.Block.Type == eBlock.BLOCK || b.OnBlock) g.FillRectangle(BlockColors.bBlock, r);
+                if (b.B.ID == BlockType.BLOCK || b.OnBlock) g.FillRectangle(BlockColors.bBlock, r);
                 else
                     g.FillRectangle(BlockColors.bAir, r);
 
@@ -117,35 +114,35 @@ namespace Redstone_Simulator
                0x4: Facing east
              */
 
-            switch (b.Block.Type)
+            switch (b.B.ID)
             {
-                case eBlock.WIRE:
+                case BlockType.WIRE:
                     gDrawWire(g, r, b);
                     break;
-                case eBlock.REPEATER:
+                case BlockType.REPEATER:
                     Point[] Arrow = new Point[8];
-                    int tick = b.Block.Ticks;
-                    bool rpow = b.Block.Powered;
+                    int tick = b.B.Ticks;
+                    bool rpow = b.On;
                     //b.Mount = 
-                    switch (b.Block.Mount)
+                    switch (b.B.Place)
                     {
                         // There a better, fasterway for a vector arrow?
-                        case eMount.NORTH:
+                        case Direction.NORTH:
                             for (int i = 0; i < 8; i++) { Arrow[i] = northArrow[i]; Arrow[i].Offset(r.Location); }
                             r = new Rectangle(r.X + 3, r.Y + 3, 2, 1);
                             r.Offset(0, tick);
                             break;
-                        case eMount.SOUTH:
+                        case Direction.SOUTH:
                             for (int i = 0; i < 8; i++) { Arrow[i] = southArrow[i]; Arrow[i].Offset(r.Location); }
                             r = new Rectangle(r.X + 3, r.Y + 4, 2, 1);
                             r.Offset(0, -tick);
                             break;
-                        case eMount.WEST:
+                        case Direction.WEST:
                             for (int i = 0; i < 8; i++) { Arrow[i] = westArrow[i]; Arrow[i].Offset(r.Location); }
                             r = new Rectangle(r.X + 4, r.Y + 3, 1, 2);
                             r.Offset(-tick, 0);
                             break;
-                        case eMount.EAST:
+                        case Direction.EAST:
                             for (int i = 0; i < 8; i++) { Arrow[i] = eastArrow[i]; Arrow[i].Offset(r.Location); }
                             r = new Rectangle(r.X + 3, r.Y + 3, 1, 2);
                             r.Offset(tick, 0);
@@ -164,110 +161,110 @@ namespace Redstone_Simulator
 
 
                     break;
-                case eBlock.LEVER:
-                    switch (b.Block.Mount)
+                case BlockType.LEVER:
+                    switch (b.B.Place)
                     {
-                        case eMount.SOUTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y, 2, 5); break;
-                        case eMount.NORTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 2, 5); break;
-                        case eMount.EAST: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 5, 2); break;
-                        case eMount.WEST: g.FillRectangle(BlockColors.bLever, r.X, r.Y + 3, 5, 2); break;
+                        case Direction.SOUTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y, 2, 5); break;
+                        case Direction.NORTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 2, 5); break;
+                        case Direction.EAST: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 5, 2); break;
+                        case Direction.WEST: g.FillRectangle(BlockColors.bLever, r.X, r.Y + 3, 5, 2); break;
                     }
                     g.FillEllipse(BlockColors.bValve, r.X + 2, r.Y + 2, 4, 4);
-                    if (b.Block.Powered)
+                    if (b.On)
                         g.FillEllipse(BlockColors.bWireOn, r.X + 3, r.X + 3, 2, 2);
                     break;
-                case eBlock.TORCH:
-                    switch (b.Block.Mount)
+                case BlockType.TORCH:
+                    switch (b.B.Place)
                     {
-                        case eMount.SOUTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y, 2, 5); break;
-                        case eMount.NORTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 2, 5); break;
-                        case eMount.EAST: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 5, 2); break;
-                        case eMount.WEST: g.FillRectangle(BlockColors.bLever, r.X, r.Y + 3, 5, 2); break;
+                        case Direction.SOUTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y, 2, 5); break;
+                        case Direction.NORTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 2, 5); break;
+                        case Direction.EAST: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 5, 2); break;
+                        case Direction.WEST: g.FillRectangle(BlockColors.bLever, r.X, r.Y + 3, 5, 2); break;
                     }
 
-                    if (b.Block.Powered)
+                    if (b.On)
                         g.FillEllipse(BlockColors.bWireOn, r.X + 2, r.Y + 2, 4, 4);
                     else
                         g.FillEllipse(BlockColors.bWireOff, r.X + 2, r.Y + 2, 4, 4);
 
                     break;
 
-                case eBlock.BUTTON:
+                case BlockType.BUTTON:
 
-                    if (b.Block.Powered)
-                        switch (b.Block.Mount)
+                    if (b.On)
+                        switch (b.B.Place)
                         {
-                            case eMount.NORTH: g.FillRectangle(BlockColors.bButton, r.X + 2, r.Y + 7, 4, 1); break;
-                            case eMount.SOUTH: g.FillRectangle(BlockColors.bButton, r.X + 2, r.Y, 4, 1); break;
-                            case eMount.EAST: g.FillRectangle(BlockColors.bButton, r.X + 7, r.Y + 2, 1, 4); break;
-                            case eMount.WEST: g.FillRectangle(BlockColors.bButton, r.X, r.Y + 2, 1, 4); break;
+                            case Direction.NORTH: g.FillRectangle(BlockColors.bButton, r.X + 2, r.Y + 7, 4, 1); break;
+                            case Direction.SOUTH: g.FillRectangle(BlockColors.bButton, r.X + 2, r.Y, 4, 1); break;
+                            case Direction.EAST: g.FillRectangle(BlockColors.bButton, r.X + 7, r.Y + 2, 1, 4); break;
+                            case Direction.WEST: g.FillRectangle(BlockColors.bButton, r.X, r.Y + 2, 1, 4); break;
                         }
                     else
-                        switch (b.Block.Mount)
+                        switch (b.B.Place)
                         {
-                            case eMount.SOUTH: g.FillRectangle(BlockColors.bButton, r.X + 2, r.Y + 5, 4, 3); break;
-                            case eMount.NORTH: g.FillRectangle(BlockColors.bButton, r.X + 2, r.Y, 4, 3); break;
-                            case eMount.EAST: g.FillRectangle(BlockColors.bButton, r.X + 5, r.Y + 2, 3, 4); break;
-                            case eMount.WEST: g.FillRectangle(BlockColors.bButton, r.X, r.Y + 2, 3, 4); break;
+                            case Direction.SOUTH: g.FillRectangle(BlockColors.bButton, r.X + 2, r.Y + 5, 4, 3); break;
+                            case Direction.NORTH: g.FillRectangle(BlockColors.bButton, r.X + 2, r.Y, 4, 3); break;
+                            case Direction.EAST: g.FillRectangle(BlockColors.bButton, r.X + 5, r.Y + 2, 3, 4); break;
+                            case Direction.WEST: g.FillRectangle(BlockColors.bButton, r.X, r.Y + 2, 3, 4); break;
 
                         }
                     break;
 
-                case eBlock.PRESS: // '\t'
-                    if (b.Block.Powered)
+                case BlockType.PREASUREPAD: // '\t'
+                    if (b.On)
                         g.FillRectangle(BlockColors.bWireOn, r.X + 1, r.Y + 1, 6, 6);
                     else
                         g.FillRectangle(BlockColors.bValve, r.X + 1, r.Y + 1, 6, 6);
                     break;
-                case eBlock.DOORB:
+             /*   case BlockType.DOORB:
                     break; //Check for this 
-                case eBlock.DOORA: // '\007'
+                case BlockType.DOORA: // '\007'
                     if (b.Block.Powered)
-                        switch (b.Block.Mount) // THIS IS UNPOWERED, NEEDS TO BE MODIFIED.
+                        switch (b.Block.Place) // THIS IS UNPOWERED, NEEDS TO BE MODIFIED.
                         // JUST LASY AND TESTING RIGHT NOW
                         {
                             // FYI, this is facing, so its hinge to edge not powered
-                            case eMount.NORTH: // Hinge, bottom left, Closed
+                            case Direction.NORTH: // Hinge, bottom left, Closed
                                 g.FillRectangle(BlockColors.bDoor, r.X, r.Y, 2, 8);
                                 g.FillRectangle(BlockColors.bWireOff, r.X, r.Y + 6, 2, 2);
                                 break;
-                            case eMount.SOUTH: // Hinge upper right, Closed
+                            case Direction.SOUTH: // Hinge upper right, Closed
                                 g.FillRectangle(BlockColors.bDoor, r.X, r.Y + 6, 2, 8);
                                 g.FillRectangle(BlockColors.bWireOff, r.X + 6, r.Y, 2, 2);
                                 break;
-                            case eMount.EAST: // Hinge, upper left
+                            case Direction.EAST: // Hinge, upper left
                                 g.FillRectangle(BlockColors.bDoor, r.X, r.Y, 8, 2);
                                 g.FillRectangle(BlockColors.bWireOff, r.X, r.Y, 2, 2);
                                 break;
-                            case eMount.WEST:  // bottom right
+                            case Direction.WEST:  // bottom right
                                 g.FillRectangle(BlockColors.bDoor, r.X, r.Y + 6, 8, 2);
                                 g.FillRectangle(BlockColors.bWireOff, r.X + 6, r.Y + 6, 2, 2);
                                 break;
                         }
                     else
-                        switch (b.Block.Mount)
+                        switch (b.Block.Place)
                         {
                             // FYI, this is facing, so its hinge to edge not powered
-                            case eMount.NORTH: // Hinge, bottom left, Closed
+                            case Direction.NORTH: // Hinge, bottom left, Closed
                                 g.FillRectangle(BlockColors.bDoor, r.X, r.Y, 2, 8);
                                 g.FillRectangle(BlockColors.bWireOff, r.X, r.Y + 6, 2, 2);
                                 break;
-                            case eMount.SOUTH: // Hinge upper right, Closed
+                            case Direction.SOUTH: // Hinge upper right, Closed
                                 g.FillRectangle(BlockColors.bDoor, r.X, r.Y + 6, 2, 8);
                                 g.FillRectangle(BlockColors.bWireOff, r.X + 6, r.Y, 2, 2);
                                 break;
-                            case eMount.EAST: // Hinge, upper left
+                            case Direction.EAST: // Hinge, upper left
                                 g.FillRectangle(BlockColors.bDoor, r.X, r.Y, 8, 2);
                                 g.FillRectangle(BlockColors.bWireOff, r.X, r.Y, 2, 2);
                                 break;
-                            case eMount.WEST:  // bottom right
+                            case Direction.WEST:  // bottom right
                                 g.FillRectangle(BlockColors.bDoor, r.X, r.Y + 6, 8, 2);
                                 g.FillRectangle(BlockColors.bWireOff, r.X + 6, r.Y + 6, 2, 2);
                                 break;
                         }
 
 
-                    break;
+                    break;*/
 
 
             }

@@ -4,395 +4,588 @@ using System.Linq;
 using System.Text;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Collections;
 
 namespace Redstone_Simulator
 {
-    public struct BlockVector
-    {
-        public static readonly BlockVector Null = new BlockVector();
-        bool offset; public bool HasOffset { get { return offset; } }
-        int x,y,z,xO,yO,zO;
-        public int X { get { if(offset) return xO; else return x; } }
-        public int Y { get { if (offset) return yO; else return y; } }
-        public int Z { get { if (offset) return zO; else return z; } }
-        public BlockVector Old { get { return offset ? new BlockVector(x, y, z) : BlockVector.Null; } }
-        public BlockVector(int X, int Y, int Z) : this() { x = X; y = Y; z = Z; }
-        public BlockVector(BlockVector v) : this(v.X, v.Y, v.Z) { }
-        public void Offset(int X, int Y, int Z) { xO =X+ x; yO=Y + y; zO =Z + z; offset =true;}
-        public void Offset(int X, int Y) { xO = X + x; yO = Y + y; zO = z; offset = true; }
-        public void ClearOff() {  offset = false; }
-        public BlockVector Up { get { return new BlockVector(X, Y, Z + 1); } }
-        public BlockVector North {get { return new BlockVector(X, Y-1, Z); }}
-        public BlockVector South { get { return new BlockVector(X, Y+1, Z); }}
-        public BlockVector East { get { return new BlockVector(X+1, Y, Z); }}
-        public BlockVector West { get { return new BlockVector(X-1, Y, Z); }}
-        public BlockVector Down { get { return new BlockVector(X, Y, Z-1); }}
-        
-        public override bool Equals(object obj)
-        {
-            if (!(obj is BlockVector)) return false;
-            BlockVector v = (BlockVector)obj;
-            return v.X == X && v.Y == Y && v.Z == Z ;
-        }
-        public override int GetHashCode()
-        {
-            return new int[] { x, y, z }.GetHashCode();
-        }
-        public override string ToString()
-        {
-            return  String.Format("{0}:{0}:{0}",x,y,z); 
-        }
-
-    }
+    
+    
     public class BlockSim
     {
-        private static int[,] dir = {
-        {
-            0, 0, -1
-        }, {
-            0, 1, 0
-        }, {
-            0, -1, 0
-        }, {
-            1, 0, 0
-        }, {
-            -1, 0, 0
-        }
-    };
-        bool isJustWires = false;
-        Blocks[, ,] data;
-        int lenX, lenY, lenZ;
-        int safeX, safeY, safeZ;
-        bool isSafe = false;
+        Blocks data;
+       // Blocks lastTick;
+        readonly Direction[] Directions = {
+                                 Direction.DOWN,
+                                 Direction.NORTH,
+                                 Direction.EAST,
+                                 Direction.SOUTH,
+                                 Direction.WEST,
+                                 Direction.UP
+                                  };
+        readonly Direction[]  CompassDir = {
+                                 Direction.NORTH,
+                                 Direction.EAST,
+                                 Direction.SOUTH,
+                                 Direction.WEST,
+                                  };
 
+        List<BlockVector> update, source;
+        int lenX, lenY, lenZ;
         public int X { get { return lenX; } }
         public int Y { get { return lenY; } }
         public int Z { get { return lenZ; } }
 
         public BlockSim(int X, int Y, int Z)
         {
-            data = new Blocks[X, Y, Z];
-            lenX = X;
-            lenY = Y;
-            lenZ = Z;
+          //  BlockVector.SetLimit(X,Y,Z);
+            source = new List<BlockVector>();
+            update = new List<BlockVector>();
+            data = new Blocks(X, Y, Z);
+            lenX = X; lenY = Y; lenZ = Z;
+       
         }
-
-        /// <summary>
-        /// Tests if two blocks can connect
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="tX"></param>
-        /// <param name="tY"></param>
-        /// <param name="z"></param>
-        /// <returns></returns>
-        public bool canConnect(int x, int y, int tX, int tY, int z)
+        public void setConnections(BlockVector v)
         {
-            Blocks test = this[tX, tY, z];
-            if (test.isAir) // if the block is Air, return the connection below
-                return this[tX, tY, z - 1].Conn;
-            if (test.isBlock) // if there isn't a block above us ANd we have a connection on the block in front..
-                return !this[x, y, z + 1].isBlock && this[tX, tY, z + 1].Conn;
-            if (test.Type == eBlock.REPEATER)
+            data[v].Mask = getConnections(v);
+            foreach (Direction d in CompassDir)
+                data[v.Dir(d)].Mask = getConnections(v.Dir(d));
+        }
+        public Block this[int x, int y, int z]
+        {
+            get { return data[x, y, z]; }
+            set { data[x, y, z] = value; }
+        }
+        public Block this[BlockVector v]
+        {
+            get { return data[v]; }
+            set { data[v] = value;  }
+        }
+        public Block this[int i]
+        {
+            get { return data[i]; }
+            set { data[i] = value; }
+        }
+       
+        public static bool TestMask(WireMask obj,WireMask toTest )
+        {
+            return ((obj & toTest) == toTest);
+        }
+        void followWireQ(BlockVector v, Direction d, int pow)
+        {
+            BlockVector n = v.Dir(d);
+            if (data[n].isWire) followWire(n, pow);
+            if (data[n].isBlock)
             {
-                // Repeater matters what side its connected too.
-                // Luckly ANYTHING can power a repeater
-                switch (test.Mount)
-                {
-                    case eMount.NORTH:
-                    case eMount.SOUTH:
-                        if ((tY < y || tY > y) && tX == x) return true; else return false;
-                    case eMount.EAST:
-                    case eMount.WEST:
-                        if ((tX < x || tX > x) && tY == y) return true; else return false;
-                    default:
-                        return false;
-                }
-
+                if (data[n.Up].isWire && !data[v.Up].isBlock)
+                    followWire(n.Up, pow);
             }
             else
-                return true;
+                if (data[n.Down].isWire)
+                    followWire(n.Down, pow);
         }
-        public void touchControl(int x, int y, int z)
+        void followWire(BlockVector v, int pow)
         {
-
-        }
-
-
-        public Boolean blockConnect(int x, int y, int dy, int dx, int z, bool pow)
-        {
-            if (this[x + dx, y + dy, z].Type != eBlock.WIRE || this[x + dx, y + dy, z].Powered && pow)
-                return false;
-            if (this[x + dx + dy, (y + dy) - dx, z].isBlock)
-            {
-                if (!this[x + dx, y + dy, z + 1].isBlock && this[x + dx + dy, (y + dy) - dx, z + 1].Conn)
-                    return false;
-            }
-            else
-                if (this[x + dx + dy, (y + dy) - dx, z].isAir)
-                {
-                    if (this[x + dx + dy, (y + dy) - dx, z - 1].Conn)
-                        return false;
-                }
-                else
-                {
-                    return false;
-                }
-            if (this[(x + dx) - dy, y + dy + dx, z].isBlock) // Check the direction right to see if its a torch.  Not sure if I can use this
-                return this[x + dx, y + dy, z + 1].isBlock || !this[(x + dx) - dy, y + dy + dx, z + 1].Conn;
-            if (this[(x + dx) - dy, y + dy + dx, z].isAir)
-                return !this[(x + dx) - dy, y + dy + dx, z - 1].Conn;
-            else
-                return false;
-        }
-
-
-
-        /// <summary>
-        /// Tests if the location is valid
-        /// </summary>
-        /// <param name="x"></param>
-        /// <param name="y"></param>
-        /// <param name="z"></param>
-        /// <returns></returns>
-        public bool TestLoc(int x, int y, int z)
-        {
-            if (z < 0 || z >= lenZ || y < 0 || y >= lenY || x < 0 || x >= lenX)
-            { isSafe = false; return false; }
-            isSafe = false;
-            safeX = x; safeY = y; safeZ = z;
-            isSafe = true;
-
-            return true;
-        }
-        public void SetBlock(BlockVector v, eBlock b)
-        {
-            if (v.Z < 0 || v.Z >= lenZ || v.Y < 0 || v.Y >= lenY || v.X < 0 || v.X >= lenX)
+            if (pow <= data[v].Charge)
                 return;
-
-            data[v.X,v.Y,v.Z] = new Blocks(b);
-
+            data[v].Charge = pow;
+            if (pow > 0)
+                foreach(Direction d in Directions)
+                    followWireQ(v,d,pow -1);
         }
-        public Blocks GetBlock(BlockVector v)
+        public void newTick()
         {
-            if (v.Z < 0)
-                return Blocks.BLOCK;
-            if (v.Z >= lenZ || v.Y < 0 || v.Y >= lenY || v.X < 0 || v.X >= lenX)
-                return Blocks.AIR;
-
-            return data[v.X, v.Y, v.Z];
-        }
-        public void SetBlock(int x, int y, int z, eBlock b)
-        {
-            if (z < 0 || z >= lenZ || y < 0 || y >= lenY || x < 0 || x >= lenX)
-                return;
-
-            data[x, y, z] = new Blocks(b);
-
-        }
-        public Blocks GetBlock(int x, int y, int z)
-        {
-            if (z < 0)
-                return Blocks.BLOCK;
-            if (z >= lenZ || y < 0 || y >= lenY || x < 0 || x >= lenX)
-                return Blocks.AIR;
-
-            return data[x, y, z];
-        }
-        public void SetPower(BlockVector v,int p)
-        {
-            if (v.Z < 0 || v.Z >= lenZ || v.Y < 0 || v.Y >= lenY || v.X < 0 || v.X >= lenX)
-                return;
-
-            data[v.X, v.Y, v.Z].Power = p;
-        }
-        public void SetPower(int x, int y, int z,int p)
-        {
-            if (z < 0 || z >= lenZ || y < 0 || y >= lenY || x < 0 || x >= lenX)
-                return;
-
-            data[x, y, z].Power=p;
-        }
-        public int GetPower(BlockVector v)
-        {
-            if (v.Z < 0 || v.Z >= lenZ || v.Y < 0 || v.Y >= lenY || v.X < 0 || v.X >= lenX)
-                return 0;
-
-            return data[v.X, v.Y, v.Z].Power;
-        }
-        public int GetPower(int x, int y, int z)
-        {
-            if (z < 0 || z >= lenZ || y < 0 || y >= lenY || x < 0 || x >= lenX)
-                return 0;
-
-            return data[x, y, z].Power;
-        }
-
-        public void RotateMount(int x, int y, int z)
-        {
-            if (z < 0 || z >= lenZ || y < 0 || y >= lenY || x < 0 || x >= lenX)
-                return;
-
-            data[x, y, z].Rotate();
-        }
-
-        public Blocks this[int x, int y, int z]
-        {
-            get
-            {
-                if (z < 0)
-                    return Blocks.BLOCK;
-                if (z >= lenZ)
-                    return Blocks.AIR;
-                if (y < 0 || y >= lenY || x < 0 || x >= lenX)
-                     return Blocks.AIR;
-                safeX = x; safeY = y; safeZ = z;
-                return data[x, y, z];
-            }
-        }
-
-        private void followWire(BlockVector v, int p)
-        {
-            Blocks b = GetBlock(v);
-            if (p <= b.Power)
-                return;
-            SetPower(v, p);
-            if (p == 0)
-            {
-                return;
-            }
-            else
-            {
-                followWireQ(v.North, p - 1);
-                followWireQ(v.South, p - 1);
-                followWireQ(v.West, p - 1);
-                followWireQ(v.East, p - 1);
-                return;
-            }
-        }
-
-        private void followWireQ(BlockVector v, int p)
-        {
-            if (GetBlock(v).Type == eBlock.WIRE)
-                followWire(v, p);
-            else
-                if (GetBlock(v).isBlock)
-                {
-                    if (GetBlock(v.Up).Type == eBlock.WIRE && !GetBlock(v.Old).isBlock)
-                        followWire(v.Up, p);
-                }
-                else
-                    if (GetBlock(v.Down).Type == eBlock.WIRE)
-                        followWire(v.Down, p);
-        }
-
-        public void tick()
-        {
-
-
-            for (int z = 0; z < lenZ; z++)
-                for (int y = 0; y < lenY; y++)
-                    for (int x = 0; x < lenX; x++)
+            // Turn on all torches that are powered by a block, this is where we tick the repeater when I get to it
+            for (int x = 0; x < lenX; x++) for (int y = 0; y < lenY; y++) for (int z = 0; z < lenZ; z++)
                     {
                         BlockVector v = new BlockVector(x, y, z);
-                        Blocks b = data[x, y, z];
-                        if (b.Type == eBlock.TORCH)
-                        {
-                            switch (b.Mount)
-                            {
-                                case eMount.TOP: SetPower(v, GetPower(v.Down) < 16 ? 16 : 0); break;
-                                case eMount.SOUTH: SetPower(v, GetPower(v.South) < 16 ? 16 : 0); break;
-                                case eMount.NORTH: SetPower(v, GetPower(v.North) < 16 ? 16 : 0); break;
-                                case eMount.EAST: SetPower(v, GetPower(v.East) < 16 ? 16 : 0); break;
-                                case eMount.WEST: SetPower(v, GetPower(v.West) < 16 ? 16 : 0); break;
-                            }
+                        Block b = data[x, y, z];
+                        switch (b.ID)
+                        { // Check torches and count down button, pad timers.
+                            case BlockType.TORCH: // Power a torch from a powered block
+                                b.Source = data[v.Dir(b.Place)].Source;
+                                break;
+                            case BlockType.PREASUREPAD:
+                            case BlockType.BUTTON:
+                                if (b.Powered) b.Charge--;
+                                break;
                         }
-                        else
-                            if (b.CtrlOn && (b.Type == eBlock.BUTTON || b.Type == eBlock.PRESS))
-                                data[x, y, z].Power--;
-
-                        update();
                     }
-        }
-      
 
-        public void update()
+
+            updateT();
+
+        }
+        public void updateT()
         {
-            // Clear power, tick to torches.  Put in repeater in here
-            for (int z = 0; z < lenZ; z++)
-                for (int y = 0; y < lenY; y++)
-                    for (int x = 0; x < lenX; x++)
-                    {
-                        BlockVector v = new BlockVector(x,y,z);
-                        Blocks b = GetBlock(v);
-                        if (b.Type == eBlock.WIRE || b.Type == eBlock.DOORB)
-                            SetPower(v,0);
-                        else
-                            if (b.isBlock)
-                            {
-                                SetPower(v,0);
-                                if (GetBlock(v.Down).Powered && GetBlock(v.Down).Type == eBlock.TORCH)
-                                {
-                                    // A torch below a block powers the block
-                                    SetPower(v,17);
-                                }
-                                else
-                                {
-                                    // Check if there is a switch on the block and turn it on
-                                    if(GetBlock(v.North).isControl && GetBlock(v.North).Mount == eMount.NORTH && GetBlock(v).Powered) SetPower(v,17);
-                                    if(GetBlock(v.South).isControl && GetBlock(v.South).Mount == eMount.SOUTH && GetBlock(v).Powered) SetPower(v,17);
-                                    if(GetBlock(v.East).isControl && GetBlock(v.East).Mount == eMount.EAST && GetBlock(v).Powered) SetPower(v,17);
-                                    if(GetBlock(v.West).isControl && GetBlock(v.West).Mount == eMount.WEST && GetBlock(v).Powered) SetPower(v,17);
-                                    if(GetBlock(v.Up).isControl && GetBlock(v.Up).Mount == eMount.TOP && GetBlock(v).Powered) SetPower(v,17);
-                                }
-                            }
-
-                    }
-
-            for (int z = 0; z < lenZ; z++)
-                for (int y = 0; y < lenY; y++)
-                    for (int x = 0; x < lenX; x++)
-                    {
-                        BlockVector v = new BlockVector(x,y,z);
-                        Blocks b = GetBlock(v);
-                        if (b.Power >= (b.Type != eBlock.BUTTON && b.Type != eBlock.PRESS ? 16 : 1)
-                            && (b.Type == eBlock.TORCH || b.isControl || b.isBlock && b.Power == 17))
+            // Change this to be using a stack
+            // Clear all old power caculations and power the blocks for the next tick
+            for (int x = 0; x < lenX; x++) for (int y = 0; y < lenY; y++) for (int z = 0; z < lenZ; z++) 
+                {
+                        BlockVector v = new BlockVector(x, y, z);
+                        Block b = data[v];
+                        switch (b.ID)
                         {
-                            if (GetBlock(v.Up).Type == eBlock.WIRE) followWire(v.Up, 15);
-                            if (GetBlock(v.Down).Type == eBlock.WIRE) followWire(v.Down, 15);
-                            if (GetBlock(v.North).Type == eBlock.WIRE) followWire(v.North, 15);
-                            if (GetBlock(v.South).Type == eBlock.WIRE) followWire(v.South, 15);
-                            if (GetBlock(v.East).Type == eBlock.WIRE) followWire(v.East, 15);
-                            if (GetBlock(v.West).Type == eBlock.WIRE) followWire(v.West, 15);
+                            case BlockType.WIRE: b.Charge = 0; break;
+                            case BlockType.BLOCK:
+                                b.Source = false;
+                                if(data[v.Down].Source && data[v.Down].isTorch)
+                                    b.Source = true; // Block is powered by a torch
+                                 else 
+                                    foreach(Direction d in CompassDir)
+                                    {
+                                        Block t = data[v.Dir(d)];
+                                        if (t.isControl && t.Place == d && t.Source)
+                                            b.Source = true;
+                                    }
+                                
+                                break;
+                        }
+                }
+
+            // Power on all the wires
+            for (int x = 0; x < lenX; x++) for (int y = 0; y < lenY; y++) for (int z = 0; z < lenZ; z++)
+                    {
+                        BlockVector v = new BlockVector(x, y, z);
+                        Block b = data[v];
+                        switch (b.ID)
+                        {
+                            case BlockType.BUTTON:
+                            case BlockType.PREASUREPAD:
+                            case BlockType.TORCH:
+                                if (b.Powered)
+                                    SearchWire(v);
+                                break;
+                            case BlockType.BLOCK:
+                                if (b.Charge == 17)
+                                    SearchWire(v);
+                                break;
                         }
                     }
 
-
-
-            for (int z = 0; z < lenZ; z++)
-                for (int y = 0; y < lenY; y++)
-                    for (int x = 0; x < lenX; x++)
+            for (int x = 0; x < lenX; x++) for (int y = 0; y < lenY; y++) for (int z = 0; z < lenZ; z++)
                     {
-                        BlockVector v = new BlockVector(x,y,z);
-                        Blocks b = GetBlock(v);
-                        if ((b.isBlock && !b.Powered || b.Type == eBlock.DOORA)
-                            && (GetBlock(v.Up).Type == eBlock.WIRE && GetBlock(v.Up).Powered ||
-                            blockConnect(x, y, 0, 1, z, true) ||
-                            blockConnect(x, y, 0, -1, z, true) ||
-                            blockConnect(x, y, 1, 0, z, true) ||
-                            blockConnect(x, y, -1, 0, z, true)))
-                            data[x, y, z].Power = 16;
+                        BlockVector v = new BlockVector(x, y, z);
+                        Block b = data[v];
+                        if (b.isBlock && !b.Powered ||
+                            blockConnect(v, Direction.NORTH, true) ||
+                            blockConnect(v, Direction.SOUTH, true) ||
+                            blockConnect(v, Direction.EAST, true) ||
+                            blockConnect(v, Direction.WEST, true))
+                            b.Charge = 16;
 
                     }
 
         }
+        void SearchWire(BlockVector v)
+        {
+            foreach (Direction d in Directions)
+                if (data[v.Dir(d)].isWire)
+                    followWire(v.Dir(d), 15);
+        }
+        public void tick()
+        {
+            //lastTick = data.Copy();
+            for (int x = 0; x < lenX; x++) for (int y = 0; y < lenY; y++) for (int z = 0; z < lenZ; z++)
+                        if (!data[x,y,z].isAir) // lets make this quick and not worry about stuff not air.
+                        {
+                            BlockVector v = new BlockVector(x, y, z);
+                            Block b = data[x, y, z];
+                            bool isPowered = false;
+                            switch (b.ID)
+                            {
+                                case BlockType.TORCH:
+                                    switch (b.Place)
+                                    {
+                                        case Direction.DOWN:
+                                            if (z > 0) if (data[v.Down].Powered) isPowered = true; break;
+                                        case Direction.NORTH:
+                                            if (y > 0) if (data[v.North].Powered) isPowered = true; break;
+                                        case Direction.EAST:
+                                            if (x < lenX - 1) if (data[v.East].Powered) isPowered = true; break;
+                                        case Direction.SOUTH:
+                                            if (y < lenY - 1) if (data[v.South].Powered) isPowered = true; break;
+                                        case Direction.WEST:
+                                            if (x > 0) if (data[v.West].Powered) isPowered = true; break;
+                                    }
+                                    if (data[v].waitTick(isPowered)) update.Add(v);
+                                    break;
+
+                                case BlockType.REPEATER:
+                                    switch (b.Place)
+                                    {
+                                        case Direction.NORTH: // pointing north
+                                            if (y < lenY - 1)
+                                                if ((data[v.South].canBePoweredByRepeater(b.Place)) ||
+                                                    (data[v.South].canBePoweredByRepeaterTorch(getConnections(v.North), WireMask.North)))
+                                                    data[v].waitTick(true);
+                                            break;
+                                        case Direction.EAST:
+                                            if (x < lenX - 1)
+                                                if ((data[v.East].canBePoweredByRepeater(b.Place)) ||
+                                                        (data[v.East].canBePoweredByRepeaterTorch(getConnections(v.East), WireMask.East)))
+                                                    data[v].waitTick(true);
+                                            break;
+                                        case Direction.SOUTH:
+                                            if (y < lenY - 1)
+                                                if ((data[v.South].canBePoweredByRepeater(b.Place)) ||
+                                                        (data[v.South].canBePoweredByRepeaterTorch(getConnections(v.South), WireMask.East)))
+                                                    data[v].waitTick(true);
+                                            break;
+                                        case Direction.WEST:
+                                            if (x > 0)
+                                                if ((data[v.West].canBePoweredByRepeater(b.Place)) ||
+                                                       (data[v.West].canBePoweredByRepeaterTorch(getConnections(v.West), WireMask.East)))
+                                                    data[v].waitTick(true);
+                                            break;
+                                    }
+                                    update.Add(v);
+                                    break;
+                                case BlockType.BUTTON:
+                                case BlockType.PREASUREPAD:
+                                    if (data[x, y, z].waitTick(false))
+                                        update.Add(v);
+                                    break;
+
+                            }
+                        }
+
+        }
+
+        public void noTick()
+        {
+            data.ClearChanged();
+            for (int x = 0; x < lenX; x++) for (int y = 0; y < lenY; y++) for (int z = 0; z < lenZ; z++)
+                        if (!data[x, y, z].isBlock && data[x, y, z].Source) // look for sources!
+                        {
+                            source.Add(new BlockVector(x, y, z));
+                            update.Add(new BlockVector(x, y, z));
+                        }
+                        else if (data[x, y, z].Powered) // set charge to temp to zero?
+                        {
+                            data[x, y, z].Charge = 0;
+                            update.Add(new BlockVector(x, y, z));
+                        }
+
+
+            //spreading the power
+            for (int h = 0; h < 20; h++)
+            { //runs long enough
+                List<BlockVector> now = new List<BlockVector>(source); // currently under investgation
+                source.Clear();
+                foreach (BlockVector v in now)
+                {
+                    Block block = data[v];
+                    switch (block.ID)
+                    {
+                        case BlockType.BLOCK:
+                            if (block.Charge == 16) BlockPower(v); break; //directly powered
+                        case BlockType.WIRE: WirePower(v); break;
+                        case BlockType.TORCH: TorchPower(v); break;
+                        case BlockType.REPEATER: RepeaterPower(v); break;
+                        case BlockType.BUTTON:
+                        case BlockType.PREASUREPAD:
+                        case BlockType.LEVER: InputPower(v); break;
+                    }
+                }
+
+
+            }
+
+            //updates all not similar to before
+            for (int i = 0; i < update.Count; i++)
+                if (data[update[i]].isWire)  //only wire will can be bypassed
+                    if (data[update[i]].changedCharge)
+                    {
+                        data[update[i]].ClearChanged();
+                        update.RemoveAt(i); i--; 
+                    }
+        
+
+            // We can clone update and have the GUI only update those blocks.
+
+            update.Clear();
+            source.Clear();
 
 
 
+            //GUI.updateBlocks(xArray, yArray, zArray);
+
+        }
+
+        public bool WireConn(BlockVector v, Direction dir)
+        {
+            // Fix for repeater
+            BlockVector n = v.Dir(dir); // Cache the current direction we are facing
+            if (data[n].isAir) return data[n.Down].canConnect;// if 
+            if (data[n].isBlock) return !data[v.Up].isBlock && data[n.Up].canConnect;
+            else
+                return true;
+           
+        }
+    
+        public bool getSingleConnection(BlockVector v, Direction dir)
+        {
+                BlockVector n = v.Dir(dir);
+                if (data[n].isAir && data[n.Down].canConnect) return true;
+                if(data[n].canConnect) return true;
+                if(data[v.Up].isAir && data[n].isBlock && data[n.Up].canConnect) return true;
+                return false;
+        }
+        bool blockConnect(BlockVector v, Direction d, bool pow)
+        {
+            BlockVector n = v.Dir(d);
+            BlockVector t1 = n.RotateLeft(d);
+            BlockVector t2 = n.RotateRight(d);
+            if (!data[n].isWire || !data[n].Powered && pow)
+                return false ;
+            if (data[t1].isBlock)
+            {
+                if (!data[n].isBlock && data[t1.Up].canConnect)
+                    return false;
+            }
+            else if (data[t1].isAir)
+            {
+                if (data[t1.Down].canConnect)
+                    return false;
+            }
+            if(data[t2].isBlock)
+                return data[n.Up].isBlock || !data[t2.Up].canConnect;
+            if(data[t2].isAir)
+                return !data[t2.Down].canConnect;
+            else
+                return false;
+        }
+
+
+
+        public WireMask getConnections(BlockVector v)
+        { //note: 5. boolean value is showing, if it should power blocks
+            // This is only on blocks DUH
+            if (!data[v].isWire)
+                return WireMask.NotConnected;
+
+            WireMask o = WireMask.NotConnected;
+            int no = 0;
+            if(getSingleConnection(v,Direction.NORTH)) { o |= WireMask.North; no++; }
+            if(getSingleConnection(v,Direction.SOUTH)) { o |= WireMask.South; no++; }
+            if(getSingleConnection(v,Direction.EAST)) { o |= WireMask.East; no++; }
+            if(getSingleConnection(v,Direction.WEST)) { o |= WireMask.West; no++; }
+            //in special cases
+  
+            switch (no)
+            {
+                case 0: // Not connected
+                    return WireMask.North | WireMask.South | WireMask.East | WireMask.West | WireMask.BlockPower;
+                case 1: // One Connected
+                    switch (o)
+                    {
+                        case WireMask.North: o |= WireMask.South; break;
+                        case WireMask.South: o |= WireMask.North; break;
+                        case WireMask.West: o |= WireMask.East; break;
+                        case WireMask.East: o |= WireMask.West; break;
+                    }
+                    o |= WireMask.BlockPower;
+                    break;
+                case 2:
+                    if ((o & WireMask.North & WireMask.South) == (WireMask.North & WireMask.South) ||
+                    (o & WireMask.East & WireMask.West) == (WireMask.East & WireMask.West))
+                        o |= WireMask.BlockPower;
+                    break;
+            }
+            return o;
+
+        }
+        
+
+        private void TorchPower(BlockVector v)
+        {
+            foreach (Direction d in Directions)
+                if(d == Direction.UP)
+                    Power(v, d, BlockType.BLOCK, 16);
+                else
+                    Power(v, d, BlockType.WIRE, 15);
+        }
+
+        private void RepeaterPower(BlockVector v)
+        {
+            Power(v, data[v].Place, BlockType.WIRE, 15);
+            Power(v, data[v].Place, BlockType.BLOCK, 16);
+        }
+
+        private void InputPower(BlockVector v)
+        {
+            Power(v, data[v].Place, BlockType.BLOCK, 16);
+            foreach (Direction d in Directions)
+                if(d!=Direction.UP)
+                    Power(v, d, BlockType.WIRE, 15);
+        }
+        private void BlockPower(BlockVector v)
+        {
+            foreach (Direction d in Directions)
+                Power(v, d, BlockType.WIRE, 15);
+        }
+        private void WirePower(BlockVector v)
+        {
+            WireMask c = getConnections(v);
+            Block current = data[v];
+            //up
+            if (v.Z < lenZ)
+                if (!data[v.Up].isBlock)
+                { //can be lead up
+                    if (((c & WireMask.North) == WireMask.North) && (v.Y > 0))  // Connected north and not a wall
+                        if (current.Charge - 1 > data[v.North.Up].Charge)
+                            Power(v.Up, Direction.NORTH, BlockType.WIRE, current.Charge - 1);
+
+                    if (((c & WireMask.West) == WireMask.West) && (v.X > 0))  // Connected north and not a wall
+                        if (current.Charge - 1 > data[v.West.Up].Charge)
+                            Power(v.Up, Direction.WEST, BlockType.WIRE, current.Charge - 1);
+
+                    if (((c & WireMask.South) == WireMask.South) && (v.Y < lenY - 1))  // Connected north and not a wall
+                        if (current.Charge - 1 > data[v.South.Up].Charge)
+                            Power(v.Up, Direction.SOUTH, BlockType.WIRE, current.Charge - 1);
+
+                    if (((c & WireMask.East) == WireMask.East) && (v.X < lenX - 1))  // Connected north and not a wall
+                        if (current.Charge - 1 > data[v.East.Up].Charge)
+                            Power(v.Up, Direction.EAST, BlockType.WIRE, current.Charge - 1);
+                }
+
+            //down
+            if (v.Z > 0)
+            {
+                if (current.Charge > data[v.Down].Charge) // If block directly under
+                    Power(v, Direction.DOWN, BlockType.BLOCK, data[v].Charge);
+
+
+                if (((c & WireMask.North) == WireMask.North) && (v.Y > 0))  // Connected north and not a wall
+                    if (!data[v.North].isBlock && current.Charge - 1 > data[v.North.Down].Charge )
+                        Power(v.Down, Direction.NORTH, BlockType.WIRE, current.Charge - 1);
+
+                if ( ((c & WireMask.West) == WireMask.West) && (v.X > 0))  // Connected north and not a wall
+                    if (!data[v.West].isBlock && current.Charge - 1 > data[v.West.Down].Charge)
+                        Power(v.Up, Direction.WEST, BlockType.WIRE, current.Charge - 1);
+
+                if ( ((c & WireMask.South) == WireMask.South) && (v.Y < lenY - 1))  // Connected north and not a wall
+                    if (!data[v.South].isBlock && current.Charge - 1 > data[v.South.Down].Charge)
+                        Power(v.Up, Direction.SOUTH, BlockType.WIRE, current.Charge - 1);
+
+                if ( ((c & WireMask.East) == WireMask.East) && (v.X < lenX - 1))  // Connected north and not a wall
+                    if (!data[v.East].isBlock && current.Charge - 1 > data[v.East.Down].Charge)
+                        Power(v.Up, Direction.EAST, BlockType.WIRE, current.Charge - 1);
+            }
+
+
+
+            //same level
+            if (((c & WireMask.North) == WireMask.North) && (v.Y > 0))
+            {// Connected north and not a wall
+                if (current.Charge - 1 > data[v.North].Charge)
+                    Power(v, Direction.NORTH, BlockType.WIRE, current.Charge - 1);
+                if ((c & WireMask.BlockPower) == WireMask.BlockPower && (current.Charge > data[v.North].Charge))
+                    Power(v, Direction.NORTH, BlockType.BLOCK, current.Charge);
+            }
+            if (((c & WireMask.West) == WireMask.West) && (v.X > 0))
+            { // Connected north and not a wall
+                if (current.Charge - 1 > data[v.West].Charge)
+                    Power(v, Direction.WEST, BlockType.WIRE, current.Charge - 1);
+                if ((c & WireMask.BlockPower) == WireMask.BlockPower && (current.Charge > data[v.West].Charge))
+                    Power(v, Direction.NORTH, BlockType.BLOCK, current.Charge);
+            }
+            if (((c & WireMask.South) == WireMask.South) && (v.Y < lenY - 1))
+            { // Connected north and not a wall
+                if (current.Charge - 1 > data[v.South].Charge)
+                    Power(v, Direction.SOUTH, BlockType.WIRE, current.Charge - 1);
+                if ((c & WireMask.BlockPower) == WireMask.BlockPower && (current.Charge > data[v.South].Charge))
+                    Power(v, Direction.NORTH, BlockType.BLOCK, current.Charge);
+            }
+            if (((c & WireMask.East) == WireMask.East) && (v.Y < lenX - 1))
+            {  // Connected north and not a wall
+                if (current.Charge - 1 > data[v.East].Charge)
+                    Power(v, Direction.EAST, BlockType.WIRE, current.Charge - 1);
+                if ((c & WireMask.BlockPower) == WireMask.BlockPower && (current.Charge > data[v.East].Charge))
+                    Power(v, Direction.NORTH, BlockType.BLOCK, current.Charge);
+            }
+
+        }
+
+        private bool isValid(BlockVector v, Direction dir)
+        {
+            switch(dir)
+            {
+                case Direction.DOWN: return v.Z == 0;
+                case Direction.NORTH: return v.Y == 0;
+                case Direction.EAST: return v.X == lenX - 1;
+                case Direction.SOUTH: return v.Y == lenY - 1;
+                case Direction.WEST: return v.X == 0;
+                case Direction.UP: return v.Z == lenZ - 1;
+                default:
+                    return false;
+            }
+        }
+        private BitArray isValid(BlockVector v)
+        {
+            return isValid(v.X, v.Y, v.Z);
+        }
+        private BitArray isValid(int x, int y, int z)
+        {
+            BitArray end = new BitArray(6);
+            end[0]= z == 0;
+            end[1]= y == 0;
+            end[2]= x == lenX - 1;
+            end[3]=y == lenY - 1;
+            end[4]= x == 0;
+            end[5] = z == lenZ - 1;
+            return end;
+        }
+     /*   private DirectionMask isValid(BlockVector v)
+        {
+            DirectionMask d;
+            d |= z == 0?DirectionMask.DOWN;
+            d |= y == 0?Direction.EAST;
+            d |= x == lenX - 1?DirectionMask.SOUTH;
+            d |= y == lenY - 1?DirectionMask.WEST;
+            d |= x == 0?DirectionMask.;
+            d |= z == lenZ - 1?;
+
+        }*/
+
+        private void Power(BlockVector v, Direction dir, BlockType target, int charge)
+        {
+            if (isValid(v,dir))
+            {
+                BlockVector t = v.Dir(dir);
+                if (data[t].ID == target)
+                {
+                    data[t].Charge = charge;
+                    source.Add(v);
+                    update.Add(v);
+                }
+            }
+        }
+
+
+       
+        public int Loc(int x, int y, int z)
+        {
+            if (z < 0 || z >= lenZ || y < 0 || y >= lenY || x < 0 || x >= lenX)
+                return -1;
+
+            return z * lenX * lenY + lenY * y + x;
+        }
+        public int Loc(BlockVector v)
+        {
+            if (v.Z < 0 || v.Z >= lenZ || v.Y < 0 || v.Y >= lenY || v.X < 0 || v.X >= lenX)
+                return -1;
+
+            return v.Z * lenX * lenY + lenX * v.Y + v.X;
+        }
+
+        public void addBlock(int x, int y, int z)
+        {
+            source.Add(new BlockVector(x, y, z));
+            update.Add(new BlockVector(x, y, z));
+        }
 
     }
-
-
 }
 
 
