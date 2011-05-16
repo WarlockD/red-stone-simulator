@@ -86,15 +86,35 @@ namespace Redstone_Simulator
           //  BlockVector.SetLimit(X,Y,Z);
             source = new List<BlockVector>();
             update = new List<BlockVector>();
+            
             data = new Blocks(X, Y, Z);
             lenX = X; lenY = Y; lenZ = Z;
        
+        }
+        public BlockSim(string fileName)
+        {
+            source = new List<BlockVector>();
+            update = new List<BlockVector>();
+            data = FileLoader.Load(fileName);
+           
+            lenX = data.X;
+            lenY = data.Y;
+            lenZ = data.Z;
+            setAllConnections();
         }
         public void setConnections(BlockVector v)
         {
             data[v].Mask = getConnections(v);
             foreach (Direction d in CompassDir)
                 data[v.Dir(d)].Mask = getConnections(v.Dir(d));
+        }
+        public void setAllConnections()
+        {
+            for (int z = 0; z < lenZ; z++)
+                for (int y = 0; y < lenY; y++)
+                    for (int x = 0; x < lenX; x++)
+                        setConnections(new BlockVector(x,y,z));
+
         }
         public Block this[int x, int y, int z]
         {
