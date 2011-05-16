@@ -8,7 +8,53 @@ using System.Collections;
 
 namespace Redstone_Simulator
 {
-    
+    public struct BlockNode :IEquatable<BlockNode>,IEquatable<BlockVector>,IEquatable<Block>
+    {
+        public Block B { get; internal set; }
+        public BlockVector V { get; internal set; }
+        public BlockNode(Block B, BlockVector V) : this() { this.B = B; this.V = V; }
+        public BlockNode(BlockNode N, BlockVector V) : this() { this.B = N.B; this.V = V; }
+        public BlockNode(BlockNode N) : this() { this.B = N.B; this.V = N.V; }
+        public override bool Equals(object obj)
+        {
+            if (obj is BlockNode)
+                return Equals((BlockNode)obj);
+
+            return false;
+        }
+        public static   bool operator ==(BlockNode a, BlockNode b) { return a.Equals(b); }
+        public static   bool operator ==(BlockNode a, BlockVector b) { return a.Equals(b); }
+        public static  bool operator ==(BlockNode a, Block b) { return a.Equals(b); }
+        public static  bool operator !=(BlockNode a, BlockNode b) { return !(a == b); }
+        public static  bool operator !=(BlockNode a, BlockVector b) { return !(a == b); }
+        public static  bool operator !=(BlockNode a, Block b) { return !(a == b); }
+        public bool Equals(BlockNode n)
+        {
+            return n.V == this.V && this.B == n.B;
+        }
+        public bool Equals(Block b)
+        {
+            return this.B == b;
+        }
+        public bool Equals(BlockVector v)
+        {
+            return this.V == v;
+        }
+        public override int GetHashCode()
+        {
+            return base.GetHashCode() ^ B.GetHashCode() ^ V.GetHashCode();
+        }
+        public override string ToString()
+        {
+            return V.ToString() + " * " + B.ToString();
+        }
+        public bool isMountedOn(BlockNode n)
+        {
+            if (this.B.canMount && this.B.isBlock)
+                return this.V.Flip(n.B.Place) == V;
+            return false;
+        }
+    }
     
     public class BlockSim
     {
@@ -89,7 +135,7 @@ namespace Redstone_Simulator
                 return;
             data[v].Charge = pow;
             if (pow > 0)
-                foreach(Direction d in Directions)
+                foreach(Direction d in CompassDir)
                     followWireQ(v,d,pow -1);
         }
         public void newTick()
@@ -101,8 +147,13 @@ namespace Redstone_Simulator
                         Block b = data[x, y, z];
                         switch (b.ID)
                         { // Check torches and count down button, pad timers.
-                            case BlockType.TORCH: // Power a torch from a powered block
-                                b.Source = data[v.Dir(b.Place)].Source;
+                            case BlockType.BLOCK:
+                                foreach(Direction d in Directions)
+                                    if(!(d == Direction.DOWN))
+                                        if(data[v.Dir(d)].isTorch)
+                                            data[v.Dir(d)].Powered = !b.Source;
+                          //  case BlockType.TORCH: // Power a torch from a powered block
+                           //     b.Powered = !data[v.Flip(b.Place)].Source;
                                 break;
                             case BlockType.PREASUREPAD:
                             case BlockType.BUTTON:
@@ -118,26 +169,22 @@ namespace Redstone_Simulator
         public void updateT()
         {
             // Change this to be using a stack
-            // Clear all old power caculations and power the blocks for the next tick
+            // Clear all wires and torches, power blocks by hard power (switches, or under torch)
             for (int x = 0; x < lenX; x++) for (int y = 0; y < lenY; y++) for (int z = 0; z < lenZ; z++) 
                 {
                         BlockVector v = new BlockVector(x, y, z);
                         Block b = data[v];
                         switch (b.ID)
                         {
-                            case BlockType.WIRE: b.Charge = 0; break;
+                            case BlockType.WIRE: b.Powered = false; break;
                             case BlockType.BLOCK:
                                 b.Source = false;
-                                if(data[v.Down].Source && data[v.Down].isTorch)
+                                if(data[v.Down].Powered && data[v.Down].isTorch)
                                     b.Source = true; // Block is powered by a torch
-                                 else 
-                                    foreach(Direction d in CompassDir)
-                                    {
-                                        Block t = data[v.Dir(d)];
-                                        if (t.isControl && t.Place == d && t.Source)
-                                            b.Source = true;
-                                    }
-                                
+                                break;
+                            case BlockType.LEVER:
+                                if (b.Powered)
+                                    data[v.Flip(b.Place)].Source = true;
                                 break;
                         }
                 }
@@ -156,8 +203,8 @@ namespace Redstone_Simulator
                                     SearchWire(v);
                                 break;
                             case BlockType.BLOCK:
-                                if (b.Charge == 17)
-                                    SearchWire(v);
+                                //if (b.Charge == 17)
+                                 //   SearchWire(v);
                                 break;
                         }
                     }
@@ -166,19 +213,20 @@ namespace Redstone_Simulator
                     {
                         BlockVector v = new BlockVector(x, y, z);
                         Block b = data[v];
-                        if (b.isBlock && !b.Powered ||
-                            blockConnect(v, Direction.NORTH, true) ||
-                            blockConnect(v, Direction.SOUTH, true) ||
-                            blockConnect(v, Direction.EAST, true) ||
-                            blockConnect(v, Direction.WEST, true))
-                            b.Charge = 16;
-
+                        if (b.isBlock && !b.Source)
+                            foreach(Direction d in Directions)
+                                if(!(d==Direction.DOWN))
+                                {
+                                    Block c = data[v.Dir(d)];
+                                    if(c.isWire && c.Powered && c.Mask.HasFlag(WireMask.BlockPower))
+                                        b.Source = true;
+                                }
                     }
 
         }
         void SearchWire(BlockVector v)
         {
-            foreach (Direction d in Directions)
+            foreach (Direction d in CompassDir)
                 if (data[v.Dir(d)].isWire)
                     followWire(v.Dir(d), 15);
         }
@@ -197,15 +245,15 @@ namespace Redstone_Simulator
                                     switch (b.Place)
                                     {
                                         case Direction.DOWN:
-                                            if (z > 0) if (data[v.Down].Powered) isPowered = true; break;
+                                             if (data[v.Down].Powered) isPowered = true; break;
                                         case Direction.NORTH:
-                                            if (y > 0) if (data[v.North].Powered) isPowered = true; break;
+                                             if (data[v.North].Powered) isPowered = true; break;
                                         case Direction.EAST:
-                                            if (x < lenX - 1) if (data[v.East].Powered) isPowered = true; break;
+                                            if (data[v.East].Powered) isPowered = true; break;
                                         case Direction.SOUTH:
-                                            if (y < lenY - 1) if (data[v.South].Powered) isPowered = true; break;
+                                            if (data[v.South].Powered) isPowered = true; break;
                                         case Direction.WEST:
-                                            if (x > 0) if (data[v.West].Powered) isPowered = true; break;
+                                             if (data[v.West].Powered) isPowered = true; break;
                                     }
                                     if (data[v].waitTick(isPowered)) update.Add(v);
                                     break;

@@ -15,6 +15,7 @@ namespace Redstone_Simulator
         Image stopImage;
         bool running = false;
         int  ticks = 0;
+        Timer time;
         void MakeIcons()
         {
             goImage = new Bitmap(16, 16);
@@ -34,6 +35,9 @@ namespace Redstone_Simulator
             this.blockView.StatusStrip = this.mainStatusStrip;
             this.blockView.select = blockSelect;
             this.toolStripButton1.Image = goImage;
+            time = new Timer();
+            time.Tick += new EventHandler(time_Tick);
+            time.Interval = 500;
         }
 
         void  blockView_ChangeStrip(object s, myStatusStripEventArgs e)
@@ -101,6 +105,7 @@ namespace Redstone_Simulator
             {
                 running = false;
                 toolStripButton1.Image = goImage;
+                time.Stop();
             }
             else
             {
@@ -108,8 +113,17 @@ namespace Redstone_Simulator
                 toolStripButton1.Image = stopImage;
                 ticks = 0;
                 mainStatusStrip.setTicks(ticks);
+                time.Start();
             }
 
+        }
+
+        void time_Tick(object sender, EventArgs e)
+        {
+            ticks++;
+            blockView.currentSim.newTick();
+            mainStatusStrip.setTicks(ticks);
+            blockView.Refresh();
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e)
@@ -118,8 +132,10 @@ namespace Redstone_Simulator
           //  blockView.currentSim.tick();
           //  blockView.currentSim.noTick();
             blockView.currentSim.newTick();
+           // blockView.currentSim.tick();
+           // blockView.currentSim.noTick();
             mainStatusStrip.setTicks(ticks);
-            blockView.Invalidate();
+            blockView.Refresh();
         }
     }
 }

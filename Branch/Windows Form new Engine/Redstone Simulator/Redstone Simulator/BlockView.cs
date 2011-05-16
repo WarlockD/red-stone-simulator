@@ -169,8 +169,9 @@ namespace Redstone_Simulator
                     case System.Windows.Forms.MouseButtons.Right:
                         if (currentSim[currentLoc].isControl)
                         {
-                            currentSim[currentLoc].Charge = 16;
+                            currentSim[currentLoc].Powered = !currentSim[currentLoc].Powered;
                             Display.Invalidate();
+                            currentSim.updateT();
                         }
                         break;
             }
@@ -234,11 +235,12 @@ namespace Redstone_Simulator
             }
             else
             {
-                Block b = new Block(b.ID);
-                if(b.ID == BlockType.BUTTON)
-                currentSim[v].ID = b.ID;
+                Block t = new Block(b);
+     
+                currentSim[v].ID = t.ID;
                 currentSim.setConnections(v);
             }
+            currentSim.updateT();
             Display.Refresh();
         }
 
