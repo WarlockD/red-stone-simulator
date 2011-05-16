@@ -46,6 +46,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="addRowsColumnsResult.cs" />
     <Compile Include="BlockArt.cs" />
     <Compile Include="BlockDraw.cs" />
     <Compile Include="Blocks.cs" />
@@ -70,6 +71,12 @@
     <Compile Include="Form1.Designer.cs">
       <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
+    <Compile Include="frmAddRowsCols.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAddRowsCols.designer.cs">
+      <DependentUpon>frmAddRowsCols.cs</DependentUpon>
+    </Compile>
     <Compile Include="myStatusStrip.cs">
       <SubType>Component</SubType>
     </Compile>
@@ -84,6 +91,9 @@
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmAddRowsCols.resx">
+      <DependentUpon>frmAddRowsCols.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
