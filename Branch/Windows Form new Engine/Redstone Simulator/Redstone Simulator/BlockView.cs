@@ -212,7 +212,8 @@ namespace Redstone_Simulator
 
         public BlockView()
         {
-            currentSim = new BlockSim(@"C:\Users\Paul Bruner\Documents\MC14500bv6.schematic");
+           // currentSim = new BlockSim(@"C:\Users\Paul Bruner\Documents\MC14500bv6.schematic");
+            currentSim = new BlockSim(30, 30, 5);
             DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
      
             //this.DoubleBuffered = true;

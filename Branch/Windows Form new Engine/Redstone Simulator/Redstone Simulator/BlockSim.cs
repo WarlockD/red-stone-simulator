@@ -93,14 +93,16 @@ namespace Redstone_Simulator
         }
         public BlockSim(string fileName)
         {
+           
+           
             source = new List<BlockVector>();
             update = new List<BlockVector>();
-            data = FileLoader.Load(fileName);
+           // data = FileLoader.Load(fileName);
            
-            lenX = data.X;
-            lenY = data.Y;
-            lenZ = data.Z;
-            setAllConnections();
+          //  lenX = data.X;
+         //   lenY = data.Y;
+          //  lenZ = data.Z;
+          //  setAllConnections();
         }
         public void setConnections(BlockVector v)
         {
