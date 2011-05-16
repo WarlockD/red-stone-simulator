@@ -43,6 +43,7 @@ namespace Redstone_Simulator
         Block[] data;
         int totalCount;
         int lenX, lenY, lenZ;
+        public int Length { get { return lenX * lenY * lenZ; } }
         public int X { get { return lenX; } }
         public int Y { get { return lenY; } }
         public int Z { get { return lenZ; } }
