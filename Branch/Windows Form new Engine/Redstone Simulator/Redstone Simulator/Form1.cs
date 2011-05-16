@@ -139,6 +139,13 @@ namespace Redstone_Simulator
             blockView.Refresh();
         }
 
+
+        private void Form1_KeyPress(object sender, KeyPressEventArgs e)
+        {
+           
+        }
+
+
         private void tsbZoomIn_Click(object sender, EventArgs e)
         {
             this.blockView.zoomIn();
@@ -195,6 +202,7 @@ namespace Redstone_Simulator
                     this.blockView.addNRowToTop(result.TopRows);
             }
         }
+
 
     }
 }

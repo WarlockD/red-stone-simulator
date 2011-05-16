@@ -40,7 +40,12 @@
             this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
+
             this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
+            this.blockView = new Redstone_Simulator.BlockView();
+            this.blockSelect = new Redstone_Simulator.BlockSelect();
+            this.mainStatusStrip = new Redstone_Simulator.BlockStatusStrip();
+
             this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbZoomIn = new System.Windows.Forms.ToolStripButton();
             this.tsbZoomOut = new System.Windows.Forms.ToolStripButton();
@@ -151,6 +156,7 @@
             this.toolStripButton1.Text = "toolStripButton1";
             this.toolStripButton1.Click += new System.EventHandler(this.toolStripButton1_Click);
             // 
+
             // toolStripButton2
             // 
             this.toolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
@@ -161,6 +167,44 @@
             this.toolStripButton2.Text = "Tick";
             this.toolStripButton2.Click += new System.EventHandler(this.toolStripButton2_Click);
             // 
+            // blockView
+            // 
+            this.blockView.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.blockView.AutoScroll = true;
+            this.blockView.AutoScrollMinSize = new System.Drawing.Size(813, 813);
+            this.blockView.Location = new System.Drawing.Point(0, 52);
+            this.blockView.Margin = new System.Windows.Forms.Padding(9);
+            this.blockView.MinimumSize = new System.Drawing.Size(271, 271);
+            this.blockView.Name = "blockView";
+            this.blockView.Size = new System.Drawing.Size(1105, 488);
+            this.blockView.StatusStrip = null;
+            this.blockView.TabIndex = 6;
+            this.blockView.TabStop = false;
+            // 
+            // blockSelect
+            // 
+            this.blockSelect.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Bottom | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.blockSelect.BlockScale = 5F;
+            this.blockSelect.Location = new System.Drawing.Point(0, 540);
+            this.blockSelect.MaximumSize = new System.Drawing.Size(725, 50);
+            this.blockSelect.MinimumSize = new System.Drawing.Size(725, 50);
+            this.blockSelect.Name = "blockSelect";
+            this.blockSelect.Size = new System.Drawing.Size(725, 50);
+            this.blockSelect.TabIndex = 5;
+            // 
+            // mainStatusStrip
+            // 
+            this.mainStatusStrip.BackColor = System.Drawing.Color.White;
+            this.mainStatusStrip.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
+            this.mainStatusStrip.Location = new System.Drawing.Point(0, 593);
+            this.mainStatusStrip.Name = "mainStatusStrip";
+            this.mainStatusStrip.Size = new System.Drawing.Size(1105, 23);
+            this.mainStatusStrip.TabIndex = 0;
+            // 
+
             // toolStripSeparator1
             // 
             this.toolStripSeparator1.Name = "toolStripSeparator1";
@@ -257,6 +301,7 @@
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
+            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Form1_KeyPress);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseClick);
             this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseMove);
             this.Resize += new System.EventHandler(this.Form1_Resize);
