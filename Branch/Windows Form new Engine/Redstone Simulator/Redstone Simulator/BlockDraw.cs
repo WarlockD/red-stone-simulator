@@ -97,7 +97,7 @@ namespace Redstone_Simulator
             if (s.Mask.HasFlag(WireMask.South)) g.FillRectangle(b, r.X + 3, r.Y + 3, 2, 5);
             if (s.Mask.HasFlag(WireMask.East)) g.FillRectangle(b, r.X + 3, r.Y + 3, 5, 2);
             if (s.Mask.HasFlag(WireMask.West)) g.FillRectangle(b, r.X, r.Y + 3, 5, 2);
-            if (s.Mask ==0) g.FillRectangle(b, r.X + 2, r.Y + 2, 4, 4);
+           // if (s.Mask ==0) g.FillRectangle(b, r.X + 2, r.Y + 2, 4, 4);
         }
         public static void gDrawBlock(Graphics g, Rectangle r, BlockDrawSettings b)
         {
@@ -121,6 +121,7 @@ namespace Redstone_Simulator
                     break;
                 case BlockType.REPEATER:
                     Point[] Arrow = new Point[8];
+                    Rectangle t =r;
                     int tick = b.B.Ticks;
                     bool rpow = b.On;
                     //b.Mount = 
@@ -129,37 +130,38 @@ namespace Redstone_Simulator
                         // There a better, fasterway for a vector arrow?
                         case Direction.NORTH:
                             for (int i = 0; i < 8; i++) { Arrow[i] = northArrow[i]; Arrow[i].Offset(r.Location); }
-                            r = new Rectangle(r.X + 3, r.Y + 3, 2, 1);
-                            r.Offset(0, tick);
+                            
+                            t = new Rectangle(r.X + 3, r.Y + 3, 2, 1);
+                            t.Offset(0, tick);
                             break;
                         case Direction.SOUTH:
                             for (int i = 0; i < 8; i++) { Arrow[i] = southArrow[i]; Arrow[i].Offset(r.Location); }
-                            r = new Rectangle(r.X + 3, r.Y + 4, 2, 1);
-                            r.Offset(0, -tick);
+                            t = new Rectangle(r.X + 3, r.Y + 4, 2, 1);
+                            t.Offset(0, -tick);
                             break;
                         case Direction.WEST:
                             for (int i = 0; i < 8; i++) { Arrow[i] = westArrow[i]; Arrow[i].Offset(r.Location); }
-                            r = new Rectangle(r.X + 4, r.Y + 3, 1, 2);
-                            r.Offset(-tick, 0);
+                            t = new Rectangle(r.X + 4, r.Y + 3, 1, 2);
+                            t.Offset(-tick, 0);
                             break;
                         case Direction.EAST:
                             for (int i = 0; i < 8; i++) { Arrow[i] = eastArrow[i]; Arrow[i].Offset(r.Location); }
-                            r = new Rectangle(r.X + 3, r.Y + 3, 1, 2);
-                            r.Offset(tick, 0);
+                            t = new Rectangle(r.X + 3, r.Y + 3, 1, 2);
+                            t.Offset(tick, 0);
                             break;
                     }
                     g.FillPolygon(BlockColors.bRepeater, Arrow);
                     // If its powered we light it up, if its not powered we don't need to display a single tick
                     if (rpow & tick == 0)
-                        g.FillRectangle(BlockColors.bWireOn, r);
+                        g.FillRectangle(BlockColors.bWireOn, t);
                     else
                         if (tick != 0)
                             if (rpow)
-                                g.FillRectangle(BlockColors.bWireOn, r);
+                                g.FillRectangle(BlockColors.bWireOn, t);
                             else
-                                g.FillRectangle(BlockColors.bWireOff, r);
+                                g.FillRectangle(BlockColors.bWireOff, t);
 
-
+                        g.DrawString(((int)(b.B.Delay/2)).ToString(), new Font("Courier", 4), BlockColors.bDoor, (r.Right+r.Left)/2, (r.Top+r.Bottom)/2);
                     break;
                 case BlockType.LEVER:
                     switch (b.B.Place)
@@ -178,8 +180,8 @@ namespace Redstone_Simulator
                     {
                         case Direction.SOUTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y, 2, 5); break;
                         case Direction.NORTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 2, 5); break;
-                        case Direction.EAST: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 5, 2); break;
-                        case Direction.WEST: g.FillRectangle(BlockColors.bLever, r.X, r.Y + 3, 5, 2); break;
+                    //    case Direction.EAST: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 5, 2); break;
+                   //     case Direction.WEST: g.FillRectangle(BlockColors.bLever, r.X, r.Y + 3, 5, 2); break;
                     }
 
                     if (b.On)
@@ -269,7 +271,7 @@ namespace Redstone_Simulator
 
             }
             if (b.Fog) g.FillRectangle(BlockColors.bFog, r);
-            if(!b.B.isAir)
+            if(!b.B.isAir && !b.B.isRepeater)
                 g.DrawString(b.B.Charge.ToString(), new Font("Courier",4),BlockColors.bDoor, r.X,r.Y);
         }
 
