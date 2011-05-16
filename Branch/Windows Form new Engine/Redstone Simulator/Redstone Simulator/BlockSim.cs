@@ -444,6 +444,36 @@ namespace Redstone_Simulator
 
         }
         
+        public BlockType GetBlockType(int x, int y, int z)
+        {
+            if (((x >= this.X) || (x < 0))
+                || ((y >= this.Y) || (y < 0))
+                || ((z >= this.Z) || (z < 0)))
+            {
+                throw new ArgumentException("GetBlockType: x=" + x + " y=" + y + " z=" + z);
+               
+            }
+            else
+            {
+                return data[x, y, z].ID;
+            }
+        }
+
+        public void SetBlock(int x, int y, int z, BlockType bType)
+        {
+
+            if (((x >= this.X) || (x < 0))
+                || ((y >= this.Y) || (y < 0))
+                || ((z >= this.Z) || (z < 0)))
+            {
+                throw new ArgumentException("GetBlockType: x=" + x + " y=" + y + " z=" + z);
+
+            }
+            else
+            {
+                data[x, y, z].ID = bType;
+            }
+        }
 
         private void TorchPower(BlockVector v)
         {

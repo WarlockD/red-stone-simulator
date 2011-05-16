@@ -297,8 +297,143 @@ namespace Redstone_Simulator
 
             }
         }
-       
 
-       
+
+        public void addTopRow()
+        { 
+            //create new Simulation with Y+1 rows
+            BlockSim _newSim = new BlockSim(this.currentSim.X, this.currentSim.Y + 1, this.currentSim.Z);
+            for (int i = 0; i < currentSim.X; i++)
+            {
+                for (int j = 0; j < currentSim.Y; j++)
+                {
+                    for (int k = 0; k < currentSim.Z; k++)
+                    {
+                        if (currentSim.GetBlockType(i,j,k) == BlockType.AIR)
+                            continue;
+                        _newSim.SetBlock(i, j + 1, k, currentSim.GetBlockType(i,j,k));
+                    }
+                }
+            }
+            this.Controls.Clear();
+            this.currentSim = _newSim;
+
+            DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
+            SetUpInternalDisplay();   
+        }
+
+        public void addRightColumn()
+        {
+            //create new Simulation with Y+1 rows
+            BlockSim _newSim = new BlockSim(this.currentSim.X + 1, this.currentSim.Y, this.currentSim.Z);
+            for (int i = 0; i < currentSim.X; i++)
+            {
+                for (int j = 0; j < currentSim.Y; j++)
+                {
+                    for (int k = 0; k < currentSim.Z; k++)
+                    {
+                        if (currentSim.GetBlockType(i, j, k) == BlockType.AIR)
+                            continue;
+                        _newSim.SetBlock(i, j, k, currentSim.GetBlockType(i, j, k));
+                    }
+                }
+            }
+            this.Controls.Clear();
+            this.currentSim = _newSim;
+
+            DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
+            SetUpInternalDisplay();
+        }
+
+        public void addBottomRow()
+        {
+            //create new Simulation with Y+1 rows
+            BlockSim _newSim = new BlockSim(this.currentSim.X, this.currentSim.Y + 1, this.currentSim.Z);
+            for (int i = 0; i < currentSim.X; i++)
+            {
+                for (int j = 0; j < currentSim.Y; j++)
+                {
+                    for (int k = 0; k < currentSim.Z; k++)
+                    {
+                        if (currentSim.GetBlockType(i, j, k) == BlockType.AIR)
+                            continue;
+                        _newSim.SetBlock(i, j, k, currentSim.GetBlockType(i, j, k));
+                    }
+                }
+            }
+            this.Controls.Clear();
+            this.currentSim = _newSim;
+
+            DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
+            SetUpInternalDisplay();
+        }
+
+        public void addLeftColumn()
+        {
+            //create new Simulation with Y+1 rows
+            BlockSim _newSim = new BlockSim(this.currentSim.X + 1, this.currentSim.Y, this.currentSim.Z);
+            for (int i = 0; i < currentSim.X; i++)
+            {
+                for (int j = 0; j < currentSim.Y; j++)
+                {
+                    for (int k = 0; k < currentSim.Z; k++)
+                    {
+                        if (currentSim.GetBlockType(i, j, k) == BlockType.AIR)
+                            continue;
+                        _newSim.SetBlock(i + 1, j, k, currentSim.GetBlockType(i, j, k));
+
+                    }
+                }
+            }
+            this.Controls.Clear();
+            this.currentSim = _newSim;
+
+            DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
+            SetUpInternalDisplay();
+        }
+      
+        public void addNRowToTop(int n)
+        {
+            for (int i = 0; i < n; i++)
+                addTopRow();
+        }
+
+        public void addNRowToBottom(int n)
+        {
+            for (int i = 0; i < n; i++)
+                addBottomRow();
+        }
+
+        public void addNColumnToLeft(int n)
+        {
+            for (int i = 0; i < n; i++)
+                addLeftColumn();
+        }
+
+        public void addNColumnToRight( int n)
+        {
+            for (int i = 0; i < n; i++)
+                addRightColumn();
+        }
+
+        public void zoomOut()
+        {
+            if (this.scale <= 1)
+                return;
+            this.scale -= 1.0F;
+            DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
+            this.Controls.Clear();
+            SetUpInternalDisplay();
+        }
+
+        public void zoomIn()
+        {
+            if (this.scale >= 5)
+                return;
+            this.scale += 1.0F;
+            DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
+            this.Controls.Clear();
+            SetUpInternalDisplay();
+        }
     }
 }

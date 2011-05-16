@@ -16,6 +16,7 @@ namespace Redstone_Simulator
         bool running = false;
         int  ticks = 0;
         Timer time;
+        frmAddRowsCols _addRowsCols;
         void MakeIcons()
         {
             goImage = new Bitmap(16, 16);
@@ -137,5 +138,63 @@ namespace Redstone_Simulator
             mainStatusStrip.setTicks(ticks);
             blockView.Refresh();
         }
+
+        private void tsbZoomIn_Click(object sender, EventArgs e)
+        {
+            this.blockView.zoomIn();
+        }
+
+        private void tsbZoomOut_Click(object sender, EventArgs e)
+        {
+            this.blockView.zoomOut();
+        }
+
+        private void tsbAddTop_Click(object sender, EventArgs e)
+        {
+            this.blockView.addTopRow();
+        }
+
+        private void tsbAddBottom_Click(object sender, EventArgs e)
+        {
+            this.blockView.addBottomRow();
+        }
+
+        private void tsbAddLeft_Click(object sender, EventArgs e)
+        {
+            this.blockView.addLeftColumn();
+        }
+
+        private void tsbAddRight_Click(object sender, EventArgs e)
+        {
+            this.blockView.addRightColumn();
+        }
+
+        private void tsbAddMultiDimension_Click(object sender, EventArgs e)
+        {
+            _addRowsCols = new frmAddRowsCols();
+            _addRowsCols.BtnCancel.Click += handleAddRowCol_Result;
+            _addRowsCols.BtnOk.Click += handleAddRowCol_Result;
+            _addRowsCols.Show();
+        }
+
+
+        public void handleAddRowCol_Result(object sender, EventArgs e)
+        {
+            _addRowsCols.Visible = false;
+            _addRowsCols.Hide();
+            addRowsColumnsResult result = _addRowsCols.Result;
+            if (result.ResultOK)
+            {
+                if (result.LeftColumns > 0)
+                    this.blockView.addNColumnToLeft(result.LeftColumns);
+                if (result.RightColumns > 0)
+                    this.blockView.addNColumnToRight(result.RightColumns);
+                if (result.BottomRows > 0)
+                    this.blockView.addNRowToBottom(result.BottomRows);
+                if (result.TopRows > 0)
+                    this.blockView.addNRowToTop(result.TopRows);
+            }
+        }
+
     }
 }
