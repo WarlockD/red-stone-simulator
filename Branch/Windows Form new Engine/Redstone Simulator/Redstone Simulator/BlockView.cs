@@ -56,7 +56,7 @@ namespace Redstone_Simulator
             }
 
         }
-
+        public int Floor { get { return floor; } set { if (floor > 0 || floor < currentSim.Z) floor = value; currentLoc = currentLoc.ChangeZ(floor); } }
         void ToggleTimer()
         {
             if (simTime == null)
@@ -170,8 +170,16 @@ namespace Redstone_Simulator
                         if (currentSim[currentLoc].isControl)
                         {
                             currentSim[currentLoc].Powered = !currentSim[currentLoc].Powered;
-                            Display.Invalidate();
                             currentSim.updateT();
+                            Display.Invalidate();
+
+                        }
+                        if (currentSim[currentLoc].isRepeater)
+                        {
+                            currentSim[currentLoc].increaseTick();
+                            currentSim.updateT();
+                            Display.Invalidate();                
+
                         }
                         break;
             }
@@ -204,8 +212,9 @@ namespace Redstone_Simulator
 
         public BlockView()
         {
-            currentSim = new BlockSim(20, 20, 5);
+            currentSim = new BlockSim(@"C:\Users\Paul Bruner\Documents\MC14500bv6.schematic");
             DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
+     
             //this.DoubleBuffered = true;
            // this.AutoScroll = true;
             InitializeComponent();
@@ -266,37 +275,18 @@ namespace Redstone_Simulator
                 }
         }
 
-        bool tick = false;
-        private void BlockView_KeyDown(object sender, KeyEventArgs e)
-        {
-            switch (e.KeyCode)
-            {
-                case Keys.T:
-                    if (!tick)
-                    {
-                        tick = true;
-                        ToggleTimer();
-                        Display.Invalidate();
-                    }
-                    break;
-
-            }
-        }
-
         private void BlockView_KeyUp(object sender, KeyEventArgs e)
         {
-            switch (e.KeyCode)
-            {
-                case Keys.T:
-                    if (tick)
-                    {
-                        tick = false;
-                        Display.Invalidate();
-                    }
-                    break;
+            if (e.KeyData == Keys.W)
+                this.Floor++;
+            if (e.KeyData == Keys.S)
+                this.Floor--;
+            Display.Refresh();
 
-            }
         }
+
+      
+
 
 
         public void addTopRow()
@@ -435,5 +425,6 @@ namespace Redstone_Simulator
             this.Controls.Clear();
             SetUpInternalDisplay();
         }
+
     }
 }
