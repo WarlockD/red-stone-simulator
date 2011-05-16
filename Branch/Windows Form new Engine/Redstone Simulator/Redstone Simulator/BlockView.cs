@@ -14,9 +14,10 @@ namespace Redstone_Simulator
         Timer simTime;
         private BlockStatusStrip statusStrip = null;
         public BlockStatusStrip StatusStrip { get { return statusStrip; } set { statusStrip = value; } }
-        private PictureBox Display;
-        public BlockSelect select;
+      //  private PictureBox Display;
+       // public BlockSelect blockSelect;
         public BlockSim currentSim;
+        bool stopPaint = false;
         Size DisplaySize;
         float scale = 3;
 
@@ -82,34 +83,22 @@ namespace Redstone_Simulator
 
         private void SetUpInternalDisplay()
         {
-            this.Display = new System.Windows.Forms.PictureBox();
-  
-            this.SuspendLayout();
-            // 
-            // PicBox
-            // 
-            this.Display.Location = new System.Drawing.Point(0, 0);
-            this.Display.Name = "Display";
-            this.Display.Size = DisplaySize;
-            this.Display.TabIndex = 3;
-            this.Display.TabStop = false;
-            this.Display.Paint += new PaintEventHandler(Display_Paint);
-            this.Display.MouseEnter += new EventHandler(Display_MouseEnter);
-            this.Display.MouseMove += new MouseEventHandler(Display_MouseMove);
-            this.Display.MouseDown += new MouseEventHandler(Display_MouseDown);
-            this.Display.MouseUp += new MouseEventHandler(Display_MouseUp);
-            this.Display.MouseLeave += new EventHandler(Display_MouseLeave);
+            stopPaint = true;
+            DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
+            Display.Size = DisplaySize;
+            stopPaint = false;
+            Display.Refresh();
 
-            this.Display.MouseClick += new MouseEventHandler(Display_MouseClick);
-
-           // this.Display
-            // 
-            // OuterPanel
-            // 
-          
-            this.Controls.Add(this.Display);
-            
-            this.ResumeLayout(false);
+        }
+        private void SetUpInternalDisplay(BlockSim newSim)
+        {
+            stopPaint = true;
+            currentSim = null;
+            currentSim = newSim;
+            DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
+            Display.Size = DisplaySize;
+            stopPaint = false;
+            Display.Refresh();
 
         }
 
@@ -190,11 +179,22 @@ namespace Redstone_Simulator
         {
             UpdateLoc(e.Location, floor);
             if (mouseLeftDown)
+            {
                 if (startLoc != currentLoc)
                 {
                     startLoc = currentLoc;
                     place(currentLoc, false);
                 }
+            }
+            else
+            {
+                Rectangle g = new Rectangle(0, 0, this.Width, blockSelect.Height);
+                if (g.Contains(e.Location))
+                { blockSelect.Visible = true; }
+                else
+                { blockSelect.Visible = false; }
+
+            }
         }
          
 
@@ -215,39 +215,48 @@ namespace Redstone_Simulator
            // currentSim = new BlockSim(@"C:\Users\Paul Bruner\Documents\MC14500bv6.schematic");
             currentSim = new BlockSim(30, 30, 5);
             DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
-     
+            
             //this.DoubleBuffered = true;
            // this.AutoScroll = true;
             InitializeComponent();
-            SetUpInternalDisplay();
+            Display.Size = DisplaySize;
+           // outerPanel.AutoScrool
+           // SetUpInternalDisplay();
+            
+          
             
         }
         private void BlockView_Load(object sender, EventArgs e)
         {
-
+            blockSelect.Left = (this.Width - blockSelect.Width) / 2;
+            if (blockSelect.Left < 0) blockSelect.Left = 0;
+            blockSelect.Visible = false; 
         }
         public BlockView(BlockSim sim)
         {
             InitializeComponent();
             currentSim = sim;
+            DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
+           // SetUpInternalDisplay();
 
         }
       
-
+        
        
 
         private void place(BlockVector v, bool rotate)
         {
-            Block b = select.SelectedBlock;
+            Block b = blockSelect.SelectedBlock;
             if (currentSim[v].ID == b.ID)
             { 
+               
                 currentSim[v].Rotate(); 
             }
             else
             {
                 Block t = new Block(b);
-     
-                currentSim[v].ID = t.ID;
+
+                currentSim[v]= new Block(blockSelect.SelectedBlock.ID);
                 currentSim.setConnections(v);
             }
             currentSim.updateT();
@@ -257,32 +266,31 @@ namespace Redstone_Simulator
 
         private void Display_Paint(object sender, PaintEventArgs e)
         {
-            Graphics g = e.Graphics;
-            g.Clear(BlockColors.cGrid);
-            // g.PageScale
-            g.ScaleTransform(scale, scale);
-            g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
-           
-            
-            for (int x = 0; x < currentSim.X; x++)
-                for (int y = 0; y < currentSim.Y; y++)
-                {
-                    //int ba = r.x / scale / 9; (i * 9 + 1) * scale < r.x + r.width;
-                    // g.PageScale
-                    Rectangle r = new Rectangle(x * 9 + 1, y * 9 + 1, 8, 8);
-                    BlockDrawSettings b = new BlockDrawSettings(currentSim[currentLoc.ChangeXY(x,y)]);
-                    BlockImages.gDrawBlock(g, r, b);
+            if (!stopPaint)
+            {
+                Graphics g = e.Graphics;
+                g.Clear(BlockColors.cGrid);
+                // g.PageScale
+                g.ScaleTransform(scale, scale);
+                g.SmoothingMode = System.Drawing.Drawing2D.SmoothingMode.AntiAlias;
 
-                }
+
+                for (int x = 0; x < currentSim.X; x++)
+                    for (int y = 0; y < currentSim.Y; y++)
+                    {
+                        //int ba = r.x / scale / 9; (i * 9 + 1) * scale < r.x + r.width;
+                        // g.PageScale
+                        Rectangle r = new Rectangle(x * 9 + 1, y * 9 + 1, 8, 8);
+                        BlockDrawSettings b = new BlockDrawSettings(currentSim[currentLoc.ChangeXY(x, y)]);
+                        BlockImages.gDrawBlock(g, r, b);
+
+                    }
+            }
         }
 
         private void BlockView_KeyUp(object sender, KeyEventArgs e)
         {
-            if (e.KeyData == Keys.W)
-                this.Floor++;
-            if (e.KeyData == Keys.S)
-                this.Floor--;
-            Display.Refresh();
+            
 
         }
 
@@ -306,11 +314,10 @@ namespace Redstone_Simulator
                     }
                 }
             }
-            this.Controls.Clear();
-            this.currentSim = _newSim;
+     
 
             DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
-            SetUpInternalDisplay();   
+            SetUpInternalDisplay(_newSim);   
         }
 
         public void addRightColumn()
@@ -329,11 +336,9 @@ namespace Redstone_Simulator
                     }
                 }
             }
-            this.Controls.Clear();
-            this.currentSim = _newSim;
+       
 
-            DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
-            SetUpInternalDisplay();
+            SetUpInternalDisplay(_newSim);
         }
 
         public void addBottomRow()
@@ -352,11 +357,9 @@ namespace Redstone_Simulator
                     }
                 }
             }
-            this.Controls.Clear();
-            this.currentSim = _newSim;
-
-            DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
-            SetUpInternalDisplay();
+     
+          
+            SetUpInternalDisplay(_newSim);
         }
 
         public void addLeftColumn()
@@ -376,11 +379,9 @@ namespace Redstone_Simulator
                     }
                 }
             }
-            this.Controls.Clear();
-            this.currentSim = _newSim;
+    
 
-            DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
-            SetUpInternalDisplay();
+            SetUpInternalDisplay(_newSim);
         }
       
         public void addNRowToTop(int n)
@@ -412,8 +413,8 @@ namespace Redstone_Simulator
             if (this.scale <= 1)
                 return;
             this.scale -= 1.0F;
-            DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
-            this.Controls.Clear();
+     
+         
             SetUpInternalDisplay();
         }
 
@@ -422,10 +423,32 @@ namespace Redstone_Simulator
             if (this.scale >= 5)
                 return;
             this.scale += 1.0F;
-            DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
-            this.Controls.Clear();
+          
+         
             SetUpInternalDisplay();
         }
+
+        private void BlockView_Resize(object sender, EventArgs e)
+        {
+            blockSelect.Left = (this.Width - blockSelect.Width) / 2;
+             if (blockSelect.Left < 0) blockSelect.Left = 0;
+             
+        }
+
+        private void BlockView_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyData == Keys.W)
+                this.Floor++;
+            if (e.KeyData == Keys.S)
+                this.Floor--;
+            Display.Refresh();
+        }
+
+        private void BlockView_KeyPress(object sender, KeyPressEventArgs e)
+        {
+
+        }
+
 
     }
 }

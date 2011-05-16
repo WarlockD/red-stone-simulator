@@ -33,39 +33,29 @@ namespace Redstone_Simulator
         {
             InitializeComponent();
             MakeIcons();
-            this.blockView.StatusStrip = this.mainStatusStrip;
-            this.blockView.select = blockSelect;
+            this.blockView.StatusStrip = this.blockStatusStrip;
             this.toolStripButton1.Image = goImage;
             time = new Timer();
             time.Tick += new EventHandler(time_Tick);
             time.Interval = 500;
         }
 
-        void  blockView_ChangeStrip(object s, myStatusStripEventArgs e)
-        {
- 	        if (e.Update.HasFlag(eStatusStripUdate.XYZ))
-            {
-                mainStatusStrip.setCord(e.X, e.Y, e.Z);
-             //   this.cCord.Text = e.X + "x" + e.Y + "y" + e.Z + "z";
-            //    this.cCord.Invalidate();
-            }
-        }
-
-    
+     
+      
 
         void Form1_MouseWheel(object sender, MouseEventArgs e)
         {
             this.MouseWheel += new MouseEventHandler(Form1_MouseWheel);
             
-            this.blockView.select = blockSelect;
-            if (e.Delta > 0 | e.Delta < 0)
-                blockSelect.moveSelect(e.Delta > 0 ? 1 : -1);
+       //     this.blockView.blockSelect = blockSelect;
+          //  if (e.Delta > 0 | e.Delta < 0)
+            //    blockSelect.moveSelect(e.Delta > 0 ? 1 : -1);
         }
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            blockSelect.Left = (this.Width - blockSelect.Width) / 2;
-            if (blockSelect.Left < 0) blockSelect.Left = 0;
+         //   blockSelect.Left = (this.Width - blockSelect.Width) / 2;
+        //    if (blockSelect.Left < 0) blockSelect.Left = 0;
         }
 
         private void Form1_MouseDown(object sender, MouseEventArgs e)
@@ -75,8 +65,8 @@ namespace Redstone_Simulator
 
         private void Form1_MouseClick(object sender, MouseEventArgs e)
         {
-            if (e.Delta > 0 | e.Delta < 0)
-                blockSelect.moveSelect(e.Delta);
+         //   if (e.Delta > 0 | e.Delta < 0)
+          //      blockSelect.moveSelect(e.Delta);
         }
 
         private void Form1_MouseMove(object sender, MouseEventArgs e)
@@ -91,8 +81,8 @@ namespace Redstone_Simulator
 
         private void Form1_Resize(object sender, EventArgs e)
         {
-            blockSelect.Left = (this.Width - blockSelect.Width) / 2;
-            if (blockSelect.Left < 0) blockSelect.Left = 0;
+        //    blockSelect.Left = (this.Width - blockSelect.Width) / 2;
+        //    if (blockSelect.Left < 0) blockSelect.Left = 0;
         }
 
         private void toolStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
@@ -113,7 +103,8 @@ namespace Redstone_Simulator
                 running = true;
                 toolStripButton1.Image = stopImage;
                 ticks = 0;
-                mainStatusStrip.setTicks(ticks);
+                blockStatusStrip.setTicks(ticks);
+
                 time.Start();
             }
 
@@ -123,19 +114,17 @@ namespace Redstone_Simulator
         {
             ticks++;
             blockView.currentSim.newTick();
-            mainStatusStrip.setTicks(ticks);
+            blockStatusStrip.setTicks(ticks);
             blockView.Refresh();
         }
 
         private void toolStripButton2_Click(object sender, EventArgs e)
         {
             ticks++;
-          //  blockView.currentSim.tick();
-          //  blockView.currentSim.noTick();
+       
             blockView.currentSim.newTick();
-           // blockView.currentSim.tick();
-           // blockView.currentSim.noTick();
-            mainStatusStrip.setTicks(ticks);
+
+            blockStatusStrip.setTicks(ticks);
             blockView.Refresh();
         }
 

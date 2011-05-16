@@ -56,7 +56,7 @@ namespace Redstone_Simulator
         }
     }
     
-    public class BlockSim
+    public class BlockSim 
     {
         Blocks data;
        // Blocks lastTick;
@@ -91,6 +91,7 @@ namespace Redstone_Simulator
             lenX = X; lenY = Y; lenZ = Z;
        
         }
+       
         public BlockSim(string fileName)
         {
            
