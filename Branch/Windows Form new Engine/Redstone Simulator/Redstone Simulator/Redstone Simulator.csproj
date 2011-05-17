@@ -45,6 +45,9 @@
     <OutputPath>bin\x64\Release\</OutputPath>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="LibNbt">
+      <HintPath>..\..\..\..\..\..\Documents\Visual Studio 2010\Projects\aphistic\LibNbt\bin\LibNbt.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
@@ -76,6 +79,7 @@
       <DependentUpon>BlockView.cs</DependentUpon>
     </Compile>
     <Compile Include="Extensions.cs" />
+    <Compile Include="FileLoader.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -118,6 +122,9 @@
     </Compile>
     <Resource Include="Properties\images\Thumbs.db" />
     <None Include="ClassDiagram1.cd" />
+    <None Include="MC14500bv6.schematic">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Include="ClassDiagram2.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
@@ -187,4 +194,5 @@
   <Target Name="AfterBuild">
   </Target>
   -->
+</Project>
 </Project>
