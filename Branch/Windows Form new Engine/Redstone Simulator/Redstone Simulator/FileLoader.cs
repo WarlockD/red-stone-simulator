@@ -148,32 +148,35 @@ namespace Redstone_Simulator
                     case 68:
                     case 78:
                     case 83:
-                        b[i] = new Block(BlockType.AIR);
+                        b[i] = Block.AIR;
                         break;
                     case 55:
-                        b[i] = new Block(BlockType.WIRE);
+                        b[i] = Block.WIRE;
                         break;
                     case 75: // Off
-                        b[i] = new Block(BlockType.TORCH);
+                        b[i] = Block.TORCH;
                         b[i].Place = FileToBlock[extra[i] & 0x7];
                         b[i].Charge = 0;
                         break;
                     case 76: // Off
-                        b[i] = new Block(BlockType.TORCH);
+                        b[i] = Block.TORCH;
                         b[i].Place = FileToBlock[extra[i] & 0x7];
                         b[i].Charge = 16;
+                        System.Console.WriteLine("Loc: {2}  Torch Dir: {0}    Byte: {1}", b[i].Place.ToString(), extra[i] & 0x7,i);
                         break;
                     case 69:
-                        b[i] = new Block(BlockType.LEVER);
+                        
+                        b[i] = Block.LEVER;
                         b[i].Charge = (extra[i] & 0x8) == 1 ? 16 : 0;
-                        b[i].Place = (Direction)FileToBlock[extra[i] & 0x7];
+                        b[i].Place = FileToBlock[extra[i] & 0x7];
+                     //   System.Console.WriteLine("Lever Dir: {0}    Byte: {1}", b[i].Place.ToString(), extra[i] & 0x7);
                         break;
                     case 70:
                     case 72:
-                        b[i] = new Block(BlockType.PREASUREPAD);
+                        b[i] = Block.PREASUREPAD;
                         break;
                     case 77:
-                        b[i] = new Block(BlockType.BUTTON);
+                        b[i] = Block.BUTTON;
                         b[i].Place = (Direction)FileToBlock[extra[i] & 0x7];
                         break;
                     case 64: // doors not working yet
@@ -183,7 +186,7 @@ namespace Redstone_Simulator
 
                         break;
                     default:
-                        b[i] = new Block(BlockType.BLOCK);
+                        b[i] = Block.BLOCK;
                         break;
 
 

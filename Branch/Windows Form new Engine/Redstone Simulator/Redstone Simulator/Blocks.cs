@@ -48,7 +48,7 @@ namespace Redstone_Simulator
         public int Y { get { return lenY; } }
         public int Z { get { return lenZ; } }
         public Blocks(int x, int y, int z) { lenX = x; lenY = y; lenZ = z; totalCount = x * y * z; data = new Block[totalCount];
-        for (int i=0; i < totalCount; i++) data[i] = new Block(BlockType.AIR);
+        for (int i = 0; i < totalCount; i++) data[i] = Block.AIR; 
         }
         public Blocks(int x, int y, int z, Block[] d) { data = d; lenX = x; lenY = y; lenZ = z; }
         
@@ -126,23 +126,7 @@ namespace Redstone_Simulator
         public void ClearChanged() { IDChanged = false; DirectionChanged = false; ChargeChanged = false; DelayChanged = false; TicksChanged = false; }
 
          WireMask wmask; public WireMask Mask { get { return wmask; } set { wmask = value; } }
-         BlockType id; public BlockType ID { 
-             get { return id; } 
-             set { id = value; 
-                 IDChanged = true;
-                 charge = 0;
-                 place = 0;
-                 delay = 0;
-                 tickspassed = 0;
-                 switch (id)
-                 {
-                     case BlockType.TORCH:  charge = 16; delay = 2;  break;
-                     case BlockType.REPEATER: place = Direction.NORTH ; delay = 2; break;
-                     case BlockType.BUTTON: place = Direction.NORTH; delay = 20; break;
-                     case BlockType.LEVER:  delay = 20;  break;
-                     case BlockType.PREASUREPAD:  delay = 20;  break;
-                 }
-             } }
+         BlockType id; public BlockType ID { get { return id; } }
          Direction place; public Direction Place { get { return place; } set { place = value; DirectionChanged = true; } }
          int charge; public int Charge { get { return charge; } set { charge = value; ChargeChanged = true; } }
          int delay; public int Delay { get { return delay; } set { delay = value; DelayChanged = true; } }
@@ -188,7 +172,6 @@ namespace Redstone_Simulator
             }
         }
         Block() { this.id = BlockType.AIR; place = 0; charge = 0; delay = 0; tickspassed = 0; }
-        public Block(BlockType ID) : this() { this.ID = ID; }
         public Block(BlockType ID, Direction Place, int Charge, int Delay, int Passed) {
             this.id = ID;
             this.place = Place;
@@ -197,18 +180,28 @@ namespace Redstone_Simulator
             this.tickspassed = Passed;
         }
         public Block(Block b) : this(b.ID, b.Place, b.Charge, b.Delay, b.Ticks) { }
-
-        public static Block AIR { get { return new Block(BlockType.AIR); } }
-        public static Block BLOCK { get { return new Block(BlockType.BLOCK); } }
-        public static Block WIRE { get { Block b = new Block(BlockType.WIRE); b.Mask = WireMask.AllDir; return b; } }
-        public static Block TORCH { get { return new Block(BlockType.TORCH); } }
-        public static Block LEVER { get { return new Block(BlockType.LEVER); } }
-        public static Block BUTTON { get { return new Block(BlockType.BUTTON); } }
-      //  public static Blocks DOORA { get { return new Blocks(eBlock.DOORA); } }
-      //  public static Blocks DOORB { get { return new Blocks(eBlock.DOORB); } }
-        public static Block PREASUREPAD { get { return new Block(BlockType.PREASUREPAD); } }
-        public static Block REPEATER { get { return new Block(BlockType.REPEATER); } }
-
+        public static Block New(BlockType t) {
+            switch (t)
+            {
+                case BlockType.AIR: return Block.AIR;
+                case BlockType.BLOCK: return Block.BLOCK;
+                case BlockType.BUTTON: return Block.BUTTON;
+                case BlockType.LEVER: return Block.LEVER;
+                case BlockType.PREASUREPAD: return Block.PREASUREPAD;
+                case BlockType.REPEATER: return Block.REPEATER;
+                case BlockType.TORCH: return Block.TORCH;
+                case BlockType.WIRE: return Block.WIRE;
+            }
+            return Block.AIR;
+        }
+        public static Block AIR { get { return new Block(BlockType.AIR,Direction.DOWN,0,0,0); } }
+        public static Block BLOCK { get { return new Block(BlockType.BLOCK, Direction.DOWN, 0, 0, 0); } }
+        public static Block WIRE { get { Block b = new Block(BlockType.WIRE, Direction.DOWN, 0, 0, 0); b.Mask = WireMask.AllDir; return b; } }
+        public static Block TORCH { get { return new Block(BlockType.TORCH,Direction.DOWN,16,2,0); } }
+        public static Block LEVER { get { return new Block(BlockType.LEVER, Direction.DOWN, 0, 0, 0); } }
+        public static Block BUTTON { get { return new Block(BlockType.BUTTON,Direction.NORTH,0,20,0); } }
+        public static Block PREASUREPAD { get { return new Block(BlockType.PREASUREPAD,Direction.DOWN,0,20,0); } }
+        public static Block REPEATER { get { return new Block(BlockType.REPEATER,Direction.NORTH,0,2,0); } }
         public void increaseTick()
         { //for reapeater only
             if (isRepeater)

@@ -98,12 +98,12 @@ namespace Redstone_Simulator
            
             source = new List<BlockVector>();
             update = new List<BlockVector>();
-           // data = FileLoader.Load(fileName);
+           data = FileLoader.Load(fileName);
            
-          //  lenX = data.X;
-         //   lenY = data.Y;
-          //  lenZ = data.Z;
-          //  setAllConnections();
+           lenX = data.X;
+           lenY = data.Y;
+           lenZ = data.Z;
+            setAllConnections();
         }
         public void setConnections(BlockVector v)
         {
@@ -494,7 +494,7 @@ namespace Redstone_Simulator
             }
             else
             {
-                data[x, y, z].ID = bType;
+                data[x, y, z]= Block.New(bType);
             }
         }
 

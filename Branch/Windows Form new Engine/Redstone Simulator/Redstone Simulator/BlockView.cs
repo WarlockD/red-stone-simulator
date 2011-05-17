@@ -231,6 +231,9 @@ namespace Redstone_Simulator
             blockSelect.Left = (this.Width - blockSelect.Width) / 2;
             if (blockSelect.Left < 0) blockSelect.Left = 0;
             blockSelect.Visible = false; 
+
+            // Test load
+            this.SetUpInternalDisplay(new BlockSim("MC14500bv6.schematic"));
         }
         public BlockView(BlockSim sim)
         {
@@ -256,7 +259,7 @@ namespace Redstone_Simulator
             {
                 Block t = new Block(b);
 
-                currentSim[v]= new Block(blockSelect.SelectedBlock.ID);
+                currentSim[v]= Block.New(blockSelect.SelectedBlock.ID);
                 currentSim.setConnections(v);
             }
             currentSim.updateT();

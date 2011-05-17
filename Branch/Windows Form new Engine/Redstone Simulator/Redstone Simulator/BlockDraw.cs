@@ -273,6 +273,8 @@ namespace Redstone_Simulator
             if (b.Fog) g.FillRectangle(BlockColors.bFog, r);
             if(!b.B.isAir && !b.B.isRepeater)
                 g.DrawString(b.B.Charge.ToString(), new Font("Courier",4),BlockColors.bDoor, r.X,r.Y);
+            if(b.B.isTorch)
+                g.DrawString(b.B.Place.ToString()[0].ToString(), new Font("Courier", 4), BlockColors.bDoor, r.X, r.Y);
         }
 
       
