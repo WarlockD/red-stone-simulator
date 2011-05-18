@@ -119,9 +119,9 @@
     </Compile>
     <Resource Include="Properties\images\Thumbs.db" />
     <None Include="ClassDiagram1.cd" />
-    <None Include="MC14500bv6.schematic">
+    <Content Include="MC14500bv6.schematic">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
     <None Include="ClassDiagram2.cd" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

@@ -26,16 +26,7 @@ namespace Redstone_Simulator
         WEST=4,
         UP=5
     }
-    [Flags]
-    public enum DirectionMask : int
-    {
-        DOWN = 1,
-        NORTH = 2,
-        EAST = 4,
-        SOUTH = 8,
-        WEST = 16,
-        UP = 32
-    }
+    
 
 
     public class Blocks : ICollection, ICloneable//, ICollection<Blocks>
@@ -106,31 +97,20 @@ namespace Redstone_Simulator
             }
 
         }
-        public void ClearChanged()
-        {
-            for (int i = 0; i < totalCount; i++)
-                data[i].ClearChanged();
-        }
+       
    
 
 
     }
     public class  Block : ICloneable
     {
-        bool IDChanged; public bool changedID { get { return IDChanged; } }
-        bool DirectionChanged; public bool changedDir { get { return IDChanged; } }
-        bool ChargeChanged; public bool changedCharge { get { return ChargeChanged; } }
-        bool DelayChanged; public bool changedDelay { get { return IDChanged; } }
-        bool TicksChanged; public bool changedTicks { get { return IDChanged; } }
-        public bool hasChanged { get { return IDChanged | DirectionChanged | DelayChanged | TicksChanged; } }
-        public void ClearChanged() { IDChanged = false; DirectionChanged = false; ChargeChanged = false; DelayChanged = false; TicksChanged = false; }
-
+      
          WireMask wmask; public WireMask Mask { get { return wmask; } set { wmask = value; } }
          BlockType id; public BlockType ID { get { return id; } }
-         Direction place; public Direction Place { get { return place; } set { place = value; DirectionChanged = true; } }
-         int charge; public int Charge { get { return charge; } set { charge = value; ChargeChanged = true; } }
-         int delay; public int Delay { get { return delay; } set { delay = value; DelayChanged = true; } }
-         int tickspassed; public int Ticks { get { return tickspassed; } set { tickspassed = value; TicksChanged = true; } }
+         Direction place; public Direction Place { get { return place; } set { /*place = value;*/  } }
+         int charge; public int Charge { get { return charge; } set { charge = value;  } }
+         int delay; public int Delay { get { return delay; } set { delay = value;  } }
+         int tickspassed; public int Ticks { get { return tickspassed; } set { tickspassed = value;  } }
 
         public bool isAir { get { return this.ID == BlockType.AIR; }}
         public bool isBlock { get { return this.ID == BlockType.BLOCK; }}

@@ -220,8 +220,10 @@ namespace Redstone_Simulator
                         switch (b.ID)
                         {
                             case BlockType.BUTTON:
+                                break;
                             case BlockType.PREASUREPAD:
                             case BlockType.TORCH:
+                            case BlockType.LEVER:
                                 if (b.Powered)
                                     SearchWire(v);
                                 break;
@@ -253,135 +255,9 @@ namespace Redstone_Simulator
                 if (data[v.Dir(d)].isWire)
                     followWire(v.Dir(d), 15);
         }
-        public void tick()
-        {
-            //lastTick = data.Copy();
-            for (int x = 0; x < lenX; x++) for (int y = 0; y < lenY; y++) for (int z = 0; z < lenZ; z++)
-                        if (!data[x,y,z].isAir) // lets make this quick and not worry about stuff not air.
-                        {
-                            BlockVector v = new BlockVector(x, y, z);
-                            Block b = data[x, y, z];
-                            bool isPowered = false;
-                            switch (b.ID)
-                            {
-                                case BlockType.TORCH:
-                                    switch (b.Place)
-                                    {
-                                        case Direction.DOWN:
-                                             if (data[v.Down].Powered) isPowered = true; break;
-                                        case Direction.NORTH:
-                                             if (data[v.North].Powered) isPowered = true; break;
-                                        case Direction.EAST:
-                                            if (data[v.East].Powered) isPowered = true; break;
-                                        case Direction.SOUTH:
-                                            if (data[v.South].Powered) isPowered = true; break;
-                                        case Direction.WEST:
-                                             if (data[v.West].Powered) isPowered = true; break;
-                                    }
-                                    if (data[v].waitTick(isPowered)) update.Add(v);
-                                    break;
+   
 
-                                case BlockType.REPEATER:
-                                    switch (b.Place)
-                                    {
-                                        case Direction.NORTH: // pointing north
-                                            if (y < lenY - 1)
-                                                if ((data[v.South].canBePoweredByRepeater(b.Place)) ||
-                                                    (data[v.South].canBePoweredByRepeaterTorch(getConnections(v.North), WireMask.North)))
-                                                    data[v].waitTick(true);
-                                            break;
-                                        case Direction.EAST:
-                                            if (x < lenX - 1)
-                                                if ((data[v.East].canBePoweredByRepeater(b.Place)) ||
-                                                        (data[v.East].canBePoweredByRepeaterTorch(getConnections(v.East), WireMask.East)))
-                                                    data[v].waitTick(true);
-                                            break;
-                                        case Direction.SOUTH:
-                                            if (y < lenY - 1)
-                                                if ((data[v.South].canBePoweredByRepeater(b.Place)) ||
-                                                        (data[v.South].canBePoweredByRepeaterTorch(getConnections(v.South), WireMask.East)))
-                                                    data[v].waitTick(true);
-                                            break;
-                                        case Direction.WEST:
-                                            if (x > 0)
-                                                if ((data[v.West].canBePoweredByRepeater(b.Place)) ||
-                                                       (data[v.West].canBePoweredByRepeaterTorch(getConnections(v.West), WireMask.East)))
-                                                    data[v].waitTick(true);
-                                            break;
-                                    }
-                                    update.Add(v);
-                                    break;
-                                case BlockType.BUTTON:
-                                case BlockType.PREASUREPAD:
-                                    if (data[x, y, z].waitTick(false))
-                                        update.Add(v);
-                                    break;
-
-                            }
-                        }
-
-        }
-
-        public void noTick()
-        {
-            data.ClearChanged();
-            for (int x = 0; x < lenX; x++) for (int y = 0; y < lenY; y++) for (int z = 0; z < lenZ; z++)
-                        if (!data[x, y, z].isBlock && data[x, y, z].Source) // look for sources!
-                        {
-                            source.Add(new BlockVector(x, y, z));
-                            update.Add(new BlockVector(x, y, z));
-                        }
-                        else if (data[x, y, z].Powered) // set charge to temp to zero?
-                        {
-                            data[x, y, z].Charge = 0;
-                            update.Add(new BlockVector(x, y, z));
-                        }
-
-
-            //spreading the power
-            for (int h = 0; h < 20; h++)
-            { //runs long enough
-                List<BlockVector> now = new List<BlockVector>(source); // currently under investgation
-                source.Clear();
-                foreach (BlockVector v in now)
-                {
-                    Block block = data[v];
-                    switch (block.ID)
-                    {
-                        case BlockType.BLOCK:
-                            if (block.Charge == 16) BlockPower(v); break; //directly powered
-                        case BlockType.WIRE: WirePower(v); break;
-                        case BlockType.TORCH: TorchPower(v); break;
-                        case BlockType.REPEATER: RepeaterPower(v); break;
-                        case BlockType.BUTTON:
-                        case BlockType.PREASUREPAD:
-                        case BlockType.LEVER: InputPower(v); break;
-                    }
-                }
-
-
-            }
-
-            //updates all not similar to before
-            for (int i = 0; i < update.Count; i++)
-                if (data[update[i]].isWire)  //only wire will can be bypassed
-                    if (data[update[i]].changedCharge)
-                    {
-                        data[update[i]].ClearChanged();
-                        update.RemoveAt(i); i--; 
-                    }
-        
-
-            // We can clone update and have the GUI only update those blocks.
-
-            update.Clear();
-            source.Clear();
-
-
-
-            //GUI.updateBlocks(xArray, yArray, zArray);
-
-        }
+      
 
         public bool WireConn(BlockVector v, Direction dir)
         {

@@ -28,18 +28,11 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.toolTip = new System.Windows.Forms.ToolTip(this.components);
             this.Display = new System.Windows.Forms.PictureBox();
             this.outerPanel = new System.Windows.Forms.Panel();
-            this.blockSelect = new Redstone_Simulator.BlockSelect();
             ((System.ComponentModel.ISupportInitialize)(this.Display)).BeginInit();
             this.outerPanel.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // toolTip
-            // 
-            this.toolTip.Active = false;
             // 
             // Display
             // 
@@ -61,24 +54,12 @@
             this.outerPanel.AutoScroll = true;
             this.outerPanel.AutoSize = true;
             this.outerPanel.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.outerPanel.Controls.Add(this.blockSelect);
             this.outerPanel.Controls.Add(this.Display);
             this.outerPanel.Dock = System.Windows.Forms.DockStyle.Fill;
             this.outerPanel.Location = new System.Drawing.Point(0, 0);
             this.outerPanel.Name = "outerPanel";
             this.outerPanel.Size = new System.Drawing.Size(921, 539);
             this.outerPanel.TabIndex = 2;
-            // 
-            // blockSelect
-            // 
-            this.blockSelect.Anchor = System.Windows.Forms.AnchorStyles.None;
-            this.blockSelect.BlockScale = 5F;
-            this.blockSelect.Location = new System.Drawing.Point(91, 3);
-            this.blockSelect.MaximumSize = new System.Drawing.Size(680, 50);
-            this.blockSelect.MinimumSize = new System.Drawing.Size(680, 50);
-            this.blockSelect.Name = "blockSelect";
-            this.blockSelect.Size = new System.Drawing.Size(680, 50);
-            this.blockSelect.TabIndex = 1;
             // 
             // BlockView
             // 
@@ -99,9 +80,8 @@
 
         #endregion
 
-        private System.Windows.Forms.ToolTip toolTip;
         private System.Windows.Forms.PictureBox Display;
-        private BlockSelect blockSelect;
+   
         private System.Windows.Forms.Panel outerPanel;
     }
 }

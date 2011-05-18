@@ -12,6 +12,7 @@ namespace Redstone_Simulator
 {
     public partial class BlockSelect : UserControl
     {
+        const int ConstScale = 10;
         Bitmap bar;
         int selected = 0; public int Selected { get { return selected; } }
         public Block SelectedBlock { get { return sArray[selected][0]; } }
@@ -25,9 +26,10 @@ namespace Redstone_Simulator
             this.DoubleBuffered = true;
             InitializeComponent();
         }
+       
         void makeBar()
         {
-            bar = new Bitmap((int)((sArray.Length * 9 + 1) * scale), (int)(scale * 10));
+            bar = new Bitmap((int)((sArray.Length * 10) * scale), (int)(scale * 10));
             Graphics g = Graphics.FromImage(bar);
             
             g.Clear(BlockColors.cGrid);
@@ -145,7 +147,7 @@ namespace Redstone_Simulator
 
         private void BlockSelect_MouseEnter(object sender, EventArgs e)
         {
-        //    if (!this.Focused) this.Focus();
+           if (!this.Focused && this.Visible) this.Focus();
         }
 
       

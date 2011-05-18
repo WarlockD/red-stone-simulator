@@ -105,8 +105,10 @@ namespace Redstone_Simulator
     class FileLoader
     {
         static readonly byte[] BlockToFile = new byte[] { 5, 2, 4, 1, 2 };
-        static readonly Direction[] FileToBlock = new Direction[] { Direction.UP, Direction.SOUTH,
-           Direction.NORTH,Direction.WEST,Direction.EAST,Direction.DOWN };
+        static readonly Direction[] FileToBlock = new Direction[] { Direction.UP, Direction.WEST,
+           Direction.EAST,Direction.SOUTH,Direction.NORTH,Direction.DOWN };
+       // static readonly Direction[] FileToBlock = new Direction[] { Direction.UP, Direction.WEST,
+       //    Direction.EAST,Direction.NORTH,Direction.SOUTH,Direction.DOWN };
         public static Blocks LoadTest()
         {
             return Load("MC14500bv6.schematic");
@@ -153,15 +155,12 @@ namespace Redstone_Simulator
                     case 55:
                         b[i] = Block.WIRE;
                         break;
-                    case 75: // Off
-                        b[i] = Block.TORCH;
-                        b[i].Place = FileToBlock[extra[i] & 0x7];
-                        b[i].Charge = 0;
+                    case 75: // Off 
+                        b[i] = new Block(BlockType.TORCH, FileToBlock[extra[i] & 0x7], 0, 0, 0);
                         break;
                     case 76: // Off
-                        b[i] = Block.TORCH;
-                        b[i].Place = FileToBlock[extra[i] & 0x7];
-                        b[i].Charge = 16;
+                        b[i] = new Block(BlockType.TORCH, FileToBlock[extra[i] & 0x7], 16, 0, 0);
+   
                         System.Console.WriteLine("Loc: {2}  Torch Dir: {0}    Byte: {1}", b[i].Place.ToString(), extra[i] & 0x7,i);
                         break;
                     case 69:

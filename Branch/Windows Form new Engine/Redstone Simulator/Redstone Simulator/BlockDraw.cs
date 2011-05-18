@@ -26,9 +26,17 @@ namespace Redstone_Simulator
         public bool Fog { get;  set; }
         public bool On { get; internal set; }
         public bool OnBlock { get;  set; }
-        public WireMask Mask { get { return B.Mask; } }
-        public BlockDrawSettings(Block b) : this() { B = b; this.On = b.Powered ? true : false;  }
-        public BlockDrawSettings(Block b, bool On) : this() { B = b; this.On = On; }
+        public WireMask Mask { get;  set; }
+        public BlockType ID { get; internal set; }
+        public Direction Place { get; internal set; }
+        public int Delay { get; internal set; }
+        public BlockDrawSettings(Block b) : this() { B = b; this.On = b.Powered ? true : false; Mask = B.Mask; Place = B.Place; ID = B.ID; Delay = B.Delay; }
+        public BlockDrawSettings(Block b, bool On) : this(b) {  this.On = On; }
+        public static BlockDrawSettings New(BlockType id, int charge, Direction place, int ticks)  { return new BlockDrawSettings(new Block(id, place, charge, ticks, 0)); }
+        public static BlockDrawSettings New(BlockType id) { return new BlockDrawSettings(new Block(id, Direction.DOWN, 0, 0, 0)); }
+        public static BlockDrawSettings New(BlockType id,int charge) { return new BlockDrawSettings(new Block(id, Direction.DOWN, charge, 0, 0)); }
+        public static BlockDrawSettings New(BlockType id,Direction place, int charge) { return new BlockDrawSettings(new Block(id, place, charge, 0, 0)); }
+   
     }
     public class BlockColors
     {
@@ -173,7 +181,7 @@ namespace Redstone_Simulator
                     }
                     g.FillEllipse(BlockColors.bValve, r.X + 2, r.Y + 2, 4, 4);
                     if (b.On)
-                        g.FillEllipse(BlockColors.bWireOn, r.X + 3, r.X + 3, 2, 2);
+                        g.FillEllipse(BlockColors.bWireOn, r.X + 3, r.Y + 3, 2, 2);
                     break;
                 case BlockType.TORCH:
                     switch (b.B.Place)
@@ -271,10 +279,15 @@ namespace Redstone_Simulator
 
             }
             if (b.Fog) g.FillRectangle(BlockColors.bFog, r);
+            StringFormat sf = new StringFormat();
+            sf.Alignment=StringAlignment.Near;
+            sf.LineAlignment=StringAlignment.Near;
+            string s = b.B.Charge.ToString();
+            if (b.B.canMount)
+                s += '\n' + b.B.Place.ToString()[0].ToString();
             if(!b.B.isAir && !b.B.isRepeater)
-                g.DrawString(b.B.Charge.ToString(), new Font("Courier",4),BlockColors.bDoor, r.X,r.Y);
-            if(b.B.isTorch)
-                g.DrawString(b.B.Place.ToString()[0].ToString(), new Font("Courier", 4), BlockColors.bDoor, r.X, r.Y);
+                g.DrawString(s, new Font("Courier",4,FontStyle.Regular,GraphicsUnit.Pixel),
+                    BlockColors.bDoor,r,sf);
         }
 
       

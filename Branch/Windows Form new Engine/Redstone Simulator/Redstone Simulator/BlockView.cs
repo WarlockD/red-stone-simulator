@@ -17,6 +17,7 @@ namespace Redstone_Simulator
       //  private PictureBox Display;
        // public BlockSelect blockSelect;
         public BlockSim currentSim;
+        public BlockType selectedBlock { get; set; }
         bool stopPaint = false;
         Size DisplaySize;
         float scale = 3;
@@ -27,6 +28,7 @@ namespace Redstone_Simulator
         BlockVector startLoc;
         int floor = 0;
         bool mouseLeftDown = false;
+        bool controlUp = true;
         bool playing = false;
         bool locValid = false;
         bool isDragging = false;
@@ -74,7 +76,7 @@ namespace Redstone_Simulator
 
         void simTime_Tick(object sender, EventArgs e)
         {
-            currentSim.tick();
+            currentSim.newTick();
         }
 
 
@@ -109,6 +111,7 @@ namespace Redstone_Simulator
 
         void Display_MouseLeave(object sender, EventArgs e)
         {
+           // blockSelect.Visible = false;
            isDragging = false;
            mouseLeftDown = false;
            UpdateLoc(false);
@@ -188,11 +191,11 @@ namespace Redstone_Simulator
             }
             else
             {
-                Rectangle g = new Rectangle(0, 0, this.Width, blockSelect.Height);
-                if (g.Contains(e.Location))
-                { blockSelect.Visible = true; }
-                else
-                { blockSelect.Visible = false; }
+              //  Rectangle g = new Rectangle(0, 0, this.Width, blockSelect.Height);
+              //  if (g.Contains(e.Location))
+             //   { blockSelect.Visible = true; blockSelect.Focus(); }
+             //   else
+              //  { blockSelect.Visible = false; }
 
             }
         }
@@ -228,12 +231,12 @@ namespace Redstone_Simulator
         }
         private void BlockView_Load(object sender, EventArgs e)
         {
-            blockSelect.Left = (this.Width - blockSelect.Width) / 2;
-            if (blockSelect.Left < 0) blockSelect.Left = 0;
-            blockSelect.Visible = false; 
+         //   blockSelect.Left = (this.Width - blockSelect.Width) / 2;
+         //   if (blockSelect.Left < 0) blockSelect.Left = 0;
+         //   blockSelect.Visible = false; 
 
             // Test load
-            this.SetUpInternalDisplay(new BlockSim("MC14500bv6.schematic"));
+           // this.SetUpInternalDisplay(new BlockSim("MC14500bv6.schematic"));
         }
         public BlockView(BlockSim sim)
         {
@@ -249,17 +252,15 @@ namespace Redstone_Simulator
 
         private void place(BlockVector v, bool rotate)
         {
-            Block b = blockSelect.SelectedBlock;
-            if (currentSim[v].ID == b.ID)
+            if (currentSim[v].ID == selectedBlock)
             { 
                
                 currentSim[v].Rotate(); 
             }
             else
             {
-                Block t = new Block(b);
 
-                currentSim[v]= Block.New(blockSelect.SelectedBlock.ID);
+                currentSim[v]= Block.New(selectedBlock);
                 currentSim.setConnections(v);
             }
             currentSim.updateT();
@@ -281,10 +282,22 @@ namespace Redstone_Simulator
                 for (int x = 0; x < currentSim.X; x++)
                     for (int y = 0; y < currentSim.Y; y++)
                     {
-                        //int ba = r.x / scale / 9; (i * 9 + 1) * scale < r.x + r.width;
-                        // g.PageScale
+                        BlockDrawSettings b;
+                        BlockVector v = new BlockVector(x, y, floor);
+                        if (currentSim[v].isBlock && (currentSim[v.Up].isWire || currentSim[v.Up].isPreasurePad ||
+                            ((currentSim[v.Up].isTorch || currentSim[v.Up].isLeaver || currentSim[v.Up].isTorch) && currentSim[v.Up].Place == Direction.DOWN)))
+                        {
+                            b = new BlockDrawSettings(currentSim[v.Up]);
+                            b.OnBlock = true;
+                        }
+                        else
+                        {
+                            b = new BlockDrawSettings(currentSim[v]);
+                        }
+
                         Rectangle r = new Rectangle(x * 9 + 1, y * 9 + 1, 8, 8);
-                        BlockDrawSettings b = new BlockDrawSettings(currentSim[currentLoc.ChangeXY(x, y)]);
+         
+            
                         BlockImages.gDrawBlock(g, r, b);
 
                     }
@@ -433,8 +446,7 @@ namespace Redstone_Simulator
 
         private void BlockView_Resize(object sender, EventArgs e)
         {
-            blockSelect.Left = (this.Width - blockSelect.Width) / 2;
-             if (blockSelect.Left < 0) blockSelect.Left = 0;
+
              
         }
 
