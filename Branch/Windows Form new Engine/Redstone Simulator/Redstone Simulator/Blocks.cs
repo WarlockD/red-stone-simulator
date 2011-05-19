@@ -107,7 +107,7 @@ namespace Redstone_Simulator
       
          WireMask wmask; public WireMask Mask { get { return wmask; } set { wmask = value; } }
          BlockType id; public BlockType ID { get { return id; } }
-         Direction place; public Direction Place { get { return place; } set { /*place = value;*/  } }
+         Direction place; public Direction Place { get { return place; } set { place = value;  } }
          int charge; public int Charge { get { return charge; } set { charge = value;  } }
          int delay; public int Delay { get { return delay; } set { delay = value;  } }
          int tickspassed; public int Ticks { get { return tickspassed; } set { tickspassed = value;  } }

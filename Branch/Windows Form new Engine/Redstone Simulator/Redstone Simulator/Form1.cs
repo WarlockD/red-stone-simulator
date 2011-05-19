@@ -9,7 +9,7 @@ using System.Windows.Forms;
 
 namespace Redstone_Simulator
 {
-    public partial class Form1 : Form
+    public partial class frmMain : Form
     {
         const int ConstScale = 10;
         Image goImage;
@@ -17,11 +17,19 @@ namespace Redstone_Simulator
         bool running = false;
         int  ticks = 0;
         Timer time;
+        private BlockStatusStrip blockStatusStrip;
+        private MenuStrip menuStrip1;
+        private ToolStripMenuItem loadItem;
+        private ToolStripMenuItem saveItem;
+        private ToolStripSeparator toolStripMenuItem1;
+        private ToolStripMenuItem quitItem;
+        private ToolStrip toolStrip;
+        private Panel outerPanel;
+        private BlockView blockView;
         frmAddRowsCols _addRowsCols;
 
         // Hack till I can fix designer
-        BlockView blockView;
-        BlockStatusStrip blockStatusStrip;
+      
         void makeCustomControls()
         {
             blockView = new BlockView();
@@ -43,9 +51,9 @@ namespace Redstone_Simulator
             g.Clear(Color.Red);
             g.Dispose();
         }
-        void customInitalize()
+        /*void customInitalize()
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
+            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
             this.menuStrip = new System.Windows.Forms.MenuStrip();
             this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -291,16 +299,18 @@ namespace Redstone_Simulator
             this.toolStrip.PerformLayout();
             this.ResumeLayout(false);
 
-        }
-        public Form1()
+        }*/
+        public frmMain()
         {
-           // InitializeComponent();
-            makeCustomControls();
+            InitializeComponent();
+            MakeNewToolStipButtons();
+           // this.AutoScroll = true;
+           // makeCustomControls();
             MakeIcons();
             // Fucking hate 2010 designer
 
             this.blockView.StatusStrip = this.blockStatusStrip;
-            this.toolStripButton1.Image = goImage;
+           // this.toolStripButton1.Image = goImage;
             time = new Timer();
             time.Tick += new EventHandler(time_Tick);
             time.Interval = 500;
@@ -324,6 +334,7 @@ namespace Redstone_Simulator
 
             for (int i = 0; i < b.Length; i++)
             {
+                b[i] = new ToolStripButton();
                 b[i].DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
                 b[i].Image = pics[i];
                 b[i].Name = "BlockSelect_" + i;
@@ -390,13 +401,13 @@ namespace Redstone_Simulator
             if (running)
             {
                 running = false;
-                toolStripButton1.Image = goImage;
+               // toolStripButton1.Image = goImage;
                 time.Stop();
             }
             else
             {
                 running = true;
-                toolStripButton1.Image = stopImage;
+               // toolStripButton1.Image = stopImage;
                 ticks = 0;
                 blockStatusStrip.setTicks(ticks);
 
@@ -565,6 +576,126 @@ namespace Redstone_Simulator
 
         private void menuStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
+
+        }
+
+        private void InitializeComponent()
+        {
+            System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
+            this.loadItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.saveItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
+            this.quitItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.toolStrip = new System.Windows.Forms.ToolStrip();
+            this.outerPanel = new System.Windows.Forms.Panel();
+            this.blockView = new Redstone_Simulator.BlockView();
+            this.blockStatusStrip = new Redstone_Simulator.BlockStatusStrip();
+            fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuStrip1.SuspendLayout();
+            this.outerPanel.SuspendLayout();
+            this.SuspendLayout();
+            // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            fileToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(888, 24);
+            this.menuStrip1.TabIndex = 1;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
+            // fileToolStripMenuItem
+            // 
+            fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.loadItem,
+            this.saveItem,
+            this.toolStripMenuItem1,
+            this.quitItem});
+            fileToolStripMenuItem.Name = "fileToolStripMenuItem";
+            fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
+            fileToolStripMenuItem.Text = "File";
+            // 
+            // loadItem
+            // 
+            this.loadItem.Name = "loadItem";
+            this.loadItem.Size = new System.Drawing.Size(100, 22);
+            this.loadItem.Text = "Load";
+            // 
+            // saveItem
+            // 
+            this.saveItem.Name = "saveItem";
+            this.saveItem.Size = new System.Drawing.Size(100, 22);
+            this.saveItem.Text = "Save";
+            // 
+            // toolStripMenuItem1
+            // 
+            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
+            this.toolStripMenuItem1.Size = new System.Drawing.Size(97, 6);
+            // 
+            // quitItem
+            // 
+            this.quitItem.Name = "quitItem";
+            this.quitItem.Size = new System.Drawing.Size(100, 22);
+            this.quitItem.Text = "Quit";
+            // 
+            // toolStrip
+            // 
+            this.toolStrip.Location = new System.Drawing.Point(0, 24);
+            this.toolStrip.Name = "toolStrip";
+            this.toolStrip.Size = new System.Drawing.Size(888, 25);
+            this.toolStrip.TabIndex = 2;
+            this.toolStrip.Text = "toolStrip1";
+            // 
+            // outerPanel
+            // 
+            this.outerPanel.AutoScroll = true;
+            this.outerPanel.AutoSize = true;
+            this.outerPanel.Controls.Add(this.blockView);
+            this.outerPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.outerPanel.Location = new System.Drawing.Point(0, 49);
+            this.outerPanel.Name = "outerPanel";
+            this.outerPanel.Size = new System.Drawing.Size(888, 572);
+            this.outerPanel.TabIndex = 3;
+            // 
+            // blockView
+            // 
+            this.blockView.AutoScrollOffset = new System.Drawing.Point(10, 10);
+            this.blockView.Floor = 0;
+            this.blockView.Location = new System.Drawing.Point(0, 0);
+            this.blockView.Name = "blockView";
+            this.blockView.selectedBlock = Redstone_Simulator.BlockType.AIR;
+            this.blockView.Size = new System.Drawing.Size(742, 816);
+            this.blockView.StatusStrip = null;
+            this.blockView.TabIndex = 0;
+            // 
+            // blockStatusStrip
+            // 
+            this.blockStatusStrip.BackColor = System.Drawing.Color.White;
+            this.blockStatusStrip.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
+            this.blockStatusStrip.Location = new System.Drawing.Point(0, 621);
+            this.blockStatusStrip.Name = "blockStatusStrip";
+            this.blockStatusStrip.Size = new System.Drawing.Size(888, 23);
+            this.blockStatusStrip.TabIndex = 0;
+            this.blockStatusStrip.Text = "blockStatusStrip1";
+            // 
+            // frmMain
+            // 
+            this.AutoScroll = true;
+            this.ClientSize = new System.Drawing.Size(888, 644);
+            this.Controls.Add(this.outerPanel);
+            this.Controls.Add(this.toolStrip);
+            this.Controls.Add(this.blockStatusStrip);
+            this.Controls.Add(this.menuStrip1);
+            this.MainMenuStrip = this.menuStrip1;
+            this.Name = "frmMain";
+            this.Text = "Redston Simulator";
+            this.menuStrip1.ResumeLayout(false);
+            this.menuStrip1.PerformLayout();
+            this.outerPanel.ResumeLayout(false);
+            this.ResumeLayout(false);
+            this.PerformLayout();
 
         }
         // Backup before stupid designer screw up

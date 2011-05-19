@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="Redstone_Simulator.Form1" Collapsed="true">
+  <Class Name="Redstone_Simulator.frmMain" Collapsed="true">
     <Position X="0.5" Y="0.5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>DQxBAA0AmiABAIACOMGQgUkKIIgigABgBwQgAAAgFQA=</HashCode>
+      <HashCode>BYBBBAcBCgAAAIACKMEwgQAKAIgCgBBgBwYkAAAkFQA=</HashCode>
       <FileName>Form1.cs</FileName>
     </TypeIdentifier>
   </Class>

@@ -12,10 +12,9 @@ namespace Redstone_Simulator
     public partial class BlockView : UserControl
     {
         Timer simTime;
+        
         private BlockStatusStrip statusStrip = null;
         public BlockStatusStrip StatusStrip { get { return statusStrip; } set { statusStrip = value; } }
-      //  private PictureBox Display;
-       // public BlockSelect blockSelect;
         public BlockSim currentSim;
         public BlockType selectedBlock { get; set; }
         bool stopPaint = false;
@@ -32,10 +31,13 @@ namespace Redstone_Simulator
         bool playing = false;
         bool locValid = false;
         bool isDragging = false;
+
+
+
         void UpdateLoc(Point p, int cFloor)
         {
             
-            if (p.X < 0 || p.Y < 0 || p.X > Display.Width|| p.Y > Display.Height)
+            if (p.X < 0 || p.Y < 0 || p.X > this.Width|| p.Y > this.Height)
             {
                 UpdateLoc(false);
             }
@@ -81,15 +83,14 @@ namespace Redstone_Simulator
 
 
 
-        protected void OnChangeStrip(object s, myStatusStripEventArgs e) { }// nothing to as we are changing the strip }
-
         private void SetUpInternalDisplay()
         {
             stopPaint = true;
             DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
-            Display.Size = DisplaySize;
+            this.Size = DisplaySize;
+            MinimumSize = DisplaySize;
             stopPaint = false;
-            Display.Refresh();
+            this.Refresh();
 
         }
         private void SetUpInternalDisplay(BlockSim newSim)
@@ -98,20 +99,17 @@ namespace Redstone_Simulator
             currentSim = null;
             currentSim = newSim;
             DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
-            Display.Size = DisplaySize;
+            this.Size = DisplaySize;
+            this.MinimumSize = DisplaySize;
             stopPaint = false;
-            Display.Refresh();
+            this.Refresh();
 
         }
 
-        void Display_MouseClick(object sender, MouseEventArgs e)
-        {
-            //place(cX, cY, cZ, true);
-        }
+      
 
         void Display_MouseLeave(object sender, EventArgs e)
         {
-           // blockSelect.Visible = false;
            isDragging = false;
            mouseLeftDown = false;
            UpdateLoc(false);
@@ -136,7 +134,7 @@ namespace Redstone_Simulator
                         if (currentSim[currentLoc].isControl)
                         {
                             currentSim[currentLoc].Charge = 16;
-                            Display.Invalidate();
+                            this.Invalidate();
                         }
                         break;
                 }
@@ -163,14 +161,14 @@ namespace Redstone_Simulator
                         {
                             currentSim[currentLoc].Powered = !currentSim[currentLoc].Powered;
                             currentSim.updateT();
-                            Display.Invalidate();
+                            this.Invalidate();
 
                         }
                         if (currentSim[currentLoc].isRepeater)
                         {
                             currentSim[currentLoc].increaseTick();
                             currentSim.updateT();
-                            Display.Invalidate();                
+                            this.Invalidate();                
 
                         }
                         break;
@@ -215,16 +213,21 @@ namespace Redstone_Simulator
 
         public BlockView()
         {
+            InitializeComponent();
            // currentSim = new BlockSim(@"C:\Users\Paul Bruner\Documents\MC14500bv6.schematic");
             currentSim = new BlockSim(30, 30, 5);
             DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
-            
-            //this.DoubleBuffered = true;
-           // this.AutoScroll = true;
-            InitializeComponent();
-            Display.Size = DisplaySize;
-           // outerPanel.AutoScrool
-           // SetUpInternalDisplay();
+            SetUpInternalDisplay();
+            this.SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.OptimizedDoubleBuffer | ControlStyles.UserPaint, true);
+            this.AutoScrollOffset = new Point(10, 10);
+            this.Size = DisplaySize;
+            this.Paint += this.Display_Paint;
+            this.MouseDown += this.Display_MouseDown;
+            this.MouseUp += this.Display_MouseUp;
+            this.MouseMove += this.Display_MouseMove;
+            this.MouseEnter += this.Display_MouseEnter;
+            this.MouseLeave += this.Display_MouseLeave;
+ 
             
           
             
@@ -240,7 +243,7 @@ namespace Redstone_Simulator
         }
         public BlockView(BlockSim sim)
         {
-            InitializeComponent();
+            
             currentSim = sim;
             DisplaySize = new Size((int)((currentSim.X * 9 + 1) * scale), (int)((currentSim.Y * 9 + 1) * scale));
            // SetUpInternalDisplay();
@@ -253,18 +256,58 @@ namespace Redstone_Simulator
         private void place(BlockVector v, bool rotate)
         {
             if (currentSim[v].ID == selectedBlock)
-            { 
-               
-                currentSim[v].Rotate(); 
+            {
+                Block b = currentSim[v];
+                Direction old = b.Place;
+                switch (selectedBlock)
+                {
+                    case BlockType.TORCH:
+                    case BlockType.LEVER:
+                         b.Rotate();
+                        if (!currentSim[v.Dir(b.Place)].isBlock && b.Place != old ||  (b.Place != Direction.DOWN  && !currentSim[v.Down].isBlock))
+                            goto case BlockType.LEVER;
+                        break;
+                    case BlockType.BUTTON:
+                        b.Rotate();
+                        if (!currentSim[v.Flip(b.Place)].isBlock || b.Place != old)
+                            goto case BlockType.BUTTON;
+                        break;
+                    case BlockType.REPEATER:
+                        b.Rotate();
+                        break;
+                }
             }
             else
             {
-
-                currentSim[v]= Block.New(selectedBlock);
+                Block b = Block.New(selectedBlock);
+                Direction old = b.Place;
+                switch (selectedBlock)
+                {
+                    case BlockType.TORCH:
+                    case BlockType.LEVER:
+                    b.Rotate();
+                        if (!currentSim[v.Dir(b.Place)].isBlock && b.Place != old ||  (b.Place != Direction.DOWN  && !currentSim[v.Down].isBlock))
+                            goto case BlockType.LEVER;
+                           if(!currentSim[v.Down].isBlock && b.Place == old)
+                               return;
+                        break;
+                    case BlockType.BUTTON:
+                        b.Rotate();
+                        if (!currentSim[v.Flip(b.Place)].isBlock || b.Place != old)
+                            goto case BlockType.BUTTON;
+                        if(!currentSim[v.Flip(b.Place)].isBlock && b.Place == old)
+                                return;
+                        break;
+                    case BlockType.REPEATER:
+                        b.Rotate();
+                        break;
+                }
+                currentSim[v] = b;
                 currentSim.setConnections(v);
+
             }
             currentSim.updateT();
-            Display.Refresh();
+            this.Refresh();
         }
 
 
@@ -302,6 +345,7 @@ namespace Redstone_Simulator
 
                     }
             }
+           
         }
 
         private void BlockView_KeyUp(object sender, KeyEventArgs e)
@@ -456,11 +500,23 @@ namespace Redstone_Simulator
                 this.Floor++;
             if (e.KeyData == Keys.S)
                 this.Floor--;
-            Display.Refresh();
+            this.Refresh();
         }
 
         private void BlockView_KeyPress(object sender, KeyPressEventArgs e)
         {
+
+        }
+
+        private void InitializeComponent()
+        {
+            this.SuspendLayout();
+            // 
+            // BlockView
+            // 
+            this.Name = "BlockView";
+            this.Size = new System.Drawing.Size(445, 385);
+            this.ResumeLayout(false);
 
         }
 

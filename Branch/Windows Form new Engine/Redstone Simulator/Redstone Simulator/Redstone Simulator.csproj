@@ -72,16 +72,10 @@
     <Compile Include="BlockView.cs">
       <SubType>UserControl</SubType>
     </Compile>
-    <Compile Include="BlockView.Designer.cs">
-      <DependentUpon>BlockView.cs</DependentUpon>
-    </Compile>
     <Compile Include="Extensions.cs" />
     <Compile Include="FileLoader.cs" />
     <Compile Include="Form1.cs">
       <SubType>Form</SubType>
-    </Compile>
-    <Compile Include="Form1.Designer.cs">
-      <DependentUpon>Form1.cs</DependentUpon>
     </Compile>
     <Compile Include="frmAddRowsCols.cs">
       <SubType>Form</SubType>
