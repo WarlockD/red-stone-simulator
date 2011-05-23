@@ -26,6 +26,17 @@ namespace Redstone_Simulator
         private ToolStrip toolStrip;
         private Panel outerPanel;
         private BlockView blockView;
+        private ToolStrip toolStrip1;
+        private ToolStripButton tsbZoomIn;
+        private ToolStripButton tsbZoomOut;
+        private ToolStripSeparator toolStripSeparator1;
+        private ToolStripButton tsbAddRowTop;
+        private ToolStripButton tsbAddRowBottom;
+        private ToolStripButton tsbAddColLeft;
+        private ToolStripButton tsbAddColRight;
+        private ToolStripSeparator toolStripSeparator2;
+        private ToolStripButton tsbModifyExtents;
+        private ToolStripSeparator toolStripSeparator3;
         frmAddRowsCols _addRowsCols;
 
         // Hack till I can fix designer
@@ -582,29 +593,31 @@ namespace Redstone_Simulator
         private void InitializeComponent()
         {
             System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.loadItem = new System.Windows.Forms.ToolStripMenuItem();
             this.saveItem = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
             this.quitItem = new System.Windows.Forms.ToolStripMenuItem();
+            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.toolStrip = new System.Windows.Forms.ToolStrip();
             this.outerPanel = new System.Windows.Forms.Panel();
             this.blockView = new Redstone_Simulator.BlockView();
             this.blockStatusStrip = new Redstone_Simulator.BlockStatusStrip();
+            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.tsbZoomIn = new System.Windows.Forms.ToolStripButton();
+            this.tsbZoomOut = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsbAddRowTop = new System.Windows.Forms.ToolStripButton();
+            this.tsbAddRowBottom = new System.Windows.Forms.ToolStripButton();
+            this.tsbAddColLeft = new System.Windows.Forms.ToolStripButton();
+            this.tsbAddColRight = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
+            this.tsbModifyExtents = new System.Windows.Forms.ToolStripButton();
+            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
             fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.outerPanel.SuspendLayout();
+            this.toolStrip1.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // menuStrip1
-            // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            fileToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(888, 24);
-            this.menuStrip1.TabIndex = 1;
-            this.menuStrip1.Text = "menuStrip1";
             // 
             // fileToolStripMenuItem
             // 
@@ -640,6 +653,16 @@ namespace Redstone_Simulator
             this.quitItem.Size = new System.Drawing.Size(100, 22);
             this.quitItem.Text = "Quit";
             // 
+            // menuStrip1
+            // 
+            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            fileToolStripMenuItem});
+            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
+            this.menuStrip1.Name = "menuStrip1";
+            this.menuStrip1.Size = new System.Drawing.Size(888, 24);
+            this.menuStrip1.TabIndex = 1;
+            this.menuStrip1.Text = "menuStrip1";
+            // 
             // toolStrip
             // 
             this.toolStrip.Location = new System.Drawing.Point(0, 24);
@@ -664,9 +687,10 @@ namespace Redstone_Simulator
             this.blockView.AutoScrollOffset = new System.Drawing.Point(10, 10);
             this.blockView.Floor = 0;
             this.blockView.Location = new System.Drawing.Point(0, 0);
+            this.blockView.MinimumSize = new System.Drawing.Size(813, 813);
             this.blockView.Name = "blockView";
             this.blockView.selectedBlock = Redstone_Simulator.BlockType.AIR;
-            this.blockView.Size = new System.Drawing.Size(742, 816);
+            this.blockView.Size = new System.Drawing.Size(813, 816);
             this.blockView.StatusStrip = null;
             this.blockView.TabIndex = 0;
             // 
@@ -680,10 +704,115 @@ namespace Redstone_Simulator
             this.blockStatusStrip.TabIndex = 0;
             this.blockStatusStrip.Text = "blockStatusStrip1";
             // 
+            // toolStrip1
+            // 
+            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.tsbZoomIn,
+            this.tsbZoomOut,
+            this.toolStripSeparator1,
+            this.tsbAddRowTop,
+            this.tsbAddRowBottom,
+            this.tsbAddColLeft,
+            this.tsbAddColRight,
+            this.toolStripSeparator2,
+            this.tsbModifyExtents,
+            this.toolStripSeparator3});
+            this.toolStrip1.Location = new System.Drawing.Point(0, 49);
+            this.toolStrip1.Name = "toolStrip1";
+            this.toolStrip1.Size = new System.Drawing.Size(888, 25);
+            this.toolStrip1.TabIndex = 4;
+            this.toolStrip1.Text = "toolStrip1";
+            // 
+            // tsbZoomIn
+            // 
+            this.tsbZoomIn.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbZoomIn.Image = global::Redstone_Simulator.Properties.Resources.ZoomIn16;
+            this.tsbZoomIn.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbZoomIn.Name = "tsbZoomIn";
+            this.tsbZoomIn.Size = new System.Drawing.Size(23, 22);
+            this.tsbZoomIn.Text = "Zoom in";
+            this.tsbZoomIn.Click += new System.EventHandler(this.tsbZoomIn_Click);
+            // 
+            // tsbZoomOut
+            // 
+            this.tsbZoomOut.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbZoomOut.Image = global::Redstone_Simulator.Properties.Resources.ZoomOut16;
+            this.tsbZoomOut.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbZoomOut.Name = "tsbZoomOut";
+            this.tsbZoomOut.Size = new System.Drawing.Size(23, 22);
+            this.tsbZoomOut.Text = "Zoom out";
+            this.tsbZoomOut.Click += new System.EventHandler(this.tsbZoomOut_Click);
+            // 
+            // toolStripSeparator1
+            // 
+            this.toolStripSeparator1.Name = "toolStripSeparator1";
+            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 25);
+            // 
+            // tsbAddRowTop
+            // 
+            this.tsbAddRowTop.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbAddRowTop.Image = global::Redstone_Simulator.Properties.Resources.GrowTop16;
+            this.tsbAddRowTop.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbAddRowTop.Name = "tsbAddRowTop";
+            this.tsbAddRowTop.Size = new System.Drawing.Size(23, 22);
+            this.tsbAddRowTop.Text = "Add row to top";
+            this.tsbAddRowTop.Click += new System.EventHandler(this.tsbAddTop_Click);
+            // 
+            // tsbAddRowBottom
+            // 
+            this.tsbAddRowBottom.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbAddRowBottom.Image = global::Redstone_Simulator.Properties.Resources.GrowBottom16;
+            this.tsbAddRowBottom.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbAddRowBottom.Name = "tsbAddRowBottom";
+            this.tsbAddRowBottom.Size = new System.Drawing.Size(23, 22);
+            this.tsbAddRowBottom.Text = "Add row to bottom";
+            this.tsbAddRowBottom.Click += new System.EventHandler(this.tsbAddBottom_Click);
+            // 
+            // tsbAddColLeft
+            // 
+            this.tsbAddColLeft.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbAddColLeft.Image = global::Redstone_Simulator.Properties.Resources.GrowLeft16;
+            this.tsbAddColLeft.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbAddColLeft.Name = "tsbAddColLeft";
+            this.tsbAddColLeft.Size = new System.Drawing.Size(23, 22);
+            this.tsbAddColLeft.Text = "Add column to left";
+            this.tsbAddColLeft.Click += new System.EventHandler(this.tsbAddLeft_Click);
+            // 
+            // tsbAddColRight
+            // 
+            this.tsbAddColRight.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbAddColRight.Image = global::Redstone_Simulator.Properties.Resources.GrowRight16;
+            this.tsbAddColRight.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbAddColRight.Name = "tsbAddColRight";
+            this.tsbAddColRight.Size = new System.Drawing.Size(23, 22);
+            this.tsbAddColRight.Text = "Add column to right";
+            this.tsbAddColRight.Click += new System.EventHandler(this.tsbAddRight_Click);
+            // 
+            // toolStripSeparator2
+            // 
+            this.toolStripSeparator2.Name = "toolStripSeparator2";
+            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 25);
+            // 
+            // tsbModifyExtents
+            // 
+            this.tsbModifyExtents.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbModifyExtents.Image = global::Redstone_Simulator.Properties.Resources.GrowBack16;
+            this.tsbModifyExtents.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbModifyExtents.Name = "tsbModifyExtents";
+            this.tsbModifyExtents.Size = new System.Drawing.Size(23, 22);
+            this.tsbModifyExtents.Text = "Modify extents";
+            this.tsbModifyExtents.Click += new System.EventHandler(this.tsbAddMultiDimension_Click);
+            // 
+            // toolStripSeparator3
+            // 
+            this.toolStripSeparator3.Name = "toolStripSeparator3";
+            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
+            // 
             // frmMain
             // 
             this.AutoScroll = true;
             this.ClientSize = new System.Drawing.Size(888, 644);
+            this.Controls.Add(this.toolStrip1);
             this.Controls.Add(this.outerPanel);
             this.Controls.Add(this.toolStrip);
             this.Controls.Add(this.blockStatusStrip);
@@ -694,10 +823,14 @@ namespace Redstone_Simulator
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
             this.outerPanel.ResumeLayout(false);
+            this.toolStrip1.ResumeLayout(false);
+            this.toolStrip1.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
         }
+
+
         // Backup before stupid designer screw up
        /* private void InitializeComponent()
         {
