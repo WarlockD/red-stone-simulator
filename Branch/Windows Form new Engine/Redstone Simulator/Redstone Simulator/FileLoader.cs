@@ -105,15 +105,37 @@ namespace Redstone_Simulator
     class FileLoader
     {
         static readonly byte[] BlockToFile = new byte[] { 5, 2, 4, 1, 2 };
-        static readonly Direction[] FileToBlock = new Direction[] { Direction.UP, Direction.WEST,
-           Direction.EAST,Direction.SOUTH,Direction.NORTH,Direction.DOWN };
+        static readonly Direction[] FileToBlock = new Direction[] { Direction.UP, Direction.EAST,
+           Direction.WEST,Direction.SOUTH,Direction.NORTH,Direction.DOWN };
        // static readonly Direction[] FileToBlock = new Direction[] { Direction.UP, Direction.WEST,
        //    Direction.EAST,Direction.NORTH,Direction.SOUTH,Direction.DOWN };
         public static Blocks LoadTest()
         {
             return Load("MC14500bv6.schematic");
         }
-
+        static Direction PlaceTorch(byte data)
+        {
+            switch (data & 0x7)
+            {
+                case 1: return  Direction.EAST;
+                case 2: return Direction.WEST;
+                case 3: return Direction.SOUTH;
+                case 4: return Direction.NORTH;
+                case 5: return Direction.DOWN;
+            }
+            throw new InvalidDataException("Something is wrong");
+        }
+        static Direction PlaceButton(byte data)
+        {
+            switch (data & 0x7)
+            {
+                case 1: return Direction.WEST;
+                case 2: return Direction.EAST;
+                case 3: return Direction.SOUTH;
+                case 4: return Direction.NORTH;
+            }
+            throw new InvalidDataException("Something is wrong");
+        }
         public static Blocks Load(string filename)
         {
             NbtFile f = new NbtFile();
@@ -131,7 +153,6 @@ namespace Redstone_Simulator
             int Z = (int)((NbtShort)nHeight).Value;
             Blocks b = new Blocks(X, Y, Z);
             //bool sch = filename.EndsWith(".schematic");
-
 
             for (int i = 0; i < blocks.Length; i++)
                 switch (blocks[i])
@@ -156,18 +177,17 @@ namespace Redstone_Simulator
                         b[i] = Block.WIRE;
                         break;
                     case 75: // Off 
-                        b[i] = new Block(BlockType.TORCH, FileToBlock[extra[i] & 0x7], 0, 0, 0);
+                        b[i] = new Block(BlockType.TORCH, PlaceTorch(extra[i]), 0, 0, 0);
+                 
                         break;
                     case 76: // Off
-                        b[i] = new Block(BlockType.TORCH, FileToBlock[extra[i] & 0x7], 16, 0, 0);
-   
-                        System.Console.WriteLine("Loc: {2}  Torch Dir: {0}    Byte: {1}", b[i].Place.ToString(), extra[i] & 0x7,i);
+                        b[i] = new Block(BlockType.TORCH, PlaceTorch(extra[i]), 16, 0, 0);
+       
+                       // System.Console.WriteLine("Loc: {2}  Torch Dir: {0}    Byte: {1}", b[i].Place.ToString(), extra[i] & 0x7,i);
                         break;
                     case 69:
-                        
-                        b[i] = Block.LEVER;
-                        b[i].Charge = (extra[i] & 0x8) == 1 ? 16 : 0;
-                        b[i].Place = FileToBlock[extra[i] & 0x7];
+                        b[i] = new Block(BlockType.LEVER,  PlaceTorch(extra[i]),(extra[i] & 0x8) == 1 ? 16 : 0, 0, 0);
+              
                      //   System.Console.WriteLine("Lever Dir: {0}    Byte: {1}", b[i].Place.ToString(), extra[i] & 0x7);
                         break;
                     case 70:
@@ -176,7 +196,7 @@ namespace Redstone_Simulator
                         break;
                     case 77:
                         b[i] = Block.BUTTON;
-                        b[i].Place = (Direction)FileToBlock[extra[i] & 0x7];
+                        b[i].Place = PlaceButton(extra[i]);
                         break;
                     case 64: // doors not working yet
                     case 71:

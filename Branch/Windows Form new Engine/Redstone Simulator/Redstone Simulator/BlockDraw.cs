@@ -176,8 +176,8 @@ namespace Redstone_Simulator
                     {
                         case Direction.SOUTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y, 2, 5); break;
                         case Direction.NORTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 2, 5); break;
-                        case Direction.EAST: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 5, 2); break;
-                        case Direction.WEST: g.FillRectangle(BlockColors.bLever, r.X, r.Y + 3, 5, 2); break;
+                        case Direction.WEST: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 5, 2); break;
+                        case Direction.EAST: g.FillRectangle(BlockColors.bLever, r.X, r.Y + 3, 5, 2); break;
                     }
                     g.FillEllipse(BlockColors.bValve, r.X + 2, r.Y + 2, 4, 4);
                     if (b.On)
@@ -188,8 +188,8 @@ namespace Redstone_Simulator
                     {
                         case Direction.SOUTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y, 2, 5); break;
                         case Direction.NORTH: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 2, 5); break;
-                       case Direction.EAST: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 5, 2); break;
-                        case Direction.WEST: g.FillRectangle(BlockColors.bLever, r.X, r.Y + 3, 5, 2); break;
+                       case Direction.WEST: g.FillRectangle(BlockColors.bLever, r.X + 3, r.Y + 3, 5, 2); break;
+                        case Direction.EAST: g.FillRectangle(BlockColors.bLever, r.X, r.Y + 3, 5, 2); break;
                     }
 
                     if (b.On)

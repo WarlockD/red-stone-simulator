@@ -241,30 +241,7 @@ namespace Redstone_Simulator
 
 
 
-        public void Rotate()
-        {
-            Direction after = Place;
-
-            switch (ID)
-            {
-                //0:air; 1:block; 2:wire; 3:torch; 4:repeater; 5:buttons; 6:lever; 7:Pressure pad
-                case BlockType.TORCH:
-                    if (Place == Direction.WEST) { after = Direction.DOWN; } else { after = Place + 1; }
-                    Charge = 16;
-                    break;
-                case BlockType.REPEATER:
-                    if (Place == Direction.WEST) { after = Direction.NORTH; } else { after = Place + 1; }
-                    Charge = 0;
-                    break;
-                case BlockType.BUTTON:
-                    if (Place == Direction.WEST) { after = Direction.NORTH; } else { after = Place + 1; }
-                    break;
-                case BlockType.LEVER:
-                    if (Place == Direction.WEST) { after = Direction.DOWN; } else { after = Place + 1; }
-                    break;
-            }
-            Place = after;
-        }
+     
 
 
         

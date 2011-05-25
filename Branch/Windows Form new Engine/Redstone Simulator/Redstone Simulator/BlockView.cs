@@ -6,12 +6,16 @@ using System.Data;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace Redstone_Simulator
 {
     public partial class BlockView : UserControl
     {
         Timer simTime;
+        
+        
+
         
         private BlockStatusStrip statusStrip = null;
         public BlockStatusStrip StatusStrip { get { return statusStrip; } set { statusStrip = value; } }
@@ -32,8 +36,58 @@ namespace Redstone_Simulator
         bool locValid = false;
         bool isDragging = false;
 
+        #region WndProc Override to pass mouse to form
+        [FlagsAttribute]
+        enum DownKeys : int
+        {
+            MK_CONTROL = 0x008,
+            MK_LBUTTON = 0x001,
+            MK_MBUTTON = 0x010,
+            MK_RBUTTON = 0x002,
+            MK_SHIFT = 0x004,
+            MK_XBUTTON1 = 0x0020,
+            MK_XBUTTON2 = 0x0040
+        }
+        const int WM_MOUSEWHEEL = 0x020A;
+        const int WM_KEYUP = 0x0101;
+        const int WM_KEYDOWN = 0x0100;
+        bool imInWinProc = false;
+        [DllImport("user32.dll")]
+        private static extern IntPtr SendMessage(IntPtr wnd, int msg, IntPtr wp, IntPtr lp);
+        protected override void WndProc(ref Message m)
+        {
+            switch (m.Msg)
+            {
+                case WM_MOUSEWHEEL:
+                    if (!imInWinProc)
+                    {
+                        // http://msdn.microsoft.com/en-us/library/ms645614%28v=VS.85%29.aspx
+                        // wParm high: Whiel delta, short in 120 marks.  - left, + right
+                        // wParm low: mask with DownKeys for keys pressed
+                        // lowParm, High is x, low is y.  Eveything is short
+                        imInWinProc = true;
+                        SendMessage(this.ParentForm.Handle, m.Msg, m.WParam, m.LParam);
+                        imInWinProc = false;
+                        // Return zero if its processed, we are just passing it to the form though.
+                    }
+                    break;
+               /*case WM_KEYUP:
+                case WM_KEYDOWN:
+                    if (!imInWinProc)
+                    {
+                        imInWinProc = true;
+                        SendMessage(this.ParentForm.Handle, m.Msg, m.WParam, m.LParam);
+                        imInWinProc = false;
+                    }
+                 break;
+                    */
+                default:
+                    base.WndProc(ref m);
+                    break;
+            }
 
-
+        }
+        #endregion
         void UpdateLoc(Point p, int cFloor)
         {
             
@@ -110,18 +164,35 @@ namespace Redstone_Simulator
 
         void Display_MouseLeave(object sender, EventArgs e)
         {
+           
            isDragging = false;
            mouseLeftDown = false;
            UpdateLoc(false);
         }
 
+      //  delegate void AutoScrollPositionDelegate(ScrollableControl sender, Point p);
         void Display_MouseEnter(object sender, EventArgs e)
         {
-            Focus();
+            // Sigh, more hacks,  Java is starting to look alot better.
+       /*     if (this.Parent is Panel)
+            {
+                Panel panel = this.Parent as Panel;
+                Point p = panel.AutoScrollPosition;
+                Console.WriteLine("Before: " + p.ToString());
+                AutoScrollPositionDelegate d = new AutoScrollPositionDelegate(AutoScrollScrewup);
+                BeginInvoke(d, new Object[] { panel, p });
+
+            }*/
             isDragging = false;
             mouseLeftDown = false;
         }
-
+      /*  void AutoScrollScrewup(ScrollableControl sender, Point p)
+        {
+            Console.WriteLine("After: " + sender.AutoScrollPosition.ToString());
+           p.X = Math.Abs(p.X);
+           p.Y = Math.Abs(p.Y);
+            sender.AutoScrollPosition = p;
+        }*/
         void Display_MouseUp(object sender, MouseEventArgs e)
         {
             if(mouseLeftDown)
@@ -207,10 +278,15 @@ namespace Redstone_Simulator
                 return new BlockVector(-1, -1,currentLoc.Z);
             } else
                 return new BlockVector((int)(startMouse.X / scale), (int)(startMouse.Y / scale),currentLoc.Z);
+            
+        }
+        public void LoadSim(string filename)
+        {
+           BlockSim sim = new BlockSim(filename);
+           SetUpInternalDisplay(sim);
         }
 
-
-
+        
         public BlockView()
         {
             InitializeComponent();
@@ -227,10 +303,22 @@ namespace Redstone_Simulator
             this.MouseMove += this.Display_MouseMove;
             this.MouseEnter += this.Display_MouseEnter;
             this.MouseLeave += this.Display_MouseLeave;
- 
+            this.MouseWheel += new MouseEventHandler(BlockView_MouseWheel);
+            this.KeyDown += new KeyEventHandler(BlockView_KeyDown);
+            
             
           
             
+        }
+        //const int WM_MOUSEWHEEL = 0x020A;
+        void BlockView_MouseWheel(object sender, MouseEventArgs e)
+        {
+          //  HandledMouseEventArgs ee =  (HandledMouseEventArgs)e;
+          //  ee.Handled = false;
+          //  Message m = Message.Create(this.Parent.Handle,WM_MOUSEWHEEL,
+            //Form f = this.FindForm();
+           // f.PreProcessMessage(e.
+           // throw new NotImplementedException();
         }
         private void BlockView_Load(object sender, EventArgs e)
         {
@@ -263,17 +351,26 @@ namespace Redstone_Simulator
                 {
                     case BlockType.TORCH:
                     case BlockType.LEVER:
-                         b.Rotate();
-                        if (!currentSim[v.Dir(b.Place)].isBlock && b.Place != old ||  (b.Place != Direction.DOWN  && !currentSim[v.Down].isBlock))
-                            goto case BlockType.LEVER;
+                        if (b.Place == Direction.WEST) { b.Place = Direction.DOWN; } else { b.Place++; }
+                        if (currentSim[v.South].isBlock && b.Place == Direction.NORTH) break; 
+                        if (currentSim[v.East].isBlock && b.Place == Direction.WEST) break; 
+                        if (currentSim[v.North].isBlock && b.Place == Direction.SOUTH) break; 
+                        if (currentSim[v.West].isBlock && b.Place == Direction.EAST) break;
+                        if (currentSim[v.Down].isBlock && b.Place == Direction.DOWN) break;
+                        if (b.Place != old) goto case BlockType.LEVER;
+                        b.Place = old;
                         break;
                     case BlockType.BUTTON:
-                        b.Rotate();
-                        if (!currentSim[v.Flip(b.Place)].isBlock || b.Place != old)
-                            goto case BlockType.BUTTON;
+                         if (b.Place == Direction.WEST) { b.Place = Direction.DOWN; } else { b.Place++; }
+                        if (currentSim[v.South].isBlock && b.Place == Direction.NORTH) break; 
+                        if (currentSim[v.East].isBlock && b.Place == Direction.WEST) break; 
+                        if (currentSim[v.North].isBlock && b.Place == Direction.SOUTH) break; 
+                        if (currentSim[v.West].isBlock && b.Place == Direction.EAST) break;
+                        if (b.Place != old) goto case BlockType.LEVER;
+                        b.Place = old;
                         break;
                     case BlockType.REPEATER:
-                        b.Rotate();
+                        if (b.Place == Direction.WEST) { b.Place = Direction.NORTH; } else { b.Place++; }
                         break;
                 }
             }
@@ -285,25 +382,34 @@ namespace Redstone_Simulator
                 {
                     case BlockType.TORCH:
                     case BlockType.LEVER:
-                    b.Rotate();
-                        if (!currentSim[v.Dir(b.Place)].isBlock && b.Place != old ||  (b.Place != Direction.DOWN  && !currentSim[v.Down].isBlock))
-                            goto case BlockType.LEVER;
-                           if(!currentSim[v.Down].isBlock && b.Place == old)
-                               return;
-                        break;
+                        if (b.Place == Direction.WEST) { b.Place = Direction.DOWN; } else { b.Place++; }
+                        if (currentSim[v.South].isBlock && b.Place == Direction.NORTH) { currentSim[v] = b; break; }
+                        if (currentSim[v.East].isBlock && b.Place == Direction.WEST) { currentSim[v] = b; break; }
+                        if (currentSim[v.North].isBlock && b.Place == Direction.SOUTH) { currentSim[v] = b; break; }
+                        if (currentSim[v.West].isBlock && b.Place == Direction.EAST) { currentSim[v] = b; break; }
+                        if (currentSim[v.Down].isBlock && b.Place == Direction.DOWN) { currentSim[v] = b; break; }
+                        if (b.Place != old) goto case BlockType.LEVER;
+                        return;
                     case BlockType.BUTTON:
-                        b.Rotate();
-                        if (!currentSim[v.Flip(b.Place)].isBlock || b.Place != old)
-                            goto case BlockType.BUTTON;
-                        if(!currentSim[v.Flip(b.Place)].isBlock && b.Place == old)
-                                return;
-                        break;
+                        if (b.Place == Direction.WEST) { b.Place = Direction.DOWN; } else { b.Place++; }
+                        if (currentSim[v.South].isBlock && b.Place == Direction.NORTH) { currentSim[v] = b; break; }
+                        if (currentSim[v.East].isBlock && b.Place == Direction.WEST) { currentSim[v] = b; break; }
+                        if (currentSim[v.North].isBlock && b.Place == Direction.SOUTH) { currentSim[v] = b; break; }
+                        if (currentSim[v.West].isBlock && b.Place == Direction.EAST) { currentSim[v] = b; break; }
+                        if (b.Place != old) goto case BlockType.LEVER;
+                        return;
                     case BlockType.REPEATER:
-                        b.Rotate();
+                        if (b.Place == Direction.WEST) { b.Place = Direction.NORTH; } else { b.Place++; }
+                        currentSim[v] = b;
+                        break;
+                    case BlockType.WIRE:
+                        currentSim[v] = b;
+                        currentSim.setConnections(v);
+                        break;
+                    default:
+                        currentSim[v] = b;
                         break;
                 }
-                currentSim[v] = b;
-                currentSim.setConnections(v);
 
             }
             currentSim.updateT();
@@ -315,6 +421,7 @@ namespace Redstone_Simulator
         {
             if (!stopPaint)
             {
+                
                 Graphics g = e.Graphics;
                 g.Clear(BlockColors.cGrid);
                 // g.PageScale
@@ -514,6 +621,9 @@ namespace Redstone_Simulator
             // 
             // BlockView
             // 
+            this.AutoScroll = true;
+            this.AutoSize = true;
+            this.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
             this.Name = "BlockView";
             this.Size = new System.Drawing.Size(445, 385);
             this.ResumeLayout(false);

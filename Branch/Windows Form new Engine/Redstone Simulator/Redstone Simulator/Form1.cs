@@ -6,11 +6,13 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Windows.Forms;
+using System.Runtime.InteropServices;
 
 namespace Redstone_Simulator
 {
     public partial class frmMain : Form
     {
+        
         const int ConstScale = 10;
         Image goImage;
         Image stopImage;
@@ -24,7 +26,7 @@ namespace Redstone_Simulator
         private ToolStripSeparator toolStripMenuItem1;
         private ToolStripMenuItem quitItem;
         private ToolStrip toolStrip;
-        private Panel outerPanel;
+        private PanelScrollFix outerPanel;
         private BlockView blockView;
         private ToolStrip toolStrip1;
         private ToolStripButton tsbZoomIn;
@@ -38,9 +40,35 @@ namespace Redstone_Simulator
         private ToolStripButton tsbModifyExtents;
         private ToolStripSeparator toolStripSeparator3;
         frmAddRowsCols _addRowsCols;
+        int currentSelectedBlock = 0;
+        ToolStripButton selectedButton;
+        Bitmap[] blockImages;
+        Block[] selectArray;
+        void MakeSelectArray()
+        {
+            selectArray = new Block[8];
+            selectArray[0] = new Block(BlockType.AIR, Direction.DOWN, 0, 0, 0);
+            selectArray[1] = new Block(BlockType.BLOCK, Direction.DOWN, 0, 0, 0);
+            selectArray[2] = new Block(BlockType.WIRE, Direction.DOWN, 16, 0, 0); selectArray[2].Mask = WireMask.AllDir;
+            selectArray[3] = new Block(BlockType.TORCH, Direction.NORTH, 16, 0, 0);
+            selectArray[4] = new Block(BlockType.LEVER, Direction.NORTH, 0, 0, 0);
+            selectArray[5] = new Block(BlockType.BUTTON, Direction.NORTH, 0, 0, 0);
+            selectArray[6] = new Block(BlockType.PREASUREPAD, Direction.DOWN, 0, 0, 0);
+            selectArray[7] = new Block(BlockType.REPEATER, Direction.NORTH, 0, 0, 0);
+        }
+        void SelectBlock(int i)
+        {
+            currentSelectedBlock = i;
+            blockView.selectedBlock = selectArray[i].ID;
+            selectedButton.Image = blockImages[i];
 
-        // Hack till I can fix designer
-      
+
+        }
+        void SelectBlock()
+        {
+            blockView.selectedBlock = selectArray[currentSelectedBlock].ID;
+            selectedButton.Image = blockImages[currentSelectedBlock];
+        }
         void makeCustomControls()
         {
             blockView = new BlockView();
@@ -62,264 +90,17 @@ namespace Redstone_Simulator
             g.Clear(Color.Red);
             g.Dispose();
         }
-        /*void customInitalize()
-        {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(frmMain));
-            this.menuStrip = new System.Windows.Forms.MenuStrip();
-            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
-            this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStrip = new System.Windows.Forms.ToolStrip();
-            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsbZoomIn = new System.Windows.Forms.ToolStripButton();
-            this.tsbZoomOut = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsbAddTop = new System.Windows.Forms.ToolStripButton();
-            this.tsbAddBottom = new System.Windows.Forms.ToolStripButton();
-            this.tsbAddLeft = new System.Windows.Forms.ToolStripButton();
-            this.tsbAddRight = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsbAddMultiDimension = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuStrip.SuspendLayout();
-            this.toolStrip.SuspendLayout();
-            this.SuspendLayout();
-            // 
-            // menuStrip
-            // 
-            this.menuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem});
-            this.menuStrip.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip.Name = "menuStrip";
-            this.menuStrip.Size = new System.Drawing.Size(1156, 24);
-            this.menuStrip.TabIndex = 1;
-            this.menuStrip.Text = "menuStrip1";
-            this.menuStrip.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.menuStrip1_ItemClicked);
-            // 
-            // fileToolStripMenuItem
-            // 
-            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.newToolStripMenuItem,
-            this.openToolStripMenuItem,
-            this.saveToolStripMenuItem,
-            this.toolStripMenuItem1,
-            this.exportToolStripMenuItem,
-            this.toolStripMenuItem2,
-            this.quitToolStripMenuItem});
-            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
-            this.fileToolStripMenuItem.Text = "File";
-            // 
-            // newToolStripMenuItem
-            // 
-            this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
-            this.newToolStripMenuItem.Text = "New";
-            // 
-            // openToolStripMenuItem
-            // 
-            this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
-            this.openToolStripMenuItem.Text = "Open";
-            // 
-            // saveToolStripMenuItem
-            // 
-            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
-            this.saveToolStripMenuItem.Text = "Save";
-            // 
-            // toolStripMenuItem1
-            // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(104, 6);
-            // 
-            // exportToolStripMenuItem
-            // 
-            this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
-            this.exportToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
-            this.exportToolStripMenuItem.Text = "Export";
-            // 
-            // toolStripMenuItem2
-            // 
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(104, 6);
-            // 
-            // quitToolStripMenuItem
-            // 
-            this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
-            this.quitToolStripMenuItem.Text = "Quit";
-            // 
-            // toolStrip
-            // 
-            this.toolStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButton1,
-            this.toolStripButton2,
-            this.toolStripSeparator1,
-            this.tsbZoomIn,
-            this.tsbZoomOut,
-            this.toolStripSeparator2,
-            this.tsbAddTop,
-            this.tsbAddBottom,
-            this.tsbAddLeft,
-            this.tsbAddRight,
-            this.toolStripSeparator3,
-            this.tsbAddMultiDimension,
-            this.toolStripSeparator4});
-            this.toolStrip.Location = new System.Drawing.Point(0, 24);
-            this.toolStrip.MinimumSize = new System.Drawing.Size(0, 32);
-            this.toolStrip.Name = "toolStrip";
-            this.toolStrip.Size = new System.Drawing.Size(1156, 32);
-            this.toolStrip.TabIndex = 2;
-            this.toolStrip.Text = "toolStrip1";
-            this.toolStrip.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.toolStrip1_ItemClicked);
-            // 
-            // toolStripButton1
-            // 
-            this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
-            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(23, 29);
-            this.toolStripButton1.Text = "toolStripButton1";
-            this.toolStripButton1.Click += new System.EventHandler(this.toolStripButton1_Click);
-            // 
-            // toolStripButton2
-            // 
-            this.toolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton2.Image")));
-            this.toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton2.Name = "toolStripButton2";
-            this.toolStripButton2.Size = new System.Drawing.Size(23, 29);
-            this.toolStripButton2.Text = "Tick";
-            this.toolStripButton2.Click += new System.EventHandler(this.toolStripButton2_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 32);
-            // 
-            // tsbZoomIn
-            // 
-            this.tsbZoomIn.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbZoomIn.Image = global::Redstone_Simulator.Properties.Resources.ZoomIn16;
-            this.tsbZoomIn.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbZoomIn.Name = "tsbZoomIn";
-            this.tsbZoomIn.Size = new System.Drawing.Size(23, 29);
-            this.tsbZoomIn.Text = "Zoom In";
-            this.tsbZoomIn.Click += new System.EventHandler(this.tsbZoomIn_Click);
-            // 
-            // tsbZoomOut
-            // 
-            this.tsbZoomOut.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbZoomOut.Image = global::Redstone_Simulator.Properties.Resources.ZoomOut16;
-            this.tsbZoomOut.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbZoomOut.Name = "tsbZoomOut";
-            this.tsbZoomOut.Size = new System.Drawing.Size(23, 29);
-            this.tsbZoomOut.Text = "Zoom Out";
-            this.tsbZoomOut.Click += new System.EventHandler(this.tsbZoomOut_Click);
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 32);
-            // 
-            // tsbAddTop
-            // 
-            this.tsbAddTop.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbAddTop.Image = global::Redstone_Simulator.Properties.Resources.GrowTop16;
-            this.tsbAddTop.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbAddTop.Name = "tsbAddTop";
-            this.tsbAddTop.Size = new System.Drawing.Size(23, 29);
-            this.tsbAddTop.Text = "Add row to top";
-            this.tsbAddTop.Click += new System.EventHandler(this.tsbAddTop_Click);
-            // 
-            // tsbAddBottom
-            // 
-            this.tsbAddBottom.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbAddBottom.Image = global::Redstone_Simulator.Properties.Resources.GrowBottom16;
-            this.tsbAddBottom.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbAddBottom.Name = "tsbAddBottom";
-            this.tsbAddBottom.Size = new System.Drawing.Size(23, 29);
-            this.tsbAddBottom.Text = "Add row to bottom";
-            this.tsbAddBottom.Click += new System.EventHandler(this.tsbAddBottom_Click);
-            // 
-            // tsbAddLeft
-            // 
-            this.tsbAddLeft.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbAddLeft.Image = global::Redstone_Simulator.Properties.Resources.GrowLeft16;
-            this.tsbAddLeft.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbAddLeft.Name = "tsbAddLeft";
-            this.tsbAddLeft.Size = new System.Drawing.Size(23, 29);
-            this.tsbAddLeft.Text = "Add column to left";
-            this.tsbAddLeft.Click += new System.EventHandler(this.tsbAddLeft_Click);
-            // 
-            // tsbAddRight
-            // 
-            this.tsbAddRight.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbAddRight.Image = global::Redstone_Simulator.Properties.Resources.GrowRight16;
-            this.tsbAddRight.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbAddRight.Name = "tsbAddRight";
-            this.tsbAddRight.Size = new System.Drawing.Size(23, 29);
-            this.tsbAddRight.Text = "Add column to right";
-            this.tsbAddRight.Click += new System.EventHandler(this.tsbAddRight_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 32);
-            // 
-            // tsbAddMultiDimension
-            // 
-            this.tsbAddMultiDimension.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbAddMultiDimension.Image = global::Redstone_Simulator.Properties.Resources.GrowFront16;
-            this.tsbAddMultiDimension.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbAddMultiDimension.Name = "tsbAddMultiDimension";
-            this.tsbAddMultiDimension.Size = new System.Drawing.Size(23, 29);
-            this.tsbAddMultiDimension.Text = "Add Multiple Dimensions";
-            this.tsbAddMultiDimension.Click += new System.EventHandler(this.tsbAddMultiDimension_Click);
-            // 
-            // toolStripSeparator4
-            // 
-            this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 32);
-            // 
-            // Form1
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1156, 629);
-            this.MainMenuStrip = this.menuStrip;
-            this.Name = "Form1";
-            this.Text = "Form1";
-            this.Load += new System.EventHandler(this.Form1_Load);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Form1_KeyPress);
-            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseClick);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseMove);
-            this.Resize += new System.EventHandler(this.Form1_Resize);
-            this.menuStrip.ResumeLayout(false);
-            this.menuStrip.PerformLayout();
-            this.toolStrip.ResumeLayout(false);
-            this.toolStrip.PerformLayout();
-            this.ResumeLayout(false);
-
-        }*/
         public frmMain()
         {
+            MakeIcons();
             InitializeComponent();
+            this.MouseWheel += new MouseEventHandler(Form1_MouseWheel);
             MakeNewToolStipButtons();
            // this.AutoScroll = true;
            // makeCustomControls();
             MakeIcons();
-            // Fucking hate 2010 designer
 
+          
             this.blockView.StatusStrip = this.blockStatusStrip;
            // this.toolStripButton1.Image = goImage;
             time = new Timer();
@@ -333,28 +114,48 @@ namespace Redstone_Simulator
             {
                 ToolStripButton b = (ToolStripButton)sender;
                 blockView.selectedBlock = (BlockType)b.Tag;
-                
-
             }
         }
 
         void MakeNewToolStipButtons()
         {
+            MakeSelectArray();
             Bitmap[] pics = getFoorOneTiles();
-            ToolStripButton[] b = new ToolStripButton[pics.Length];
+            blockImages = pics;
+            ToolStripButton[] b = new ToolStripButton[selectArray.Length];
+            toolStrip.SuspendLayout();
+            b[0] = new ToolStripButton();
+            b[0].DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            b[0].Image = global::Redstone_Simulator.Properties.Resources.Play24;
+            b[0].Name = "StartClock";
+            b[0].Size = new System.Drawing.Size(23, 29);
+            b[0].Text = "Start Clock";
+            b[0].Click += new System.EventHandler(this.startRunning);
+            toolStrip.Items.Add(b[0]);
+            toolStrip.Items.Add(new ToolStripSeparator());
+            
 
+            selectedButton = new ToolStripButton(pics[0]);
+           
+            toolStrip.Items.Add(selectedButton);
+            toolStrip.Items.Add(new ToolStripSeparator());
             for (int i = 0; i < b.Length; i++)
             {
+                
                 b[i] = new ToolStripButton();
+                b[i].AutoSize = true;
                 b[i].DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
                 b[i].Image = pics[i];
                 b[i].Name = "BlockSelect_" + i;
-                b[i].Size = new System.Drawing.Size(23, 29);
+                b[i].Size = pics[i].Size;
                 b[i].Text = "BlockSelect_" + i;
-                b[i].Tag = (BlockType)i;
-                b[i].Click += new System.EventHandler(this.toolStrip_SelectBlock);
+                b[i].Tag = i;
+                b[i].Click += new System.EventHandler(delegate(object o, EventArgs e) { 
+                    SelectBlock((int)((ToolStripButton)o).Tag); });
             }
             toolStrip.Items.AddRange(b);
+            b[0].Select();
+            toolStrip.ResumeLayout(false);
 
 
         
@@ -362,11 +163,16 @@ namespace Redstone_Simulator
 
         void Form1_MouseWheel(object sender, MouseEventArgs e)
         {
-            this.MouseWheel += new MouseEventHandler(Form1_MouseWheel);
+            //HandledMouseEventArgs me = (HandledMouseEventArgs)e;
+           // me.Handled = true;
+             if (e.Delta == 0)
+                return;
+
+             currentSelectedBlock +=e.Delta > 0 ? 1 : -1;
+             if (currentSelectedBlock < 0) currentSelectedBlock = selectArray.Length - 1;
+             if (currentSelectedBlock > selectArray.Length - 1) currentSelectedBlock = 0;
+             SelectBlock();
             
-       //     this.blockView.blockSelect = blockSelect;
-          //  if (e.Delta > 0 | e.Delta < 0)
-            //    blockSelect.moveSelect(e.Delta > 0 ? 1 : -1);
         }
 
         private void Form1_Load(object sender, EventArgs e)
@@ -375,48 +181,25 @@ namespace Redstone_Simulator
         //    if (blockSelect.Left < 0) blockSelect.Left = 0;
         }
 
-        private void Form1_MouseDown(object sender, MouseEventArgs e)
-        {
-
-        }
-
-        private void Form1_MouseClick(object sender, MouseEventArgs e)
-        {
-         //   if (e.Delta > 0 | e.Delta < 0)
-          //      blockSelect.moveSelect(e.Delta);
-        }
-
-        private void Form1_MouseMove(object sender, MouseEventArgs e)
-        {
-            
-        }
-
-        private void blockView1_Load(object sender, EventArgs e)
-        {
-
-        }
-
-        private void Form1_Resize(object sender, EventArgs e)
-        {
-        //    blockSelect.Left = (this.Width - blockSelect.Width) / 2;
-        //    if (blockSelect.Left < 0) blockSelect.Left = 0;
-        }
-
+     
         private void toolStrip1_ItemClicked(object sender, ToolStripItemClickedEventArgs e)
         {
 
         }
 
-        private void toolStripButton1_Click(object sender, EventArgs e)
+        private void startRunning(object sender, EventArgs e)
         {
+            ToolStripButton o = (ToolStripButton)sender;
             if (running)
             {
+                o.Image = global::Redstone_Simulator.Properties.Resources.Play24;
                 running = false;
                // toolStripButton1.Image = goImage;
                 time.Stop();
             }
             else
             {
+                o.Image = global::Redstone_Simulator.Properties.Resources.Stop24;
                 running = true;
                // toolStripButton1.Image = stopImage;
                 ticks = 0;
@@ -518,69 +301,24 @@ namespace Redstone_Simulator
             g.TextRenderingHint = System.Drawing.Text.TextRenderingHint.ClearTypeGridFit;
             return g;
         }
-        public static Bitmap[] getFoorOneTiles()
+        public Bitmap[] getFoorOneTiles()
         {
             // make them 50x50
             BlockDrawSettings bd;
             Size s = new Size(10 * ConstScale, 10 * ConstScale);
             Point p = new Point(0, 0);
             Graphics g;
-            Bitmap[] bArray = new Bitmap[8];
+            Bitmap[] bArray = new Bitmap[selectArray.Length];
+
+            for (int i = 0; i < bArray.Length; i++)
+            {
+                bArray[i] = new Bitmap(s.Width, s.Height);
+                g = setGraphics(bArray[i]);
+                bd = new BlockDrawSettings(selectArray[i]);
+                BlockImages.gDrawBlock(g, new Rectangle(p, s), bd);
+                g.Dispose();
+            }
             
-   
-            // Air
-            bArray[0] = new Bitmap(s.Width, s.Height);
-            g = setGraphics(bArray[0]);
-            bd = BlockDrawSettings.New(BlockType.AIR);
-            BlockImages.gDrawBlock(g, new Rectangle(p, s), bd);
-
-            // Block
-            bArray[1] = new Bitmap(s.Width, s.Height);
-            g = setGraphics(bArray[1]);
-            bd = BlockDrawSettings.New(BlockType.BLOCK);
-            BlockImages.gDrawBlock(g, new Rectangle(p, s), bd);
-
-            // Wire 
-            bArray[2] = new Bitmap(s.Width, s.Height);
-            g = setGraphics(bArray[2]);
-            bd = BlockDrawSettings.New(BlockType.WIRE, 16);
-            bd.Mask = WireMask.AllDir;
-            BlockImages.gDrawBlock(g, new Rectangle(p, s), bd);
-
-            // Torch 
-            bArray[3] = new Bitmap(s.Width, s.Height);
-            g = setGraphics(bArray[3]);
-            bd = BlockDrawSettings.New(BlockType.TORCH, 16);
-            BlockImages.gDrawBlock(g, new Rectangle(p, s), bd);
-
-        // Repeater 
-            bArray[7] = new Bitmap(s.Width, s.Height);
-            g = setGraphics(bArray[7]);
-            bd = BlockDrawSettings.New(BlockType.REPEATER, 0, Direction.NORTH, 0);
-            BlockImages.gDrawBlock(g, new Rectangle(p, s), bd);
-
-        // Button 
-            bArray[5] = new Bitmap(s.Width, s.Height);
-            g = setGraphics(bArray[5]);
-            bd = BlockDrawSettings.New(BlockType.BUTTON, 0, Direction.NORTH, 0);
-            BlockImages.gDrawBlock(g, new Rectangle(p, s), bd);
-
-            // Lever 
-            bArray[4] = new Bitmap(s.Width, s.Height);
-            g = setGraphics(bArray[4]);
-            bd = BlockDrawSettings.New(BlockType.LEVER, 0, Direction.NORTH, 0);
-            BlockImages.gDrawBlock(g, new Rectangle(p, s), bd);
-
-            
-
-            // Plate 
-            bArray[6] = new Bitmap(s.Width, s.Height);
-            g = setGraphics(bArray[6]);
-            bd = BlockDrawSettings.New(BlockType.PREASUREPAD);
-            BlockImages.gDrawBlock(g, new Rectangle(p, s), bd);
-
-            
-
             return bArray;
 
         }
@@ -589,7 +327,27 @@ namespace Redstone_Simulator
         {
 
         }
+        void SetUpTheView()
+        {
+            this.blockView.AutoScrollOffset = new System.Drawing.Point(10, 10);
+            this.blockView.Floor = 0;
+            this.blockView.Location = new System.Drawing.Point(0, 0);
+            this.blockView.MinimumSize = new System.Drawing.Size(813, 813);
+            this.blockView.Name = "blockView";
+            this.blockView.selectedBlock = Redstone_Simulator.BlockType.AIR;
+            this.blockView.Size = new System.Drawing.Size(813, 816);
+            this.blockView.StatusStrip = null;
+            this.blockView.TabIndex = 0;
 
+            this.outerPanel.AutoScroll = true;
+            this.outerPanel.AutoSize = true;
+            this.outerPanel.Controls.Add(this.blockView);
+            this.outerPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.outerPanel.Location = new System.Drawing.Point(0, 74);
+            this.outerPanel.Name = "outerPanel";
+            this.outerPanel.Size = new System.Drawing.Size(888, 547);
+            this.outerPanel.TabIndex = 3;
+        }
         private void InitializeComponent()
         {
             System.Windows.Forms.ToolStripMenuItem fileToolStripMenuItem;
@@ -599,9 +357,7 @@ namespace Redstone_Simulator
             this.quitItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.toolStrip = new System.Windows.Forms.ToolStrip();
-            this.outerPanel = new System.Windows.Forms.Panel();
-            this.blockView = new Redstone_Simulator.BlockView();
-            this.blockStatusStrip = new Redstone_Simulator.BlockStatusStrip();
+            this.outerPanel = new PanelScrollFix();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsbZoomIn = new System.Windows.Forms.ToolStripButton();
             this.tsbZoomOut = new System.Windows.Forms.ToolStripButton();
@@ -613,6 +369,8 @@ namespace Redstone_Simulator
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbModifyExtents = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.blockView = new Redstone_Simulator.BlockView();
+            this.blockStatusStrip = new Redstone_Simulator.BlockStatusStrip();
             fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
             this.outerPanel.SuspendLayout();
@@ -635,6 +393,7 @@ namespace Redstone_Simulator
             this.loadItem.Name = "loadItem";
             this.loadItem.Size = new System.Drawing.Size(100, 22);
             this.loadItem.Text = "Load";
+            this.loadItem.Click += new System.EventHandler(this.loadItem_Click);
             // 
             // saveItem
             // 
@@ -665,9 +424,11 @@ namespace Redstone_Simulator
             // 
             // toolStrip
             // 
+            this.toolStrip.ImageScalingSize = new System.Drawing.Size(32, 32);
             this.toolStrip.Location = new System.Drawing.Point(0, 24);
+            this.toolStrip.MinimumSize = new System.Drawing.Size(0, 50);
             this.toolStrip.Name = "toolStrip";
-            this.toolStrip.Size = new System.Drawing.Size(888, 25);
+            this.toolStrip.Size = new System.Drawing.Size(888, 50);
             this.toolStrip.TabIndex = 2;
             this.toolStrip.Text = "toolStrip1";
             // 
@@ -677,32 +438,10 @@ namespace Redstone_Simulator
             this.outerPanel.AutoSize = true;
             this.outerPanel.Controls.Add(this.blockView);
             this.outerPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.outerPanel.Location = new System.Drawing.Point(0, 49);
+            this.outerPanel.Location = new System.Drawing.Point(0, 74);
             this.outerPanel.Name = "outerPanel";
-            this.outerPanel.Size = new System.Drawing.Size(888, 572);
+            this.outerPanel.Size = new System.Drawing.Size(888, 547);
             this.outerPanel.TabIndex = 3;
-            // 
-            // blockView
-            // 
-            this.blockView.AutoScrollOffset = new System.Drawing.Point(10, 10);
-            this.blockView.Floor = 0;
-            this.blockView.Location = new System.Drawing.Point(0, 0);
-            this.blockView.MinimumSize = new System.Drawing.Size(813, 813);
-            this.blockView.Name = "blockView";
-            this.blockView.selectedBlock = Redstone_Simulator.BlockType.AIR;
-            this.blockView.Size = new System.Drawing.Size(813, 816);
-            this.blockView.StatusStrip = null;
-            this.blockView.TabIndex = 0;
-            // 
-            // blockStatusStrip
-            // 
-            this.blockStatusStrip.BackColor = System.Drawing.Color.White;
-            this.blockStatusStrip.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
-            this.blockStatusStrip.Location = new System.Drawing.Point(0, 621);
-            this.blockStatusStrip.Name = "blockStatusStrip";
-            this.blockStatusStrip.Size = new System.Drawing.Size(888, 23);
-            this.blockStatusStrip.TabIndex = 0;
-            this.blockStatusStrip.Text = "blockStatusStrip1";
             // 
             // toolStrip1
             // 
@@ -717,7 +456,7 @@ namespace Redstone_Simulator
             this.toolStripSeparator2,
             this.tsbModifyExtents,
             this.toolStripSeparator3});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 49);
+            this.toolStrip1.Location = new System.Drawing.Point(0, 74);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(888, 25);
             this.toolStrip1.TabIndex = 4;
@@ -808,6 +547,29 @@ namespace Redstone_Simulator
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
             // 
+            // blockView
+            // 
+            this.blockView.AutoScrollOffset = new System.Drawing.Point(10, 10);
+            this.blockView.Floor = 0;
+            this.blockView.Location = new System.Drawing.Point(0, 0);
+            this.blockView.MinimumSize = new System.Drawing.Size(813, 813);
+            this.blockView.Name = "blockView";
+            this.blockView.selectedBlock = Redstone_Simulator.BlockType.AIR;
+            this.blockView.Size = new System.Drawing.Size(813, 816);
+            this.blockView.StatusStrip = null;
+            this.blockView.TabIndex = 0;
+          
+            // 
+            // blockStatusStrip
+            // 
+            this.blockStatusStrip.BackColor = System.Drawing.Color.White;
+            this.blockStatusStrip.LayoutStyle = System.Windows.Forms.ToolStripLayoutStyle.HorizontalStackWithOverflow;
+            this.blockStatusStrip.Location = new System.Drawing.Point(0, 621);
+            this.blockStatusStrip.Name = "blockStatusStrip";
+            this.blockStatusStrip.Size = new System.Drawing.Size(888, 23);
+            this.blockStatusStrip.TabIndex = 0;
+            this.blockStatusStrip.Text = "blockStatusStrip1";
+            // 
             // frmMain
             // 
             this.AutoScroll = true;
@@ -830,256 +592,17 @@ namespace Redstone_Simulator
 
         }
 
-
-        // Backup before stupid designer screw up
-       /* private void InitializeComponent()
+        private void loadItem_Click(object sender, EventArgs e)
         {
-            System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(Form1));
-            this.menuStrip1 = new System.Windows.Forms.MenuStrip();
-            this.fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.newToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.openToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.saveToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem1 = new System.Windows.Forms.ToolStripSeparator();
-            this.exportToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStripMenuItem2 = new System.Windows.Forms.ToolStripSeparator();
-            this.quitToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
-            this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.toolStripButton1 = new System.Windows.Forms.ToolStripButton();
-            this.toolStripButton2 = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator1 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsbZoomIn = new System.Windows.Forms.ToolStripButton();
-            this.tsbZoomOut = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsbAddTop = new System.Windows.Forms.ToolStripButton();
-            this.tsbAddBottom = new System.Windows.Forms.ToolStripButton();
-            this.tsbAddLeft = new System.Windows.Forms.ToolStripButton();
-            this.tsbAddRight = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
-            this.tsbAddMultiDimension = new System.Windows.Forms.ToolStripButton();
-            this.toolStripSeparator4 = new System.Windows.Forms.ToolStripSeparator();
-            this.menuStrip1.SuspendLayout();
-            this.toolStrip1.SuspendLayout();
-            this.SuspendLayout();
-            // 
-            // menuStrip1
-            // 
-            this.menuStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.fileToolStripMenuItem});
-            this.menuStrip1.Location = new System.Drawing.Point(0, 0);
-            this.menuStrip1.Name = "menuStrip1";
-            this.menuStrip1.Size = new System.Drawing.Size(1156, 24);
-            this.menuStrip1.TabIndex = 1;
-            this.menuStrip1.Text = "menuStrip1";
-            this.menuStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.menuStrip1_ItemClicked);
-            // 
-            // fileToolStripMenuItem
-            // 
-            this.fileToolStripMenuItem.DropDownItems.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.newToolStripMenuItem,
-            this.openToolStripMenuItem,
-            this.saveToolStripMenuItem,
-            this.toolStripMenuItem1,
-            this.exportToolStripMenuItem,
-            this.toolStripMenuItem2,
-            this.quitToolStripMenuItem});
-            this.fileToolStripMenuItem.Name = "fileToolStripMenuItem";
-            this.fileToolStripMenuItem.Size = new System.Drawing.Size(37, 20);
-            this.fileToolStripMenuItem.Text = "File";
-            // 
-            // newToolStripMenuItem
-            // 
-            this.newToolStripMenuItem.Name = "newToolStripMenuItem";
-            this.newToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
-            this.newToolStripMenuItem.Text = "New";
-            // 
-            // openToolStripMenuItem
-            // 
-            this.openToolStripMenuItem.Name = "openToolStripMenuItem";
-            this.openToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
-            this.openToolStripMenuItem.Text = "Open";
-            // 
-            // saveToolStripMenuItem
-            // 
-            this.saveToolStripMenuItem.Name = "saveToolStripMenuItem";
-            this.saveToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
-            this.saveToolStripMenuItem.Text = "Save";
-            // 
-            // toolStripMenuItem1
-            // 
-            this.toolStripMenuItem1.Name = "toolStripMenuItem1";
-            this.toolStripMenuItem1.Size = new System.Drawing.Size(104, 6);
-            // 
-            // exportToolStripMenuItem
-            // 
-            this.exportToolStripMenuItem.Name = "exportToolStripMenuItem";
-            this.exportToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
-            this.exportToolStripMenuItem.Text = "Export";
-            // 
-            // toolStripMenuItem2
-            // 
-            this.toolStripMenuItem2.Name = "toolStripMenuItem2";
-            this.toolStripMenuItem2.Size = new System.Drawing.Size(104, 6);
-            // 
-            // quitToolStripMenuItem
-            // 
-            this.quitToolStripMenuItem.Name = "quitToolStripMenuItem";
-            this.quitToolStripMenuItem.Size = new System.Drawing.Size(107, 22);
-            this.quitToolStripMenuItem.Text = "Quit";
-            // 
-            // toolStrip1
-            // 
-            this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
-            this.toolStripButton1,
-            this.toolStripButton2,
-            this.toolStripSeparator1,
-            this.tsbZoomIn,
-            this.tsbZoomOut,
-            this.toolStripSeparator2,
-            this.tsbAddTop,
-            this.tsbAddBottom,
-            this.tsbAddLeft,
-            this.tsbAddRight,
-            this.toolStripSeparator3,
-            this.tsbAddMultiDimension,
-            this.toolStripSeparator4});
-            this.toolStrip1.Location = new System.Drawing.Point(0, 24);
-            this.toolStrip1.MinimumSize = new System.Drawing.Size(0, 32);
-            this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1156, 32);
-            this.toolStrip1.TabIndex = 2;
-            this.toolStrip1.Text = "toolStrip1";
-            this.toolStrip1.ItemClicked += new System.Windows.Forms.ToolStripItemClickedEventHandler(this.toolStrip1_ItemClicked);
-            // 
-            // toolStripButton1
-            // 
-            this.toolStripButton1.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton1.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton1.Image")));
-            this.toolStripButton1.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton1.Name = "toolStripButton1";
-            this.toolStripButton1.Size = new System.Drawing.Size(23, 29);
-            this.toolStripButton1.Text = "toolStripButton1";
-            this.toolStripButton1.Click += new System.EventHandler(this.toolStripButton1_Click);
-            // 
-            // toolStripButton2
-            // 
-            this.toolStripButton2.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.toolStripButton2.Image = ((System.Drawing.Image)(resources.GetObject("toolStripButton2.Image")));
-            this.toolStripButton2.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripButton2.Name = "toolStripButton2";
-            this.toolStripButton2.Size = new System.Drawing.Size(23, 29);
-            this.toolStripButton2.Text = "Tick";
-            this.toolStripButton2.Click += new System.EventHandler(this.toolStripButton2_Click);
-            // 
-            // toolStripSeparator1
-            // 
-            this.toolStripSeparator1.Name = "toolStripSeparator1";
-            this.toolStripSeparator1.Size = new System.Drawing.Size(6, 32);
-            // 
-            // tsbZoomIn
-            // 
-            this.tsbZoomIn.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbZoomIn.Image = global::Redstone_Simulator.Properties.Resources.ZoomIn16;
-            this.tsbZoomIn.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbZoomIn.Name = "tsbZoomIn";
-            this.tsbZoomIn.Size = new System.Drawing.Size(23, 29);
-            this.tsbZoomIn.Text = "Zoom In";
-            this.tsbZoomIn.Click += new System.EventHandler(this.tsbZoomIn_Click);
-            // 
-            // tsbZoomOut
-            // 
-            this.tsbZoomOut.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbZoomOut.Image = global::Redstone_Simulator.Properties.Resources.ZoomOut16;
-            this.tsbZoomOut.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbZoomOut.Name = "tsbZoomOut";
-            this.tsbZoomOut.Size = new System.Drawing.Size(23, 29);
-            this.tsbZoomOut.Text = "Zoom Out";
-            this.tsbZoomOut.Click += new System.EventHandler(this.tsbZoomOut_Click);
-            // 
-            // toolStripSeparator2
-            // 
-            this.toolStripSeparator2.Name = "toolStripSeparator2";
-            this.toolStripSeparator2.Size = new System.Drawing.Size(6, 32);
-            // 
-            // tsbAddTop
-            // 
-            this.tsbAddTop.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbAddTop.Image = global::Redstone_Simulator.Properties.Resources.GrowTop16;
-            this.tsbAddTop.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbAddTop.Name = "tsbAddTop";
-            this.tsbAddTop.Size = new System.Drawing.Size(23, 29);
-            this.tsbAddTop.Text = "Add row to top";
-            this.tsbAddTop.Click += new System.EventHandler(this.tsbAddTop_Click);
-            // 
-            // tsbAddBottom
-            // 
-            this.tsbAddBottom.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbAddBottom.Image = global::Redstone_Simulator.Properties.Resources.GrowBottom16;
-            this.tsbAddBottom.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbAddBottom.Name = "tsbAddBottom";
-            this.tsbAddBottom.Size = new System.Drawing.Size(23, 29);
-            this.tsbAddBottom.Text = "Add row to bottom";
-            this.tsbAddBottom.Click += new System.EventHandler(this.tsbAddBottom_Click);
-            // 
-            // tsbAddLeft
-            // 
-            this.tsbAddLeft.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbAddLeft.Image = global::Redstone_Simulator.Properties.Resources.GrowLeft16;
-            this.tsbAddLeft.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbAddLeft.Name = "tsbAddLeft";
-            this.tsbAddLeft.Size = new System.Drawing.Size(23, 29);
-            this.tsbAddLeft.Text = "Add column to left";
-            this.tsbAddLeft.Click += new System.EventHandler(this.tsbAddLeft_Click);
-            // 
-            // tsbAddRight
-            // 
-            this.tsbAddRight.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbAddRight.Image = global::Redstone_Simulator.Properties.Resources.GrowRight16;
-            this.tsbAddRight.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbAddRight.Name = "tsbAddRight";
-            this.tsbAddRight.Size = new System.Drawing.Size(23, 29);
-            this.tsbAddRight.Text = "Add column to right";
-            this.tsbAddRight.Click += new System.EventHandler(this.tsbAddRight_Click);
-            // 
-            // toolStripSeparator3
-            // 
-            this.toolStripSeparator3.Name = "toolStripSeparator3";
-            this.toolStripSeparator3.Size = new System.Drawing.Size(6, 32);
-            // 
-            // tsbAddMultiDimension
-            // 
-            this.tsbAddMultiDimension.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
-            this.tsbAddMultiDimension.Image = global::Redstone_Simulator.Properties.Resources.GrowFront16;
-            this.tsbAddMultiDimension.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tsbAddMultiDimension.Name = "tsbAddMultiDimension";
-            this.tsbAddMultiDimension.Size = new System.Drawing.Size(23, 29);
-            this.tsbAddMultiDimension.Text = "Add Multiple Dimensions";
-            this.tsbAddMultiDimension.Click += new System.EventHandler(this.tsbAddMultiDimension_Click);
-            // 
-            // toolStripSeparator4
-            // 
-            this.toolStripSeparator4.Name = "toolStripSeparator4";
-            this.toolStripSeparator4.Size = new System.Drawing.Size(6, 32);
-            // 
-            // Form1
-            // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1156, 629);
-            this.MainMenuStrip = this.menuStrip1;
-            this.Name = "Form1";
-            this.Text = "Form1";
-            this.Load += new System.EventHandler(this.Form1_Load);
-            this.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.Form1_KeyPress);
-            this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseClick);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.Form1_MouseMove);
-            this.Resize += new System.EventHandler(this.Form1_Resize);
-            this.menuStrip1.ResumeLayout(false);
-            this.menuStrip1.PerformLayout();
-            this.toolStrip1.ResumeLayout(false);
-            this.toolStrip1.PerformLayout();
-            this.ResumeLayout(false);
+            OpenFileDialog diag = new OpenFileDialog();
+            if (diag.ShowDialog() == DialogResult.OK)
+            {
+                blockView.LoadSim(diag.FileName);
+            }
+        }
 
-        }*/
+        
+
+
     }
 }
