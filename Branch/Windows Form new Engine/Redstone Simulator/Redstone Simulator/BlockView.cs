@@ -437,14 +437,16 @@ namespace Redstone_Simulator
                         if (currentSim[v].isBlock && (currentSim[v.Up].isWire || currentSim[v.Up].isPreasurePad ||
                             ((currentSim[v.Up].isTorch || currentSim[v.Up].isLeaver || currentSim[v.Up].isTorch) && currentSim[v.Up].Place == Direction.DOWN)))
                         {
-                            b = new BlockDrawSettings(currentSim[v.Up]);
+                            v = v.Up;
+                            b = new BlockDrawSettings(currentSim[v]);
                             b.OnBlock = true;
                         }
                         else
                         {
                             b = new BlockDrawSettings(currentSim[v]);
                         }
-
+                        
+                        if (currentSim[v.Up].isBlock) b.Fog = true;
                         Rectangle r = new Rectangle(x * 9 + 1, y * 9 + 1, 8, 8);
          
             
@@ -607,6 +609,10 @@ namespace Redstone_Simulator
                 this.Floor++;
             if (e.KeyData == Keys.S)
                 this.Floor--;
+            if (Floor < 0) Floor = 0;
+            if (Floor > currentSim.Z) Floor = currentSim.Z;
+            UpdateLoc(true);
+            this.Invalidate();
             this.Refresh();
         }
 
