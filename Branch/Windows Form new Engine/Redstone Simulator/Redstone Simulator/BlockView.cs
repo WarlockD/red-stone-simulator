@@ -376,8 +376,11 @@ namespace Redstone_Simulator
             }
             else
             {
+
+                Block oldBlock = currentSim[v];
                 Block b = Block.New(selectedBlock);
                 Direction old = b.Place;
+                
                 switch (selectedBlock)
                 {
                     case BlockType.TORCH:
@@ -408,6 +411,14 @@ namespace Redstone_Simulator
                         break;
                     default:
                         currentSim[v] = b;
+                        //if the old block was a wire, we need to recheck the connections 
+                        //so that the previously wired block does not hold the wire connections
+                        //that it did previously hold
+                        //  Was:        |   Now Is:
+                        //  ┌┐ -> ┌┐    |   ┌┐ ->  ┌─
+                        //  └┘ -> └     |   └┘ ->  │
+                        //
+                        if (oldBlock.ID == BlockType.WIRE) {  currentSim.setConnections(v); }
                         break;
                 }
 
@@ -632,7 +643,13 @@ namespace Redstone_Simulator
             this.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
             this.Name = "BlockView";
             this.Size = new System.Drawing.Size(445, 385);
+            this.Load += new System.EventHandler(this.BlockView_Load_1);
             this.ResumeLayout(false);
+
+        }
+
+        private void BlockView_Load_1(object sender, EventArgs e)
+        {
 
         }
 
