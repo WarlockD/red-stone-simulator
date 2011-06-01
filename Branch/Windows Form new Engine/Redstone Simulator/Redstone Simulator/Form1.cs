@@ -43,6 +43,8 @@ namespace Redstone_Simulator
         int currentSelectedBlock = 0;
         ToolStripButton selectedButton;
         Bitmap[] blockImages;
+        private ToolStripButton tsbUpOneLevel;
+        private ToolStripButton tsbDownOneLevel;
         Block[] selectArray;
         void MakeSelectArray()
         {
@@ -357,7 +359,6 @@ namespace Redstone_Simulator
             this.quitItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1 = new System.Windows.Forms.MenuStrip();
             this.toolStrip = new System.Windows.Forms.ToolStrip();
-            this.outerPanel = new PanelScrollFix();
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
             this.tsbZoomIn = new System.Windows.Forms.ToolStripButton();
             this.tsbZoomOut = new System.Windows.Forms.ToolStripButton();
@@ -369,12 +370,15 @@ namespace Redstone_Simulator
             this.toolStripSeparator2 = new System.Windows.Forms.ToolStripSeparator();
             this.tsbModifyExtents = new System.Windows.Forms.ToolStripButton();
             this.toolStripSeparator3 = new System.Windows.Forms.ToolStripSeparator();
+            this.outerPanel = new Redstone_Simulator.PanelScrollFix();
             this.blockView = new Redstone_Simulator.BlockView();
             this.blockStatusStrip = new Redstone_Simulator.BlockStatusStrip();
+            this.tsbUpOneLevel = new System.Windows.Forms.ToolStripButton();
+            this.tsbDownOneLevel = new System.Windows.Forms.ToolStripButton();
             fileToolStripMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.menuStrip1.SuspendLayout();
-            this.outerPanel.SuspendLayout();
             this.toolStrip1.SuspendLayout();
+            this.outerPanel.SuspendLayout();
             this.SuspendLayout();
             // 
             // fileToolStripMenuItem
@@ -432,17 +436,6 @@ namespace Redstone_Simulator
             this.toolStrip.TabIndex = 2;
             this.toolStrip.Text = "toolStrip1";
             // 
-            // outerPanel
-            // 
-            this.outerPanel.AutoScroll = true;
-            this.outerPanel.AutoSize = true;
-            this.outerPanel.Controls.Add(this.blockView);
-            this.outerPanel.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.outerPanel.Location = new System.Drawing.Point(0, 74);
-            this.outerPanel.Name = "outerPanel";
-            this.outerPanel.Size = new System.Drawing.Size(888, 547);
-            this.outerPanel.TabIndex = 3;
-            // 
             // toolStrip1
             // 
             this.toolStrip1.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
@@ -455,7 +448,9 @@ namespace Redstone_Simulator
             this.tsbAddColRight,
             this.toolStripSeparator2,
             this.tsbModifyExtents,
-            this.toolStripSeparator3});
+            this.toolStripSeparator3,
+            this.tsbUpOneLevel,
+            this.tsbDownOneLevel});
             this.toolStrip1.Location = new System.Drawing.Point(0, 74);
             this.toolStrip1.Name = "toolStrip1";
             this.toolStrip1.Size = new System.Drawing.Size(888, 25);
@@ -547,18 +542,31 @@ namespace Redstone_Simulator
             this.toolStripSeparator3.Name = "toolStripSeparator3";
             this.toolStripSeparator3.Size = new System.Drawing.Size(6, 25);
             // 
+            // outerPanel
+            // 
+            this.outerPanel.AutoScroll = true;
+            this.outerPanel.AutoSize = true;
+            this.outerPanel.Controls.Add(this.blockView);
+            this.outerPanel.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.outerPanel.Location = new System.Drawing.Point(0, 74);
+            this.outerPanel.Name = "outerPanel";
+            this.outerPanel.Size = new System.Drawing.Size(888, 547);
+            this.outerPanel.TabIndex = 3;
+            // 
             // blockView
             // 
+            this.blockView.AutoScroll = true;
             this.blockView.AutoScrollOffset = new System.Drawing.Point(10, 10);
+            this.blockView.AutoSize = true;
+            this.blockView.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
             this.blockView.Floor = 0;
-            this.blockView.Location = new System.Drawing.Point(0, 0);
+            this.blockView.Location = new System.Drawing.Point(0, 3);
             this.blockView.MinimumSize = new System.Drawing.Size(813, 813);
             this.blockView.Name = "blockView";
             this.blockView.selectedBlock = Redstone_Simulator.BlockType.AIR;
-            this.blockView.Size = new System.Drawing.Size(813, 816);
+            this.blockView.Size = new System.Drawing.Size(813, 813);
             this.blockView.StatusStrip = null;
             this.blockView.TabIndex = 0;
-          
             // 
             // blockStatusStrip
             // 
@@ -569,6 +577,26 @@ namespace Redstone_Simulator
             this.blockStatusStrip.Size = new System.Drawing.Size(888, 23);
             this.blockStatusStrip.TabIndex = 0;
             this.blockStatusStrip.Text = "blockStatusStrip1";
+            // 
+            // tsbUpOneLevel
+            // 
+            this.tsbUpOneLevel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbUpOneLevel.Image = global::Redstone_Simulator.Properties.Resources.Up16;
+            this.tsbUpOneLevel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbUpOneLevel.Name = "tsbUpOneLevel";
+            this.tsbUpOneLevel.Size = new System.Drawing.Size(23, 22);
+            this.tsbUpOneLevel.Text = "Up One Level";
+            this.tsbUpOneLevel.Click += new System.EventHandler(this.upOneLevel_Click);
+            // 
+            // tsbDownOneLevel
+            // 
+            this.tsbDownOneLevel.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image;
+            this.tsbDownOneLevel.Image = global::Redstone_Simulator.Properties.Resources.Down16;
+            this.tsbDownOneLevel.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tsbDownOneLevel.Name = "tsbDownOneLevel";
+            this.tsbDownOneLevel.Size = new System.Drawing.Size(23, 22);
+            this.tsbDownOneLevel.Text = "Down One Level";
+            this.tsbDownOneLevel.Click += new System.EventHandler(this.downOneLevel_Click);
             // 
             // frmMain
             // 
@@ -582,11 +610,13 @@ namespace Redstone_Simulator
             this.MainMenuStrip = this.menuStrip1;
             this.Name = "frmMain";
             this.Text = "Redston Simulator";
+            this.Load += new System.EventHandler(this.frmMain_Load);
             this.menuStrip1.ResumeLayout(false);
             this.menuStrip1.PerformLayout();
-            this.outerPanel.ResumeLayout(false);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
+            this.outerPanel.ResumeLayout(false);
+            this.outerPanel.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -601,7 +631,31 @@ namespace Redstone_Simulator
             }
         }
 
-        
+        private void frmMain_Load(object sender, EventArgs e)
+        {
+            this.outerPanel.Size = new Size(this.outerPanel.Width, this.outerPanel.Height - this.toolStrip1.Size.Height);
+        }
+
+        private void upOneLevel_Click(object sender, EventArgs e)
+        {
+            if (this.blockView.Floor < this.blockView.currentSim.Z - 1)
+            {
+                this.blockView.AddLayer();
+            }
+            this.blockView.Floor += 1;
+            this.blockStatusStrip.setLayer(this.blockView.Floor);
+            this.Refresh();
+        }
+
+        private void downOneLevel_Click(object sender, EventArgs e)
+        {
+            if (this.blockView.Floor > 1)
+            {
+                this.blockView.Floor -= 1;
+            }
+            this.blockStatusStrip.setLayer(this.blockView.Floor);
+            this.Refresh();
+        }
 
 
     }

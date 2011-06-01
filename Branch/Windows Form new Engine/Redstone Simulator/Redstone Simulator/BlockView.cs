@@ -31,10 +31,12 @@ namespace Redstone_Simulator
         BlockVector startLoc;
         int floor = 0;
         bool mouseLeftDown = false;
+        bool mouseRightDown = false;
         bool controlUp = true;
         bool playing = false;
         bool locValid = false;
         bool isDragging = false;
+
 
         #region WndProc Override to pass mouse to form
         [FlagsAttribute]
@@ -147,6 +149,7 @@ namespace Redstone_Simulator
             this.Refresh();
 
         }
+
         private void SetUpInternalDisplay(BlockSim newSim)
         {
             stopPaint = true;
@@ -167,6 +170,7 @@ namespace Redstone_Simulator
            
            isDragging = false;
            mouseLeftDown = false;
+            mouseRightDown = false;
            UpdateLoc(false);
         }
 
@@ -185,6 +189,7 @@ namespace Redstone_Simulator
             }*/
             isDragging = false;
             mouseLeftDown = false;
+            mouseRightDown = false;
         }
       /*  void AutoScrollScrewup(ScrollableControl sender, Point p)
         {
@@ -305,7 +310,6 @@ namespace Redstone_Simulator
             this.MouseLeave += this.Display_MouseLeave;
             this.MouseWheel += new MouseEventHandler(BlockView_MouseWheel);
             this.KeyDown += new KeyEventHandler(BlockView_KeyDown);
-            
             
           
             
@@ -653,6 +657,27 @@ namespace Redstone_Simulator
 
         }
 
+        public void AddLayer()
+        {
+            //create new Simulation with Y+1 rows
+            BlockSim _newSim = new BlockSim(this.currentSim.X, this.currentSim.Y, this.currentSim.Z+1);
+            for (int i = 0; i < currentSim.X; i++)
+            {
+                for (int j = 0; j < currentSim.Y; j++)
+                {
+                    for (int k = 0; k < currentSim.Z; k++)
+                    {
+                        if (currentSim.GetBlockType(i, j, k) == BlockType.AIR)
+                            continue;
+                        _newSim.SetBlock(i, j, k, currentSim.GetBlockType(i, j, k));
+
+                    }
+                }
+            }
+
+
+            SetUpInternalDisplay(_newSim);
+        }
 
     }
 }
