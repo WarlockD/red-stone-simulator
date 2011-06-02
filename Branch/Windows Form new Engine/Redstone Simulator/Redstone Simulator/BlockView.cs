@@ -388,6 +388,7 @@ namespace Redstone_Simulator
                 switch (selectedBlock)
                 {
                     case BlockType.TORCH:
+                        
                     case BlockType.LEVER:
                         if (b.Place == Direction.WEST) { b.Place = Direction.DOWN; } else { b.Place++; }
                         if (currentSim[v.South].isBlock && b.Place == Direction.NORTH) { currentSim[v] = b; break; }
@@ -431,6 +432,7 @@ namespace Redstone_Simulator
             this.Refresh();
         }
 
+        
 
         private void Display_Paint(object sender, PaintEventArgs e)
         {
@@ -647,13 +649,7 @@ namespace Redstone_Simulator
             this.AutoValidate = System.Windows.Forms.AutoValidate.EnableAllowFocusChange;
             this.Name = "BlockView";
             this.Size = new System.Drawing.Size(445, 385);
-            this.Load += new System.EventHandler(this.BlockView_Load_1);
             this.ResumeLayout(false);
-
-        }
-
-        private void BlockView_Load_1(object sender, EventArgs e)
-        {
 
         }
 
@@ -670,12 +666,11 @@ namespace Redstone_Simulator
                         if (currentSim.GetBlockType(i, j, k) == BlockType.AIR)
                             continue;
                         _newSim.SetBlock(i, j, k, currentSim.GetBlockType(i, j, k));
-
+                        
                     }
                 }
             }
-
-
+            _newSim.setAllConnections();
             SetUpInternalDisplay(_newSim);
         }
 

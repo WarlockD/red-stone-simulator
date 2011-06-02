@@ -638,23 +638,25 @@ namespace Redstone_Simulator
 
         private void upOneLevel_Click(object sender, EventArgs e)
         {
-            if (this.blockView.Floor < this.blockView.currentSim.Z - 1)
+            if (this.blockView.Floor < this.blockView.currentSim.Z )
             {
                 this.blockView.AddLayer();
             }
             this.blockView.Floor += 1;
             this.blockStatusStrip.setLayer(this.blockView.Floor);
             this.Refresh();
+            this.blockView.currentSim.setAllConnections();
         }
 
         private void downOneLevel_Click(object sender, EventArgs e)
         {
-            if (this.blockView.Floor > 1)
+            if (this.blockView.Floor > 0)
             {
                 this.blockView.Floor -= 1;
             }
             this.blockStatusStrip.setLayer(this.blockView.Floor);
             this.Refresh();
+            this.blockView.currentSim.setAllConnections();
         }
 
 
