@@ -1,0 +1,197 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{9F888DE7-2B61-4EBA-B5DB-08D30042FAF2}</ProjectGuid>
+    <OutputType>WinExe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>Redstone_Simulator</RootNamespace>
+    <AssemblyName>Redstone Simulator</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>Redstone_Simulator.Program</StartupObject>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Debug|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x64'">
+    <PlatformTarget>x64</PlatformTarget>
+    <OutputPath>bin\x64\Release\</OutputPath>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Deployment" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="addRowsColumnsResult.cs" />
+    <Compile Include="BlockArt.cs" />
+    <Compile Include="BlockDraw.cs" />
+    <Compile Include="Blocks.cs" />
+    <Compile Include="BlockSelect.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="BlockSelect.Designer.cs">
+      <DependentUpon>BlockSelect.cs</DependentUpon>
+    </Compile>
+    <Compile Include="BlockSim.cs" />
+    <Compile Include="BlockVector.cs" />
+    <Compile Include="BlockView.cs">
+      <SubType>UserControl</SubType>
+    </Compile>
+    <Compile Include="Extensions.cs" />
+    <Compile Include="FileLoader.cs" />
+    <Compile Include="Form1.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAddRowsCols.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="frmAddRowsCols.designer.cs">
+      <DependentUpon>frmAddRowsCols.cs</DependentUpon>
+    </Compile>
+    <Compile Include="myStatusStrip.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="PanelScrollFix.cs">
+      <SubType>Component</SubType>
+    </Compile>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Vector3.cs" />
+    <EmbeddedResource Include="BlockSelect.resx">
+      <DependentUpon>BlockSelect.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="BlockView.resx">
+      <DependentUpon>BlockView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Form1.resx">
+      <DependentUpon>Form1.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="frmAddRowsCols.resx">
+      <DependentUpon>frmAddRowsCols.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+      <SubType>Designer</SubType>
+    </EmbeddedResource>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+      <DesignTime>True</DesignTime>
+    </Compile>
+    <Resource Include="Properties\images\Thumbs.db" />
+    <None Include="ClassDiagram1.cd" />
+    <Content Include="MC14500bv6.schematic">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <None Include="ClassDiagram2.cd" />
+    <None Include="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <Compile Include="Properties\Settings.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Properties\images\AlignCenter16.gif" />
+    <Resource Include="Properties\images\AlignCenter24.gif" />
+    <Resource Include="Properties\images\Camera16.gif" />
+    <Resource Include="Properties\images\Camera24.gif" />
+    <Resource Include="Properties\images\Copy16.gif" />
+    <Resource Include="Properties\images\Copy24.gif" />
+    <Resource Include="Properties\images\Down16.gif" />
+    <Resource Include="Properties\images\Down24.gif" />
+    <Resource Include="Properties\images\GrowBack16.gif" />
+    <Resource Include="Properties\images\GrowBottom16.gif" />
+    <Resource Include="Properties\images\GrowFront16.gif" />
+    <Resource Include="Properties\images\GrowLeft16.gif" />
+    <Resource Include="Properties\images\GrowRight16.gif" />
+    <Resource Include="Properties\images\GrowTop16.gif" />
+    <Resource Include="Properties\images\Logo16.png" />
+    <Resource Include="Properties\images\New16.gif" />
+    <Resource Include="Properties\images\New24.gif" />
+    <Resource Include="Properties\images\Open16.gif" />
+    <Resource Include="Properties\images\Open24.gif" />
+    <Resource Include="Properties\images\Ore16.gif" />
+    <Resource Include="Properties\images\Pause16.gif" />
+    <Resource Include="Properties\images\Pause24.gif" />
+    <Resource Include="Properties\images\Play16.gif" />
+    <Resource Include="Properties\images\Play24.gif" />
+    <Resource Include="Properties\images\Preferences16.gif" />
+    <Resource Include="Properties\images\Preferences24.gif" />
+    <Resource Include="Properties\images\Redstone16.gif" />
+    <Resource Include="Properties\images\Save16.gif" />
+    <Resource Include="Properties\images\Save24.gif" />
+    <Resource Include="Properties\images\SaveAs16.gif" />
+    <Resource Include="Properties\images\SaveAs24.gif" />
+    <Resource Include="Properties\images\ShrinkBack16.gif" />
+    <Resource Include="Properties\images\ShrinkBottom16.gif" />
+    <Resource Include="Properties\images\ShrinkFront16.gif" />
+    <Resource Include="Properties\images\ShrinkLeft16.gif" />
+    <Resource Include="Properties\images\ShrinkRight16.gif" />
+    <Resource Include="Properties\images\ShrinkTop16.gif" />
+    <Resource Include="Properties\images\StepForward16.gif" />
+    <Resource Include="Properties\images\StepForward24.gif" />
+    <Resource Include="Properties\images\Stop16.gif" />
+    <Resource Include="Properties\images\Stop24.gif" />
+    <Resource Include="Properties\images\Torch16.gif" />
+    <Resource Include="Properties\images\Up16.gif" />
+    <Resource Include="Properties\images\Up24.gif" />
+    <Resource Include="Properties\images\ZoomIn16.gif" />
+    <Resource Include="Properties\images\ZoomIn24.gif" />
+    <Resource Include="Properties\images\ZoomOut16.gif" />
+    <Resource Include="Properties\images\ZoomOut24.gif" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\LibNbt\LibNbt.csproj">
+      <Project>{4488498D-976D-4DA3-BF72-109531AF0488}</Project>
+      <Name>LibNbt</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
